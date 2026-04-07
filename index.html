@@ -2029,8 +2029,8 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode #pane
   <div class="filter-bar">
     <button class="filter-btn" id="wtd-f-all" onclick="wtdToggleOffice('all')">All</button>
     <button class="filter-btn active" id="wtd-f-riverside" onclick="wtdToggleOffice('Riverside')">Riverside</button>
-    <button class="filter-btn active" id="wtd-f-newport" onclick="wtdToggleOffice('Newport Beach')">Newport Beach</button>
-    <button class="filter-btn active" id="wtd-f-oc" onclick="wtdToggleOffice('Orange County')">Orange County</button>
+    <button class="filter-btn" id="wtd-f-newport" onclick="wtdToggleOffice('Newport Beach')">Newport Beach</button>
+    <button class="filter-btn" id="wtd-f-oc" onclick="wtdToggleOffice('Orange County')">Orange County</button>
     <button class="filter-btn" id="wtd-f-active" onclick="wtdToggleOffice('active')">Has Activity</button>
     <div class="filter-sep"></div>
     <select id="wtd-view-select" class="squad-select" style="background:rgba(255,255,255,0.05);border:1px solid rgba(170,221,221,0.25);color:rgba(248,249,249,0.6);padding:6px 12px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer" onchange="wtdSetView(this.value,null)">
@@ -2097,9 +2097,9 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode #pane
   <div class="stats-bar" id="qtd-stats"></div>
   <div class="filter-bar">
     <button class="filter-btn" id="qtd-f-all" onclick="qtdToggleOffice('all')">All</button>
-    <button class="filter-btn" id="qtd-f-riverside" onclick="qtdToggleOffice('Riverside')">Riverside</button>
-    <button class="filter-btn active" id="qtd-f-newport" onclick="qtdToggleOffice('Newport Beach')">Newport Beach</button>
-    <button class="filter-btn active" id="qtd-f-oc" onclick="qtdToggleOffice('Orange County')">Orange County</button>
+    <button class="filter-btn active" id="qtd-f-riverside" onclick="qtdToggleOffice('Riverside')">Riverside</button>
+    <button class="filter-btn" id="qtd-f-newport" onclick="qtdToggleOffice('Newport Beach')">Newport Beach</button>
+    <button class="filter-btn" id="qtd-f-oc" onclick="qtdToggleOffice('Orange County')">Orange County</button>
     <button class="filter-btn" id="qtd-f-active" onclick="qtdToggleOffice('active')">Has Activity</button>
     <div class="filter-sep"></div>
     <select id="qtd-view-select" class="squad-select" style="background:rgba(255,255,255,0.05);border:1px solid rgba(170,221,221,0.25);color:rgba(248,249,249,0.6);padding:6px 12px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer" onchange="qtdSetView(this.value,null)">
@@ -2164,7 +2164,7 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode #pane
     <span class="filter-label">Filter —</span>
     <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
     <button class="filter-btn" onclick="setFilter('combine', this)">In Combine</button>
-    <button class="filter-btn" id="si-btn-riverside" onclick="setOfficeFilter('Riverside', this)">Riverside</button>
+    <button class="filter-btn active" id="si-btn-riverside" onclick="setOfficeFilter('Riverside', this)">Riverside</button>
     <button class="filter-btn" id="si-btn-newportbeach" onclick="setOfficeFilter('Newport Beach', this)">Newport Beach</button>
     <button class="filter-btn" id="si-btn-orangecounty" onclick="setOfficeFilter('Orange County', this)">Orange County</button>
     <div class="filter-sep"></div>
@@ -2199,7 +2199,7 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode #pane
   <div class="filter-bar">
     <span class="filter-label">Filter —</span>
     <button class="filter-btn active" onclick="gc_setFilter('all', this)">All</button>
-    <button class="filter-btn" id="gc-btn-riverside" onclick="gc_setOfficeFilter('Riverside', this)">Riverside</button>
+    <button class="filter-btn active" id="gc-btn-riverside" onclick="gc_setOfficeFilter('Riverside', this)">Riverside</button>
     <button class="filter-btn" id="gc-btn-newportbeach" onclick="gc_setOfficeFilter('Newport Beach', this)">Newport Beach</button>
     <button class="filter-btn" id="gc-btn-orangecounty" onclick="gc_setOfficeFilter('Orange County', this)">Orange County</button>
     <div class="filter-sep"></div>
@@ -2248,8 +2248,8 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode #pane
   <div class="stats-bar" id="roster-stats"></div>
   <div class="roster-controls">
     <span class="filter-label">Office —</span>
-    <button class="filter-btn active" onclick="rosterFilter('all',this)">All</button>
-    <button class="filter-btn" onclick="rosterFilter('Riverside',this)">Riverside</button>
+    <button class="filter-btn" onclick="rosterFilter('all',this)">All</button>
+    <button class="filter-btn active" onclick="rosterFilter('Riverside',this)">Riverside</button>
     <button class="filter-btn" onclick="rosterFilter('Newport Beach',this)">Newport Beach</button>
     <button class="filter-btn" onclick="rosterFilter('Orange County',this)">Orange County</button>
     <div class="filter-sep"></div>
@@ -2301,9 +2301,9 @@ let GC_EMPLOYEES       = []; // Populated from Google Sheets — Game Changers t
 let RANKINGS_MAP       = {}; // Populated from Google Sheets (Export tab)
 let rankingsData       = []; // Same as RANKINGS_MAP but as array for Rankings tab
 // Combine tab state
-let combineState = { offices: new Set(['all']), squad: '', showMissed: false };
+let combineState = { offices: new Set(['Riverside']), squad: '', showMissed: false };
 // Rankings tab state
-let rkOfficeFilter = new Set(); // empty = all
+let rkOfficeFilter = new Set(['Riverside']); // default Riverside
 let rkRankFilter   = new Set(); // empty = all
 let rkTitleFilter  = new Set(); // empty = all
 let rkSortCol      = 'llPoints';
@@ -2419,7 +2419,7 @@ let wtdOffices = new Set(['Riverside']);
 let wtdActiveExtra = null; // 'active' or null
 let wtdSortCol='name', wtdSortDir=1, wtdView='squad', wtdSquadFilter='';
 let qtdOffices=new Set(['Riverside']), qtdSortCol='name', qtdSortDir=1, qtdView='squad', qtdSquadFilter='';
-let rosterOfficeFilter='all', rosterSortMode='name', rosterViewMode='card';
+let rosterOfficeFilter='Riverside', rosterSortMode='name', rosterViewMode='card';
 
 // ── WTD GOALS (global, editable, persisted) ──
 const WTD_GOALS_DEFAULT = {ac:4, cs:3, sra:2, cap:1, ic:1, pitches:30, hours:30};
@@ -5381,7 +5381,7 @@ function ob_goToEmployee(id) {
 }
 
 // ── DASHBOARD ──────────────────────────────────────────────────────────────
-let ob_dashOfficeFilter = '';
+let ob_dashOfficeFilter = 'Riverside';
 
 function ob_setDashOffice(btn) {
   document.querySelectorAll('.dash-chip').forEach(c => c.classList.remove('active'));
@@ -5531,7 +5531,7 @@ const RAW_CSV = `ID,In Combine,Name,QSRA,QIC,SRA Remaining,IC Remaining,Office
 let allData = [];
 let filteredData = [];
 let activeFilter = 'all';
-let activeOffice = null;
+let activeOffice = 'Riverside';
 let sortCol = 'QSRA';
 let sortDir = -1; // descending by default
 let searchTerm = '';
@@ -5873,7 +5873,7 @@ function deleteRow(id) {
 let gc_allData = [];
 let gc_filteredData = [];
 let gc_activeFilter = 'all';
-let gc_activeOffice = null;
+let gc_activeOffice = 'Riverside';
 let gc_sortCol = 'QSRA';
 let gc_sortDir = -1;
 let gc_searchTerm = '';
@@ -7353,7 +7353,7 @@ document.addEventListener('keydown', function(e) {
     <div class="dash-filter-group">
       <button class="dash-chip active" data-office="" onclick="ob_setDashOffice(this)">All Offices</button>
       <button class="dash-chip" data-office="Orange County" onclick="ob_setDashOffice(this)">OC</button>
-      <button class="dash-chip" data-office="Riverside" onclick="ob_setDashOffice(this)">Riverside</button>
+      <button class="dash-chip" data-office="Riverside" class="active" onclick="ob_setDashOffice(this)">Riverside</button>
       <button class="dash-chip" data-office="Newport Beach" onclick="ob_setDashOffice(this)">Newport Beach</button>
     </div>
   </div>
@@ -7670,9 +7670,9 @@ document.addEventListener('keydown', function(e) {
     <div class="prod-filter-group">
       <div class="prod-filter-label">Office</div>
       <div class="prod-pills" id="prod-office-pills">
-        <span class="prod-pill active" data-office="Orange County" onclick="prodToggleOffice('Orange County',this)">Orange County</span>
-        <span class="prod-pill active" data-office="Newport Beach" onclick="prodToggleOffice('Newport Beach',this)">Newport Beach</span>
-        <span class="prod-pill" data-office="Riverside" onclick="prodToggleOffice('Riverside',this)">Riverside</span>
+        <span class="prod-pill" data-office="Orange County" onclick="prodToggleOffice('Orange County',this)">Orange County</span>
+        <span class="prod-pill" data-office="Newport Beach" onclick="prodToggleOffice('Newport Beach',this)">Newport Beach</span>
+        <span class="prod-pill active" data-office="Riverside" onclick="prodToggleOffice('Riverside',this)">Riverside</span>
       </div>
     </div>
 
@@ -7727,7 +7727,7 @@ const PROD_HDR_CLASS = {
 };
 
 // Filter state — default: OC + NB selected, Productive + Active + Inactive selected
-let prodOffices  = new Set(['Orange County','Newport Beach']);
+let prodOffices  = new Set(['Riverside']);
 let prodStatuses = new Set(['Productive','Active','Inactive']);
 
 function prodToggleOffice(office, el) {
@@ -7880,10 +7880,10 @@ function renderProductivity() {
 
     <div class="filter-bar">
       <span class="filter-label">Office</span>
-      <button class="filter-btn active" id="cbtn-all" onclick="combineToggleOffice('all',this)">All</button>
+      <button class="filter-btn" id="cbtn-all" onclick="combineToggleOffice('all',this)">All</button>
       <button class="filter-btn" id="cbtn-nb" onclick="combineToggleOffice('Newport Beach',this)">Newport Beach</button>
       <button class="filter-btn" id="cbtn-oc" onclick="combineToggleOffice('Orange County',this)">Orange County</button>
-      <button class="filter-btn" id="cbtn-rv" onclick="combineToggleOffice('Riverside',this)">Riverside</button>
+      <button class="filter-btn active" id="cbtn-rv" onclick="combineToggleOffice('Riverside',this)">Riverside</button>
       <div class="filter-sep"></div>
       <span class="filter-label">Squad</span>
       <select class="squad-select" onchange="combineState.squad=this.value;renderCombineTab()" style="background:rgba(255,255,255,0.05);border:1px solid rgba(170,221,221,0.25);color:rgba(248,249,249,0.6);padding:6px 12px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer" id="combine-squad-select">
