@@ -76,13 +76,6 @@ body.light-mode .roster-card .rc-name { color: #F8F9F9; }
 body.light-mode .roster-card .rc-role { color: var(--cyan-light); }
 body.light-mode .rc-edit-field { color: #F8F9F9; background: #2A2828; }
 body.light-mode .search-wrap input { color: #F8F9F9; background: #2A2828; }
-body.light-mode #panel-onboard-employee .rep-card,
-body.light-mode #panel-onboard-progress .rep-card { color: #F8F9F9; }
-body.light-mode #panel-onboard-employee .rep-name,
-body.light-mode #panel-onboard-progress .rep-name { color: #F8F9F9; }
-body.light-mode #panel-onboard-employee .rep-prog-bar,
-body.light-mode #panel-onboard-progress .rep-prog-bar { background: rgba(255,255,255,0.1); }
-
 /* ── WTD GOALS PANEL ── */
 #wtd-goals-panel { display:none; }
 #wtd-goals-panel.open { display:flex !important; }
@@ -1241,165 +1234,161 @@ body.light-mode #panel-status-incentive .filter-btn.active{
 
 
 /* ── ONBOARDING TABS ── uses dashboard design system, no :root overrides ── */
-#panel-onboard-employee *, #panel-onboard-progress *{ box-sizing: border-box; margin: 0; padding: 0; }
+#panel-onboard-employee *{ box-sizing: border-box; margin: 0; padding: 0; }
 /* Stats bar override — onboarding uses flex not grid */
-#panel-onboard-employee .stats-bar, #panel-onboard-progress .stats-bar{
+#panel-onboard-employee .stats-bar{
     display: flex; gap: 28px; flex-wrap: wrap; align-items: center;
     padding: 14px 36px; border-bottom: 1px solid var(--border);
   }
-#panel-onboard-employee .stat, #panel-onboard-progress .stat{
+#panel-onboard-employee .stat{
     display: flex; flex-direction: column; align-items: center; min-width: 60px;
   }
-#panel-onboard-employee .stat-val, #panel-onboard-progress .stat-val{
+#panel-onboard-employee .stat-val{
     font-size: 28px; font-weight: 700; letter-spacing: -1px; line-height: 1; color: var(--off-white);
   }
-#panel-onboard-employee .stat-lbl, #panel-onboard-progress .stat-lbl{
+#panel-onboard-employee .stat-lbl{
     font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 9px; letter-spacing: 2px;
     text-transform: uppercase; color: var(--cyan-dark); margin-top: 4px;
   }
-#panel-onboard-employee .stat-total .stat-val, #panel-onboard-progress .stat-total .stat-val{ color: var(--cyan-light); }
-#panel-onboard-employee .stat-hired .stat-val, #panel-onboard-progress .stat-hired .stat-val{ color: #2DC48E; }
-#panel-onboard-employee .stat-yes .stat-val, #panel-onboard-progress .stat-yes .stat-val{ color: var(--cyan-light); }
-#panel-onboard-employee .stat-complete .stat-val, #panel-onboard-progress .stat-complete .stat-val{ color: #2DC48E; }
+#panel-onboard-employee .stat-total .stat-val{ color: var(--cyan-light); }
+#panel-onboard-employee .stat-hired .stat-val{ color: #2DC48E; }
+#panel-onboard-employee .stat-yes .stat-val{ color: var(--cyan-light); }
+#panel-onboard-employee .stat-complete .stat-val{ color: #2DC48E; }
 /* Controls bar */
-#panel-onboard-employee .controls, #panel-onboard-progress .controls{
+#panel-onboard-employee .controls{
     padding: 14px 36px; display: flex; gap: 10px; flex-wrap: wrap;
     align-items: center; border-bottom: 1px solid var(--border);
   }
-#panel-onboard-employee .search-wrap, #panel-onboard-progress .search-wrap{
+#panel-onboard-employee .search-wrap{
     position: relative; flex: 1; min-width: 200px; max-width: 320px;
   }
-#panel-onboard-employee .search-wrap svg, #panel-onboard-progress .search-wrap svg{
+#panel-onboard-employee .search-wrap svg{
     position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
     opacity: .45; pointer-events: none;
   }
-#panel-onboard-employee .ctrl-input, #panel-onboard-progress .ctrl-input{
+#panel-onboard-employee .ctrl-input{
     background: rgba(255,255,255,0.05); border: 1px solid var(--border);
     color: var(--off-white); font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px;
     letter-spacing: 1px; padding: 7px 12px 7px 34px; width: 100%;
     outline: none; transition: border-color 0.2s;
   }
-#panel-onboard-employee .ctrl-input:focus, #panel-onboard-progress .ctrl-input:focus{ border-color: var(--cyan-light); }
-#panel-onboard-employee .ctrl-input::placeholder, #panel-onboard-progress .ctrl-input::placeholder{ color: rgba(248,249,249,0.3); }
-#panel-onboard-employee .ctrl-select, #panel-onboard-progress .ctrl-select{
+#panel-onboard-employee .ctrl-input:focus{ border-color: var(--cyan-light); }
+#panel-onboard-employee .ctrl-input::placeholder{ color: rgba(248,249,249,0.3); }
+#panel-onboard-employee .ctrl-select{
     background: rgba(255,255,255,0.05); border: 1px solid var(--border);
     color: var(--off-white); font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px;
     letter-spacing: 1px; padding: 7px 12px; outline: none; cursor: pointer;
     transition: border-color 0.15s; color-scheme: dark;
   }
-#panel-onboard-employee .ctrl-select:focus, #panel-onboard-progress .ctrl-select:focus{ border-color: var(--cyan-light); }
+#panel-onboard-employee .ctrl-select:focus{ border-color: var(--cyan-light); }
 /* Buttons */
-#panel-onboard-employee .btn, #panel-onboard-progress .btn{
+#panel-onboard-employee .btn{
     background: var(--cyan-light); color: var(--near-black); border: none;
     font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px; font-weight: 700;
     letter-spacing: 2px; padding: 8px 16px; cursor: pointer;
     text-transform: uppercase; transition: opacity 0.15s; white-space: nowrap;
   }
-#panel-onboard-employee .btn:hover, #panel-onboard-progress .btn:hover{ opacity: .85; }
-#panel-onboard-employee .btn-outline, #panel-onboard-progress .btn-outline{
+#panel-onboard-employee .btn:hover{ opacity: .85; }
+#panel-onboard-employee .btn-outline{
     background: transparent; border: 1px solid rgba(170,221,221,0.25);
     color: rgba(248,249,249,0.6);
   }
-#panel-onboard-employee .btn-outline:hover, #panel-onboard-progress .btn-outline:hover{
+#panel-onboard-employee .btn-outline:hover{
     border-color: var(--cyan-light); color: var(--cyan-light); background: transparent; opacity: 1;
   }
-#panel-onboard-employee .btn[style*="f0a020"], #panel-onboard-progress .btn[style*="f0a020"]{
+#panel-onboard-employee .btn[style*="f0a020"]{
     border-color: #F0A020; color: #F0A020;
   }
 /* Upload zone */
-#panel-onboard-employee .upload-zone, #panel-onboard-progress .upload-zone{
+#panel-onboard-employee .upload-zone{
     margin: 16px 36px; border: 1px dashed var(--border);
     padding: 24px 28px; text-align: center; cursor: pointer;
     transition: border-color 0.15s, background 0.15s; display: none;
     color: var(--text-muted);
   }
-#panel-onboard-employee .upload-zone.visible, #panel-onboard-progress .upload-zone.visible{ display: block; }
-#panel-onboard-employee .upload-zone:hover, #panel-onboard-progress .upload-zone:hover,
-#panel-onboard-employee .upload-zone.drag, #panel-onboard-progress .upload-zone.drag{
-    border-color: var(--cyan-light); background: rgba(170,221,221,0.04);
-  }
-#panel-onboard-employee .upload-zone p, #panel-onboard-progress .upload-zone p{
+#panel-onboard-employee .upload-zone.visible{ display: block; }
+#panel-onboard-employee .upload-zone:hover, #panel-onboard-employee .upload-zone p{
     font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px; letter-spacing: 1px; color: var(--text-muted);
   }
-#panel-onboard-employee .upload-zone strong, #panel-onboard-progress .upload-zone strong{ color: var(--cyan-light); }
-#panel-onboard-employee #fileInput, #panel-onboard-progress #fileInput{ display: none; }
+#panel-onboard-employee .upload-zone strong{ color: var(--cyan-light); }
+#panel-onboard-employee #fileInput{ display: none; }
 /* Table wrapper */
-#panel-onboard-employee .table-wrapper, #panel-onboard-progress .table-wrapper{
+#panel-onboard-employee .table-wrapper{
     overflow-x: auto; overflow-y: auto;
     max-height: calc(100vh - 260px);
     padding: 0 36px 40px; margin-top: 16px;
   }
-#panel-onboard-employee table, #panel-onboard-progress table{
+#panel-onboard-employee table{
     width: 100%; border-collapse: collapse; min-width: 900px; font-size: 14px;
   }
-#panel-onboard-employee thead tr, #panel-onboard-progress thead tr{
+#panel-onboard-employee thead tr{
     border-bottom: 1px solid var(--border);
   }
-#panel-onboard-employee thead th, #panel-onboard-progress thead th{
+#panel-onboard-employee thead th{
     position: sticky; top: 0; z-index: 10; background: var(--near-black);
   }
-#panel-onboard-employee th, #panel-onboard-progress th{
+#panel-onboard-employee th{
     font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px; letter-spacing: 2px;
     text-transform: uppercase; color: var(--cyan-dark); padding: 14px 12px;
     text-align: left; white-space: nowrap; cursor: pointer; user-select: none;
     transition: color 0.15s;
   }
-#panel-onboard-employee th:hover, #panel-onboard-progress th:hover{ color: var(--cyan-light); }
-#panel-onboard-employee th .sort-icon, #panel-onboard-progress th .sort-icon{ display: inline-block; margin-left: 4px; opacity: 0.4; font-style: normal; }
-#panel-onboard-employee th.sort-asc .sort-icon::after, #panel-onboard-progress th.sort-asc .sort-icon::after{ content: '▲'; opacity: 1; color: var(--cyan-light); }
-#panel-onboard-employee th.sort-desc .sort-icon::after, #panel-onboard-progress th.sort-desc .sort-icon::after{ content: '▼'; opacity: 1; color: var(--cyan-light); }
-#panel-onboard-employee th:not(.sort-asc):not(.sort-desc) .sort-icon::after, #panel-onboard-progress th:not(.sort-asc):not(.sort-desc) .sort-icon::after{ content: '⇅'; }
-#panel-onboard-employee th.th-check, #panel-onboard-progress th.th-check{
+#panel-onboard-employee th:hover{ color: var(--cyan-light); }
+#panel-onboard-employee th .sort-icon{ display: inline-block; margin-left: 4px; opacity: 0.4; font-style: normal; }
+#panel-onboard-employee th.sort-asc .sort-icon::after{ content: '▲'; opacity: 1; color: var(--cyan-light); }
+#panel-onboard-employee th.sort-desc .sort-icon::after{ content: '▼'; opacity: 1; color: var(--cyan-light); }
+#panel-onboard-employee th:not(.sort-asc):not(.sort-desc) .sort-icon::after{ content: '⇅'; }
+#panel-onboard-employee th.th-check{
     white-space: normal; word-break: break-word; text-align: center;
     padding: 8px 6px; width: 70px; min-width: 70px; max-width: 70px;
     line-height: 1.3; cursor: default;
   }
-#panel-onboard-employee th.th-check:hover, #panel-onboard-progress th.th-check:hover{ color: var(--cyan-dark); }
-#panel-onboard-employee tbody tr, #panel-onboard-progress tbody tr{
+#panel-onboard-employee th.th-check:hover{ color: var(--cyan-dark); }
+#panel-onboard-employee tbody tr{
     border-bottom: 1px solid rgba(170,221,221,0.07); transition: background 0.1s;
     animation: rowIn .22s ease both;
   }
-#panel-onboard-employee tbody tr:hover, #panel-onboard-progress tbody tr:hover{ background: var(--row-hover); }
-#panel-onboard-employee td, #panel-onboard-progress td{
+#panel-onboard-employee tbody tr:hover{ background: var(--row-hover); }
+#panel-onboard-employee td{
     padding: 11px 12px; vertical-align: middle; white-space: nowrap;
     color: var(--off-white); font-size: 14px;
   }
-#panel-onboard-employee td.name-cell, #panel-onboard-progress td.name-cell{
+#panel-onboard-employee td.name-cell{
     font-weight: 600; font-size: 15px; white-space: normal; min-width: 150px;
   }
 /* Status badges — using dashboard status-badge pattern with ob-specific colors */
-#panel-onboard-employee .badge, #panel-onboard-progress .badge{
+#panel-onboard-employee .badge{
     display: inline-block; font-family:Helvetica Neue,Helvetica,Arial,sans-serif;
     font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
     padding: 4px 9px; border: 1px solid;
   }
-#panel-onboard-employee .badge-hired, #panel-onboard-progress .badge-hired{ color: #2DC48E; border-color: rgba(45,196,142,.35); background: rgba(45,196,142,.1); }
-#panel-onboard-employee .badge-yes, #panel-onboard-progress .badge-yes{ color: var(--cyan-light); border-color: rgba(170,221,221,.35); background: rgba(170,221,221,.1); }
-#panel-onboard-employee .badge-quit, #panel-onboard-progress .badge-quit{ color: #F05252; border-color: rgba(240,82,82,.35); background: rgba(240,82,82,.1); }
-#panel-onboard-employee .badge-pending, #panel-onboard-progress .badge-pending{ color: #EF9F27; border-color: rgba(239,159,39,.35); background: rgba(239,159,39,.1); }
-#panel-onboard-employee .badge-noshow, #panel-onboard-progress .badge-noshow{ color: rgba(248,249,249,.5); border-color: rgba(248,249,249,.18); background: transparent; }
-#panel-onboard-employee .badge-scheduled, #panel-onboard-progress .badge-scheduled{ color: #2DC48E; border-color: rgba(45,196,142,.35); background: rgba(45,196,142,.08); }
-#panel-onboard-employee .badge-zoom, #panel-onboard-progress .badge-zoom{ color: var(--cyan-dark); border-color: rgba(90,158,160,.35); background: rgba(90,158,160,.1); }
-#panel-onboard-employee .badge-no, #panel-onboard-progress .badge-no{ color: #F05252; border-color: rgba(240,82,82,.35); background: rgba(240,82,82,.08); }
-#panel-onboard-employee .badge-other, #panel-onboard-progress .badge-other{ color: var(--text-muted); border-color: rgba(248,249,249,.18); background: transparent; }
+#panel-onboard-employee .badge-hired{ color: #2DC48E; border-color: rgba(45,196,142,.35); background: rgba(45,196,142,.1); }
+#panel-onboard-employee .badge-yes{ color: var(--cyan-light); border-color: rgba(170,221,221,.35); background: rgba(170,221,221,.1); }
+#panel-onboard-employee .badge-quit{ color: #F05252; border-color: rgba(240,82,82,.35); background: rgba(240,82,82,.1); }
+#panel-onboard-employee .badge-pending{ color: #EF9F27; border-color: rgba(239,159,39,.35); background: rgba(239,159,39,.1); }
+#panel-onboard-employee .badge-noshow{ color: rgba(248,249,249,.5); border-color: rgba(248,249,249,.18); background: transparent; }
+#panel-onboard-employee .badge-scheduled{ color: #2DC48E; border-color: rgba(45,196,142,.35); background: rgba(45,196,142,.08); }
+#panel-onboard-employee .badge-zoom{ color: var(--cyan-dark); border-color: rgba(90,158,160,.35); background: rgba(90,158,160,.1); }
+#panel-onboard-employee .badge-no{ color: #F05252; border-color: rgba(240,82,82,.35); background: rgba(240,82,82,.08); }
+#panel-onboard-employee .badge-other{ color: var(--text-muted); border-color: rgba(248,249,249,.18); background: transparent; }
 /* Checkbox cells */
-#panel-onboard-employee .check, #panel-onboard-progress .check{
+#panel-onboard-employee .check{
     display: inline-flex; align-items: center; justify-content: center;
     width: 20px; height: 20px; border: 1px solid var(--border);
     cursor: pointer; font-size: 11px; transition: background 0.12s, border-color 0.12s;
     user-select: none; flex-shrink: 0;
   }
-#panel-onboard-employee .check.true, #panel-onboard-progress .check.true{
+#panel-onboard-employee .check.true{
     background: rgba(45,196,142,.15); border-color: rgba(45,196,142,.5); color: #2DC48E;
   }
-#panel-onboard-employee .check.false, #panel-onboard-progress .check.false{ background: transparent; color: transparent; }
-#panel-onboard-employee .check:hover, #panel-onboard-progress .check:hover{ border-color: var(--cyan-light); }
-#panel-onboard-employee td.td-check, #panel-onboard-progress td.td-check{
+#panel-onboard-employee .check.false{ background: transparent; color: transparent; }
+#panel-onboard-employee .check:hover{ border-color: var(--cyan-light); }
+#panel-onboard-employee td.td-check{
     text-align: center; padding: 10px 4px;
     width: 70px; min-width: 70px; max-width: 70px;
   }
 /* Row highlight */
-#panel-onboard-employee tr.row-highlight td, #panel-onboard-progress tr.row-highlight td{
+#panel-onboard-employee tr.row-highlight td{
     animation: obRowFlash 1.8s ease-out forwards;
   }
 @keyframes obRowFlash{
@@ -1408,94 +1397,76 @@ body.light-mode #panel-status-incentive .filter-btn.active{
     100% { background: transparent; }
   }
 /* Progress bar in table */
-#panel-onboard-employee .prog-wrap, #panel-onboard-progress .prog-wrap{ display: flex; align-items: center; gap: 8px; min-width: 100px; }
-#panel-onboard-employee .prog-bar, #panel-onboard-progress .prog-bar{ flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
-#panel-onboard-employee .prog-fill, #panel-onboard-progress .prog-fill{ height: 100%; background: var(--cyan-light); transition: width 0.3s; border-radius: 2px; }
-#panel-onboard-employee .prog-pct, #panel-onboard-progress .prog-pct{ font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px; color: var(--text-muted); min-width: 30px; text-align: right; }
+#panel-onboard-employee .prog-wrap{ display: flex; align-items: center; gap: 8px; min-width: 100px; }
+#panel-onboard-employee .prog-bar{ flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+#panel-onboard-employee .prog-fill{ height: 100%; background: var(--cyan-light); transition: width 0.3s; border-radius: 2px; }
+#panel-onboard-employee .prog-pct{ font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px; color: var(--text-muted); min-width: 30px; text-align: right; }
 /* SMS button */
-#panel-onboard-employee .btn-sms, #panel-onboard-progress .btn-sms{
+#panel-onboard-employee .btn-sms{
     background: rgba(170,221,221,.06); border: 0.5px solid rgba(170,221,221,.3);
     color: var(--cyan-light); padding: 3px 6px; cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
     flex-shrink: 0; transition: background 0.15s, border-color 0.15s; line-height: 1;
   }
-#panel-onboard-employee .btn-sms:hover, #panel-onboard-progress .btn-sms:hover{ background: rgba(170,221,221,.14); border-color: var(--cyan-light); }
+#panel-onboard-employee .btn-sms:hover{ background: rgba(170,221,221,.14); border-color: var(--cyan-light); }
 /* Delete button */
-#panel-onboard-employee .btn-delete, #panel-onboard-progress .btn-delete{
+#panel-onboard-employee .btn-delete{
     background: transparent; border: 0.5px solid rgba(104,82,54,.35);
     color: rgba(242,207,156,.5); font-size: 12px; padding: 4px 9px;
     cursor: pointer; transition: all 0.15s; white-space: nowrap;
   }
-#panel-onboard-employee .btn-delete:hover, #panel-onboard-progress .btn-delete:hover{
+#panel-onboard-employee .btn-delete:hover{
     border-color: var(--sand); color: var(--sand); background: rgba(104,82,54,.15);
   }
 /* Duplicate row */
-#panel-onboard-employee tr.is-dupe, #panel-onboard-progress tr.is-dupe{ background: rgba(239,159,39,.06) !important; }
-#panel-onboard-employee .dupe-badge, #panel-onboard-progress .dupe-badge{
+#panel-onboard-employee tr.is-dupe{ background: rgba(239,159,39,.06) !important; }
+#panel-onboard-employee .dupe-badge{
     display: inline-block; font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 9px;
     letter-spacing: 1px; color: #EF9F27; border: 1px solid rgba(239,159,39,.4);
     background: rgba(239,159,39,.1); padding: 1px 6px; margin-left: 6px;
     vertical-align: middle; text-transform: uppercase;
   }
 /* Inline edit */
-#panel-onboard-employee .editable, #panel-onboard-progress .editable{ cursor: text; }
-#panel-onboard-employee .editable:hover, #panel-onboard-progress .editable:hover{ background: var(--row-hover); outline: 1px solid var(--border); }
-#panel-onboard-employee input.inline-edit, #panel-onboard-progress input.inline-edit,
-#panel-onboard-employee select.inline-select, #panel-onboard-progress select.inline-select,
-#panel-onboard-employee input.inline-date, #panel-onboard-progress input.inline-date{
-    background: rgba(255,255,255,0.06); border: 1px solid var(--cyan-light);
-    color: var(--off-white); font-family:Helvetica Neue,sans-serif;
-    font-size: 13px; padding: 4px 8px; outline: none; color-scheme: dark;
-  }
-#panel-onboard-employee select.inline-select, #panel-onboard-progress select.inline-select{ min-width: 110px; }
-#panel-onboard-employee input.inline-date, #panel-onboard-progress input.inline-date{ width: 140px; }
+#panel-onboard-employee .editable{ cursor: text; }
+#panel-onboard-employee .editable:hover{ background: var(--row-hover); outline: 1px solid var(--border); }
+#panel-onboard-employee input.inline-edit, #panel-onboard-employee select.inline-select{ min-width: 110px; }
+#panel-onboard-employee input.inline-date{ width: 140px; }
 /* Empty state */
-#panel-onboard-employee .empty, #panel-onboard-progress .empty{
+#panel-onboard-employee .empty{
     text-align: center; padding: 60px 20px; color: var(--text-muted);
   }
-#panel-onboard-employee .empty-icon, #panel-onboard-progress .empty-icon{ font-size: 48px; margin-bottom: 12px; }
-#panel-onboard-employee .empty p, #panel-onboard-progress .empty p{ font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 11px; letter-spacing: 2px; }
+#panel-onboard-employee .empty-icon{ font-size: 48px; margin-bottom: 12px; }
+#panel-onboard-employee .empty p{ font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 11px; letter-spacing: 2px; }
 /* Modal overlay */
-#panel-onboard-employee .modal-overlay, #panel-onboard-progress .modal-overlay{
+#panel-onboard-employee .modal-overlay{
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,.65); z-index: 100;
     align-items: center; justify-content: center; padding: 20px;
   }
-#panel-onboard-employee .modal-overlay.open, #panel-onboard-progress .modal-overlay.open{ display: flex; }
-#panel-onboard-employee .modal, #panel-onboard-progress .modal{
+#panel-onboard-employee .modal-overlay.open{ display: flex; }
+#panel-onboard-employee .modal{
     background: #2d2829; border: 0.5px solid var(--border);
     padding: 28px 32px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto;
   }
-#panel-onboard-employee .modal h2, #panel-onboard-progress .modal h2{
+#panel-onboard-employee .modal h2{
     font-size: 18px; font-weight: 600; color: var(--off-white);
     margin-bottom: 20px; letter-spacing: -.3px;
   }
-#panel-onboard-employee .form-grid, #panel-onboard-progress .form-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-#panel-onboard-employee .form-group, #panel-onboard-progress .form-group{ display: flex; flex-direction: column; gap: 5px; }
-#panel-onboard-employee .form-group.full, #panel-onboard-progress .form-group.full{ grid-column: 1 / -1; }
-#panel-onboard-employee .form-group label, #panel-onboard-progress .form-group label{
+#panel-onboard-employee .form-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+#panel-onboard-employee .form-group{ display: flex; flex-direction: column; gap: 5px; }
+#panel-onboard-employee .form-group.full{ grid-column: 1 / -1; }
+#panel-onboard-employee .form-group label{
     display: block; font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 9px;
     letter-spacing: 2px; text-transform: uppercase; color: var(--cyan-dark); margin-bottom: 2px;
   }
-#panel-onboard-employee .form-group input, #panel-onboard-progress .form-group input,
-#panel-onboard-employee .form-group select, #panel-onboard-progress .form-group select,
-#panel-onboard-employee .form-group textarea, #panel-onboard-progress .form-group textarea{
-    background: rgba(255,255,255,0.05); border: 0.5px solid rgba(170,221,221,0.25);
-    color: var(--off-white); font-family:Helvetica Neue,sans-serif;
-    font-size: 14px; padding: 9px 12px; outline: none; width: 100%;
-    transition: border-color 0.15s; color-scheme: dark;
-  }
-#panel-onboard-employee .form-group input:focus, #panel-onboard-progress .form-group input:focus,
-#panel-onboard-employee .form-group select:focus, #panel-onboard-progress .form-group select:focus,
-#panel-onboard-employee .form-group textarea:focus, #panel-onboard-progress .form-group textarea:focus{ border-color: var(--cyan-light); }
-#panel-onboard-employee .form-group select option, #panel-onboard-progress .form-group select option{ background: #2d2829; }
-#panel-onboard-employee .form-group textarea, #panel-onboard-progress .form-group textarea{ resize: vertical; min-height: 60px; }
-#panel-onboard-employee .checkboxes-grid, #panel-onboard-progress .checkboxes-grid{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 4px; }
-#panel-onboard-employee .cb-item, #panel-onboard-progress .cb-item{ display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--off-white); }
-#panel-onboard-employee .cb-item input[type=checkbox], #panel-onboard-progress .cb-item input[type=checkbox]{ width: 15px; height: 15px; accent-color: var(--cyan-light); cursor: pointer; }
-#panel-onboard-employee .modal-actions, #panel-onboard-progress .modal-actions{ display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+#panel-onboard-employee .form-group input, #panel-onboard-employee .form-group input:focus, #panel-onboard-employee .form-group select option{ background: #2d2829; }
+#panel-onboard-employee .form-group textarea{ resize: vertical; min-height: 60px; }
+#panel-onboard-employee .checkboxes-grid{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 4px; }
+#panel-onboard-employee .cb-item{ display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--off-white); }
+#panel-onboard-employee .cb-item input[type=checkbox]{ width: 15px; height: 15px; accent-color: var(--cyan-light); cursor: pointer; }
+#panel-onboard-employee .modal-actions{ display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
 /* Toast */
-#panel-onboard-employee .toast, #panel-onboard-progress .toast{
+#panel-onboard-employee .toast{
     position: fixed; bottom: 48px; right: 24px;
     background: var(--near-black); border: 1px solid var(--cyan-light);
     color: var(--cyan-light); font-family:Helvetica Neue,Helvetica,Arial,sans-serif;
@@ -1504,105 +1475,104 @@ body.light-mode #panel-status-incentive .filter-btn.active{
     transform: translateY(80px); opacity: 0;
     transition: transform 0.25s, opacity 0.25s; pointer-events: none;
   }
-#panel-onboard-employee .toast.show, #panel-onboard-progress .toast.show{ transform: translateY(0); opacity: 1; }
+#panel-onboard-employee .toast.show{ transform: translateY(0); opacity: 1; }
 /* Dashboard view (progress tab) */
-#panel-onboard-employee #dashboardView, #panel-onboard-progress #dashboardView{ display: none; padding: 24px 36px 48px; }
-#panel-onboard-employee #dashboardView.visible, #panel-onboard-progress #dashboardView.visible{ display: block; }
-#panel-onboard-employee #trackerView.hidden, #panel-onboard-progress #trackerView.hidden{ display: none; }
-#panel-onboard-employee .dash-header, #panel-onboard-progress .dash-header{
+#panel-onboard-employee #dashboardView{ display: none; padding: 24px 36px 48px; }
+#panel-onboard-employee #dashboardView.visible{ display: block; }
+#panel-onboard-employee #trackerView.hidden{ display: none; }
+#panel-onboard-employee .dash-header{
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
   }
 .ob-prog-inner { padding: 0 36px; }
-#panel-onboard-employee .dash-header h2, #panel-onboard-progress .dash-header h2{
+#panel-onboard-employee .dash-header h2{
     font-size: 20px; font-weight: 700; color: var(--off-white); letter-spacing: -.4px;
   }
-#panel-onboard-employee .dash-header h2 span, #panel-onboard-progress .dash-header h2 span{ color: var(--cyan-light); }
-#panel-onboard-employee .dash-search, #panel-onboard-progress .dash-search{ position: relative; flex: 1; max-width: 280px; }
-#panel-onboard-employee .dash-search svg, #panel-onboard-progress .dash-search svg{
+#panel-onboard-employee .dash-header h2 span{ color: var(--cyan-light); }
+#panel-onboard-employee .dash-search{ position: relative; flex: 1; max-width: 280px; }
+#panel-onboard-employee .dash-search svg{
     position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: .45; pointer-events: none;
   }
-#panel-onboard-employee .dash-search input, #panel-onboard-progress .dash-search input{
+#panel-onboard-employee .dash-search input{
     background: rgba(255,255,255,0.05); border: 1px solid var(--border);
     color: var(--off-white); font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px;
     letter-spacing: 1px; padding: 7px 12px 7px 32px; width: 100%; outline: none;
     transition: border-color 0.15s;
   }
-#panel-onboard-employee .dash-search input:focus, #panel-onboard-progress .dash-search input:focus{ border-color: var(--cyan-light); }
-#panel-onboard-employee .dash-filter-group, #panel-onboard-progress .dash-filter-group{ display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-#panel-onboard-employee .dash-chip, #panel-onboard-progress .dash-chip{
+#panel-onboard-employee .dash-search input:focus{ border-color: var(--cyan-light); }
+#panel-onboard-employee .dash-filter-group{ display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+#panel-onboard-employee .dash-chip{
     background: transparent; border: 1px solid rgba(170,221,221,0.25);
     color: rgba(248,249,249,.6); font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px;
     letter-spacing: 1.5px; text-transform: uppercase;
     padding: 6px 14px; cursor: pointer; transition: all 0.15s;
   }
-#panel-onboard-employee .dash-chip:hover, #panel-onboard-progress .dash-chip:hover{ border-color: var(--cyan-light); color: var(--cyan-light); }
-#panel-onboard-employee .dash-chip.active, #panel-onboard-progress .dash-chip.active{ border-color: var(--cyan-light); color: var(--cyan-light); background: rgba(170,221,221,.08); }
-body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode #panel-onboard-progress .dash-chip.active{ background: #2A2828; border-color: var(--cyan-light); color: var(--cyan-light); }
-/* Leader sections */
-#panel-onboard-employee .leader-section, #panel-onboard-progress .leader-section{ margin-bottom: 32px; }
-#panel-onboard-employee .leader-section-header, #panel-onboard-progress .leader-section-header{
+#panel-onboard-employee .dash-chip:hover{ border-color: var(--cyan-light); color: var(--cyan-light); }
+#panel-onboard-employee .dash-chip.active{ border-color: var(--cyan-light); color: var(--cyan-light); background: rgba(170,221,221,.08); }
+body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Leader sections */
+#panel-onboard-employee .leader-section{ margin-bottom: 32px; }
+#panel-onboard-employee .leader-section-header{
     display: flex; align-items: center; gap: 12px;
     margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
   }
-#panel-onboard-employee .leader-avatar, #panel-onboard-progress .leader-avatar{
+#panel-onboard-employee .leader-avatar{
     width: 30px; height: 30px; background: rgba(170,221,221,.08);
     border: 1px solid rgba(90,158,160,.5);
     display: flex; align-items: center; justify-content: center;
     font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 11px; font-weight: 700;
     color: var(--cyan-dark); flex-shrink: 0; text-transform: uppercase;
   }
-#panel-onboard-employee .leader-name, #panel-onboard-progress .leader-name{
+#panel-onboard-employee .leader-name{
     font-size: 14px; font-weight: 600; color: var(--off-white); letter-spacing: -.2px;
   }
-#panel-onboard-employee .leader-meta, #panel-onboard-progress .leader-meta{ font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px; color: var(--text-muted); margin-left: auto; }
-#panel-onboard-employee .leader-progress-summary, #panel-onboard-progress .leader-progress-summary{
+#panel-onboard-employee .leader-meta{ font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px; color: var(--text-muted); margin-left: auto; }
+#panel-onboard-employee .leader-progress-summary{
     font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px; letter-spacing: 1px;
     color: var(--cyan-light); background: rgba(170,221,221,.08);
     border: 1px solid rgba(170,221,221,.25); padding: 3px 9px; margin-left: 8px;
   }
 /* Rep cards (dashboard view) */
-#panel-onboard-employee .rep-grid, #panel-onboard-progress .rep-grid{
+#panel-onboard-employee .rep-grid{
     display: flex; flex-direction: row; gap: 10px; overflow-x: auto; padding-bottom: 8px;
     scrollbar-width: thin; scrollbar-color: rgba(170,221,221,.2) transparent;
   }
-#panel-onboard-employee .rep-grid::-webkit-scrollbar, #panel-onboard-progress .rep-grid::-webkit-scrollbar{ height: 3px; }
-#panel-onboard-employee .rep-grid::-webkit-scrollbar-thumb, #panel-onboard-progress .rep-grid::-webkit-scrollbar-thumb{ background: rgba(170,221,221,.2); }
-#panel-onboard-employee .rep-card, #panel-onboard-progress .rep-card{
+#panel-onboard-employee .rep-grid::-webkit-scrollbar{ height: 3px; }
+#panel-onboard-employee .rep-grid::-webkit-scrollbar-thumb{ background: rgba(170,221,221,.2); }
+#panel-onboard-employee .rep-card{
     background: var(--card-bg); border: 0.5px solid var(--border);
     padding: 14px 16px; transition: border-color 0.15s;
     cursor: pointer; position: relative; flex: 0 0 280px; min-width: 280px;
     color: var(--off-white);
   }
-#panel-onboard-employee .rep-card:hover, #panel-onboard-progress .rep-card:hover{ border-color: rgba(170,221,221,.4); }
-#panel-onboard-employee .rep-card.complete, #panel-onboard-progress .rep-card.complete{ border-color: rgba(45,196,142,.3); }
-#panel-onboard-employee .rep-card.complete:hover, #panel-onboard-progress .rep-card.complete:hover{ border-color: #2DC48E; }
-#panel-onboard-employee .rep-card-top, #panel-onboard-progress .rep-card-top{ display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
-#panel-onboard-employee .rep-name, #panel-onboard-progress .rep-name{ font-size: 14px; font-weight: 600; color: var(--off-white); line-height: 1.2; flex: 1; }
-#panel-onboard-employee .rep-office, #panel-onboard-progress .rep-office{ font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px; letter-spacing: 1px; color: var(--cyan-dark); text-transform: uppercase; margin-top: 3px; }
-#panel-onboard-employee .rep-prog-wrap, #panel-onboard-progress .rep-prog-wrap{ margin-bottom: 10px; }
-#panel-onboard-employee .rep-prog-label, #panel-onboard-progress .rep-prog-label{
+#panel-onboard-employee .rep-card:hover{ border-color: rgba(170,221,221,.4); }
+#panel-onboard-employee .rep-card.complete{ border-color: rgba(45,196,142,.3); }
+#panel-onboard-employee .rep-card.complete:hover{ border-color: #2DC48E; }
+#panel-onboard-employee .rep-card-top{ display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+#panel-onboard-employee .rep-name{ font-size: 14px; font-weight: 600; color: var(--off-white); line-height: 1.2; flex: 1; }
+#panel-onboard-employee .rep-office{ font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px; letter-spacing: 1px; color: var(--cyan-dark); text-transform: uppercase; margin-top: 3px; }
+#panel-onboard-employee .rep-prog-wrap{ margin-bottom: 10px; }
+#panel-onboard-employee .rep-prog-label{
     display: flex; justify-content: space-between; font-family:Helvetica Neue,Helvetica,Arial,sans-serif;
     font-size: 9px; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px;
   }
-#panel-onboard-employee .rep-prog-pct, #panel-onboard-progress .rep-prog-pct{ color: var(--cyan-light); font-weight: 700; }
-#panel-onboard-employee .rep-prog-bar, #panel-onboard-progress .rep-prog-bar{ height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
-#panel-onboard-employee .rep-prog-fill, #panel-onboard-progress .rep-prog-fill{ height: 100%; background: var(--cyan-light); border-radius: 2px; transition: width 0.4s; }
+#panel-onboard-employee .rep-prog-pct{ color: var(--cyan-light); font-weight: 700; }
+#panel-onboard-employee .rep-prog-bar{ height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+#panel-onboard-employee .rep-prog-fill{ height: 100%; background: var(--cyan-light); border-radius: 2px; transition: width 0.4s; }
 /* Step dots */
-#panel-onboard-employee .rep-steps, #panel-onboard-progress .rep-steps{ display: flex; gap: 4px; flex-wrap: nowrap; width: 100%; justify-content: space-between; }
-#panel-onboard-employee .rep-step, #panel-onboard-progress .rep-step{
+#panel-onboard-employee .rep-steps{ display: flex; gap: 4px; flex-wrap: nowrap; width: 100%; justify-content: space-between; }
+#panel-onboard-employee .rep-step{
     flex: 1; height: 22px; display: flex; align-items: center; justify-content: center;
     font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 8px; font-weight: 700; text-transform: uppercase;
     border: 1px solid var(--border); color: var(--text-muted); background: transparent;
     min-width: 0;
   }
-#panel-onboard-employee .rep-step.done, #panel-onboard-progress .rep-step.done{
+#panel-onboard-employee .rep-step.done{
     background: rgba(45,196,142,.15); border-color: rgba(45,196,142,.5); color: #2DC48E;
   }
-#panel-onboard-employee .rep-step.done::after, #panel-onboard-progress .rep-step.done::after{ content: '✓'; }
-#panel-onboard-employee .rep-step:not(.done)::after, #panel-onboard-progress .rep-step:not(.done)::after{ content: attr(data-label); }
+#panel-onboard-employee .rep-step.done::after{ content: '✓'; }
+#panel-onboard-employee .rep-step:not(.done)::after{ content: attr(data-label); }
 /* Unassigned label */
-#panel-onboard-employee .unassigned-label, #panel-onboard-progress .unassigned-label{
+#panel-onboard-employee .unassigned-label{
     font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 10px; letter-spacing: 2px;
     text-transform: uppercase; color: var(--text-muted); font-style: italic;
   }
@@ -1848,11 +1818,6 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode #pane
 
   /* ── Onboard Progress — tighter padding, full-width search ── */
   .ob-prog-inner { padding: 0 14px; }
-  #panel-onboard-progress .dash-header { flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 14px; }
-  #panel-onboard-progress .dash-search { max-width: 100%; width: 100%; }
-  #panel-onboard-progress .dash-filter-group { flex-wrap: wrap; gap: 6px; }
-
-
   /* Game Changers — mobile layout */
   #panel-game-changers { padding: 0; }
   #gc-main-table td, #gc-main-table th { padding: 10px 8px; }
@@ -1916,8 +1881,7 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode #pane
   <div class="xii-mob-tab" data-tab="status-incentive" onclick="xiiMobSwitch('status-incentive',this)">Status Chasers</div>
   <div class="xii-mob-tab" data-tab="game-changers" onclick="xiiMobSwitch('game-changers',this)">212°F</div>
   <div class="xii-mob-tab" data-tab="roster" onclick="xiiMobSwitch('roster',this)">Roster</div>
-  <div class="xii-mob-tab" data-tab="onboard-employee" onclick="xiiMobSwitch('onboard-employee',this)">Onboard Employee</div>
-  <div class="xii-mob-tab" data-tab="onboard-progress" onclick="xiiMobSwitch('onboard-progress',this)">Onboard Progress</div>
+  <div class="xii-mob-tab" data-tab="onboard-employee" onclick="xiiMobSwitch('onboard-employee',this)">Onboard</div>
   <div class="xii-mob-tab" data-tab="combine" onclick="xiiMobSwitch('combine',this)">Combine</div>
   <div class="xii-mob-tab" data-tab="data" onclick="xiiMobSwitch('data',this)">Data</div>
   <div class="xii-mob-tab xii-mob-tab-bug" onclick="xiiReportBug()">⚑ Report a Bug</div>
@@ -1931,8 +1895,7 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode #pane
   <div class="tab" onclick="switchTab('status-incentive',this)">Status Chasers</div>
   <div class="tab" onclick="switchTab('game-changers',this)">212°F</div>
   <div class="tab" onclick="switchTab('roster',this)">Roster</div>
-  <div class="tab" onclick="switchTab('onboard-employee',this)">Onboard Employee</div>
-  <div class="tab" onclick="switchTab('onboard-progress',this)">Onboard Progress</div>
+  <div class="tab" onclick="switchTab('onboard-employee',this)">Onboard</div>
   <div class="tab" onclick="switchTab('combine',this)">Combine</div>
   <div class="tab" onclick="switchTab('productivity',this)">Productivity</div>
 </div>
@@ -2593,7 +2556,7 @@ function switchTab(id, el){
   else if(id==='status-incentive') { if(typeof buildSIFromRepPerf==='function'){ buildSIFromRepPerf(); applyFilters(); } }
   else if(id==='game-changers') { if(typeof gc_build==='function'){ gc_build(); gc_applyFilters(); } }
   else if(id==='onboard-employee') { try{ob_renderTable();}catch(e){} }
-  else if(id==='onboard-progress') { try{ob_renderDashboard();}catch(e){} }
+
   else if(id==='onboarding') { try { ob_renderTable(); } catch(e) {} }
   else if(id==='overview') renderOverview();
   else if(id==='rankings') renderRankings();
@@ -4350,7 +4313,7 @@ document.addEventListener('click', function(e){
 
 // ── DATA ────────────────────────────────────────────────────────────────────
 let ob_employees = [];
-let ob_sortCol = 'interviewDate';
+let ob_sortCol = 'inputDate';
 let ob_sortDir = 'desc';
 const ob_CHECK_COLS = ['i9','pronto','skool','hired','badge','leaderContact','bootcamp'];
 
@@ -4406,6 +4369,7 @@ function ob_rowToEmployee(cols, idx) {
       startDate:     g(19),
       notes:         g(20),
       hired:         false,
+      repId:         '',
     };
   }
   // 20-col format (leader at [4], squad at [5])
@@ -4435,6 +4399,7 @@ function ob_rowToEmployee(cols, idx) {
       bootcamp:      ob_parseBool(g(17)),
       startDate:     g(18),
       notes:         g(19),
+      repId:         '',
     };
   }
   return {
@@ -4459,6 +4424,7 @@ function ob_rowToEmployee(cols, idx) {
     bootcamp:      ob_parseBool(g(16)),
     startDate:     g(17),
     notes:         g(18),
+    repId:         '',
   };
 }
 
@@ -4555,7 +4521,7 @@ function ob_sortedEmployees(list) {
     // so "All Leaders" view groups correctly by leader, not squad
     let va = a[ob_sortCol] ?? '', vb = b[ob_sortCol] ?? '';
     if (ob_sortCol === 'progress') { va = ob_getProgress(a).pct; vb = ob_getProgress(b).pct; }
-    if (ob_sortCol === 'interviewDate' || ob_sortCol === 'startDate') {
+    if (ob_sortCol === 'interviewDate' || ob_sortCol === 'startDate' || ob_sortCol === 'inputDate') {
       va = va ? new Date(va) : new Date(0);
       vb = vb ? new Date(vb) : new Date(0);
     }
@@ -4580,8 +4546,6 @@ function ob_getFiltered() {
   const fProg = document.getElementById('ob-filterProgress').value;
 
   return ob_employees.filter(emp => {
-    // Hide anyone with a Start Date — they've graduated to Roster
-    if (emp.startDate && emp.startDate.trim()) return false;
     if (q && !`${emp.name} ${emp.mobile} ${emp.referral} ${emp.leader} ${emp.squad} ${emp.notes}`.toLowerCase().includes(q)) return false;
     if (fStat) {
       const s = emp.status.trim().toUpperCase();
@@ -4734,7 +4698,7 @@ function ob_renderTable() {
   ob_populateFilters();
 
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="21"><div class="empty"><div class="empty-icon">🔍</div><p>No ob_employees match your filters.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="16"><div class="empty"><div class="empty-icon">🔍</div><p>No employees match your filters.</p></div></td></tr>`;
     return;
   }
 
@@ -4748,31 +4712,30 @@ function ob_renderTable() {
     if (p && p.length >= 9) { if (seenPhones[p]) { dupIds.add(emp.id); dupIds.add(seenPhones[p]); } else seenPhones[p] = emp.id; }
   });
 
-  tbody.innerHTML = filtered.map(emp => {
-    const p = ob_getProgress(emp);
-    const progColor = p.pct === 100 ? '#2DC48E' : p.pct > 0 ? 'var(--cyan-light)' : 'var(--border)';
+  tbody.innerHTML = filtered.map((emp, i) => {
+    const prog = ob_getProgress(emp);
+    const progColor = prog.pct === 100 ? '#2DC48E' : prog.pct > 0 ? 'var(--cyan-light)' : 'var(--border)';
     const isDupe = dupIds.has(emp.id);
     const dupeTag = isDupe ? `<span class="dupe-badge">dupe</span>` : '';
+    const hireDateDisplay = emp.startDate ? `<span style="color:#2DC48E;font-size:12px;font-weight:600;">${ob_fmtDate(emp.startDate)}</span>` : '<span style="color:var(--text-muted)">—</span>';
+    const fcDisplay = emp.inputDate ? `<span style="color:var(--text-muted);font-size:12px;">${ob_fmtDate(emp.inputDate)}</span>` : '<span style="color:var(--text-muted)">—</span>';
+    const leaderDisplay = (emp.leader || emp.squad || '—');
     return `
-    <tr class="${isDupe ? 'is-dupe' : ''}">
+    <tr class="${isDupe ? 'is-dupe' : ''}" style="animation-delay:${Math.min(i*0.01,0.25)}s">
       <td style="text-align:center;white-space:nowrap;padding:4px 8px;">
         <button class="btn-sunrun${emp.i9 ? ' btn-sunrun--dim' : ''}" data-eid="${emp.id}" onclick="event.stopPropagation();${emp.i9 ? '' : 'ob_openSunrunPanel(this.dataset.eid)'}" title="${emp.i9 ? 'I9 complete \u2014 already submitted' : 'Submit to Sunrun'}"${emp.i9 ? ' disabled' : ''}>CONVEY</button>
       </td>
       <td class="editable" data-eid="${emp.id}" onclick="ob_editStatusCell(this,this.dataset.eid)">${ob_statusBadge(emp.status)}</td>
-      <td class="name-cell editable" data-eid="${emp.id}" data-field="name" onclick="ob_editCell(this,this.dataset.eid,this.dataset.field)">${ob_cap(emp.name)}${dupeTag}</td>
-      <td class="editable" style="font-family:monospace;font-size:13px;" data-eid="${emp.id}" data-field="mobile" onclick="ob_editCell(this,this.dataset.eid,this.dataset.field)">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span>${emp.mobile || '—'}</span>
-          ${emp.mobile ? `<button class="btn-sms" title="Send SMS" data-eid="${emp.id}" onclick="event.stopPropagation();ob_sendSMS(this.dataset.eid)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          </button>` : ''}
+      <td class="name-cell" style="cursor:pointer;" data-eid="${emp.id}" onclick="ob_openInfoModal(this.dataset.eid)">
+        <div style="font-weight:600;font-size:15px;">${ob_cap(emp.name)}${dupeTag}</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+          <div style="flex:1;height:3px;background:rgba(255,255,255,0.1);min-width:50px;overflow:hidden;">
+            <div style="height:100%;width:${prog.pct}%;background:${progColor};"></div>
+          </div>
+          <span style="font-size:10px;color:${progColor};min-width:28px;text-align:right;">${prog.pct}%</span>
         </div>
       </td>
-      <td class="editable" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;" data-eid="${emp.id}" data-field="referral" onclick="ob_editCell(this,this.dataset.eid,this.dataset.field)">${emp.referral || '—'}</td>
-      <td class="editable" data-eid="${emp.id}" data-field="leader" onclick="ob_editCell(this,this.dataset.eid,this.dataset.field)">${emp.leader || '—'}</td>
-      <td class="editable" data-eid="${emp.id}" onclick="ob_editLeaderCell(this,this.dataset.eid)">${emp.squad || '—'}</td>
-      <td class="editable" data-eid="${emp.id}" data-field="office" onclick="ob_editCell(this,this.dataset.eid,this.dataset.field)">${emp.office || '—'}</td>
-      <td>${ob_fmtDate(emp.interviewDate) || '—'}</td>
+      <td style="color:var(--text-muted);font-size:13px;white-space:nowrap;">${leaderDisplay}</td>
       <td class="td-check"><span class="check ${emp.infoCall}" data-eid="${emp.id}" data-field="infoCall" onclick="ob_toggleCheck(this.dataset.eid,this.dataset.field)">✓</span></td>
       <td class="td-check"><span class="check ${emp.jobOffer}" data-eid="${emp.id}" data-field="jobOffer" onclick="ob_toggleCheck(this.dataset.eid,this.dataset.field)">✓</span></td>
       <td class="td-check"><span class="check ${emp.i9}" data-eid="${emp.id}" data-field="i9" onclick="ob_toggleCheck(this.dataset.eid,this.dataset.field)">✓</span></td>
@@ -4781,17 +4744,8 @@ function ob_renderTable() {
       <td class="td-check"><span class="check ${emp.skool}" data-eid="${emp.id}" data-field="skool" onclick="ob_toggleCheck(this.dataset.eid,this.dataset.field)">✓</span></td>
       <td class="td-check"><span class="check ${emp.squadAssign}" data-eid="${emp.id}" data-field="squadAssign" onclick="ob_toggleCheck(this.dataset.eid,this.dataset.field)">✓</span></td>
       <td class="td-check"><span class="check ${emp.bootcamp}" data-eid="${emp.id}" data-field="bootcamp" onclick="ob_toggleCheck(this.dataset.eid,this.dataset.field)">✓</span></td>
-      <td class="editable" data-eid="${emp.id}" onclick="ob_editDateCell(this,this.dataset.eid,'startDate')">${ob_fmtDate(emp.startDate) || '—'}</td>
-      <td>
-        <div class="prog-wrap">
-          <div class="prog-bar"><div class="prog-fill" style="width:${p.pct}%;background:${progColor};"></div></div>
-          <span class="prog-pct">${p.pct}%</span>
-        </div>
-      </td>
-      <td class="editable" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;color:var(--text-muted);font-size:13px;" data-eid="${emp.id}" data-field="notes" onclick="ob_editCell(this,this.dataset.eid,this.dataset.field)">${emp.notes || '—'}</td>
-      <td style="text-align:right;white-space:nowrap;">
-        <button class="btn-delete" data-eid="${emp.id}" onclick="ob_deleteEmployee(this.dataset.eid)">🗑 Remove</button>
-      </td>
+      <td>${hireDateDisplay}</td>
+      <td>${fcDisplay}</td>
     </tr>`;
   }).join('');
 }
@@ -4799,6 +4753,149 @@ function ob_renderTable() {
 function ob_cap(s) {
   if (!s) return '';
   return s.split(' ').map(w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : '').join(' ');
+}
+
+// ── INFO MODAL ───────────────────────────────────────────────────────────────
+let ob_infoModalId = null;
+
+// Convert M/D/YYYY or MM/DD/YYYY → YYYY-MM-DD for <input type="date">
+function ob_toInputDate(d) {
+  if (!d) return '';
+  // Already YYYY-MM-DD?
+  if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+  const dt = new Date(d);
+  if (isNaN(dt)) return '';
+  const mm = String(dt.getMonth() + 1).padStart(2, '0');
+  const dd = String(dt.getDate()).padStart(2, '0');
+  return dt.getFullYear() + '-' + mm + '-' + dd;
+}
+
+// Convert YYYY-MM-DD → M/D/YYYY for storage (matching sheetsSerialToDate output)
+function ob_fromInputDate(d) {
+  if (!d) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+    const [y, m, day] = d.split('-');
+    return parseInt(m) + '/' + parseInt(day) + '/' + y;
+  }
+  return d;
+}
+
+function ob_openInfoModal(id) {
+  const emp = ob_employees.find(e => String(e.id) === String(id));
+  if (!emp) return;
+  ob_infoModalId = String(id);
+  // Populate name
+  document.getElementById('ob-im-name').value = ob_cap(emp.name);
+  // Populate contact/placement fields
+  document.getElementById('ob-im-mobile').value   = emp.mobile        || '';
+  document.getElementById('ob-im-idate').value    = ob_toInputDate(emp.interviewDate);
+  document.getElementById('ob-im-office').value   = emp.office        || '';
+  document.getElementById('ob-im-squad').value    = emp.squad         || '';
+  document.getElementById('ob-im-referral').value = emp.referral      || '';
+  document.getElementById('ob-im-leader').value   = emp.leader        || '';
+  document.getElementById('ob-im-notes').value    = emp.notes         || '';
+  // Hire Date row (synced from New Hires — read-only)
+  const hdWrap = document.getElementById('ob-im-hiredate-wrap');
+  const hdVal  = document.getElementById('ob-im-hiredate');
+  if (emp.startDate) {
+    hdVal.value = emp.startDate + (emp.repId ? '  ·  Rep ID: ' + emp.repId : '');
+    hdWrap.style.display = 'block';
+  } else {
+    hdWrap.style.display = 'none';
+  }
+  // Progress bar + step dots
+  const p = ob_getProgress(emp);
+  const progColor = p.pct === 100 ? '#2DC48E' : p.pct > 0 ? 'var(--cyan-light)' : 'var(--border)';
+  document.getElementById('ob-im-pct').textContent = p.pct + '%';
+  document.getElementById('ob-im-pct').style.color = progColor;
+  document.getElementById('ob-im-progfill').style.width = p.pct + '%';
+  document.getElementById('ob-im-progfill').style.background = progColor;
+  const stepNames = ['Link ✅','Offer','I9','BG','Chat','Skool','Squad','Bootcamp'];
+  const stepFields = [emp.infoCall, emp.jobOffer, emp.i9, emp.bgClear, emp.pronto, emp.skool, emp.squadAssign, emp.bootcamp];
+  document.getElementById('ob-im-steps').innerHTML = stepNames.map((s, i) =>
+    `<span style="font-size:9px;padding:2px 6px;border:0.5px solid;letter-spacing:1px;text-transform:uppercase;${stepFields[i] ? 'color:#2DC48E;border-color:rgba(45,196,142,.4);background:rgba(45,196,142,.08)' : 'color:var(--text-muted);border-color:rgba(248,249,249,.12)'}">${s}</span>`
+  ).join('');
+  // Show modal
+  document.getElementById('ob-infoModal').classList.add('open');
+}
+
+function ob_closeInfoModal() {
+  document.getElementById('ob-infoModal').classList.remove('open');
+  ob_infoModalId = null;
+}
+
+function ob_saveInfoModal() {
+  const id = ob_infoModalId;
+  const emp = ob_employees.find(e => String(e.id) === id);
+  if (!emp) return;
+  const newName     = document.getElementById('ob-im-name').value.trim();
+  const newMobile   = document.getElementById('ob-im-mobile').value.trim();
+  const newIdate    = ob_fromInputDate(document.getElementById('ob-im-idate').value.trim());
+  const newOffice   = document.getElementById('ob-im-office').value.trim();
+  const newSquad    = document.getElementById('ob-im-squad').value.trim();
+  const newReferral = document.getElementById('ob-im-referral').value.trim();
+  const newLeader   = document.getElementById('ob-im-leader').value.trim();
+  const newNotes    = document.getElementById('ob-im-notes').value.trim();
+  // Apply changes to emp object
+  emp.name          = newName;
+  emp.mobile        = newMobile;
+  emp.interviewDate = newIdate;
+  emp.office        = newOffice;
+  emp.squad         = newSquad;
+  emp.referral      = newReferral;
+  emp.leader        = newLeader;
+  emp.notes         = newNotes;
+  // Write each changed field back to Sheets
+  if (emp._sheetRow) {
+    sheetsWriteCell('Onboarding', emp._sheetRow, OB_COL.name,          emp.name);
+    sheetsWriteCell('Onboarding', emp._sheetRow, OB_COL.mobile,        emp.mobile);
+    sheetsWriteCell('Onboarding', emp._sheetRow, OB_COL.interviewDate, emp.interviewDate);
+    sheetsWriteCell('Onboarding', emp._sheetRow, OB_COL.office,        emp.office);
+    sheetsWriteCell('Onboarding', emp._sheetRow, OB_COL.squad,         emp.squad);
+    sheetsWriteCell('Onboarding', emp._sheetRow, OB_COL.referral,      emp.referral);
+    sheetsWriteCell('Onboarding', emp._sheetRow, OB_COL.leader,        emp.leader);
+    sheetsWriteCell('Onboarding', emp._sheetRow, OB_COL.notes,         emp.notes);
+  }
+  ob_closeInfoModal();
+  ob_showToast('✓ ' + ob_cap(emp.name) + ' — saved');
+  ob_renderTable();
+}
+
+function ob_sendToRoster(id) {
+  const eid = id || ob_infoModalId;
+  const emp = ob_employees.find(e => String(e.id) === String(eid));
+  if (!emp) return;
+  if (!confirm('Send ' + ob_cap(emp.name) + ' to Roster and mark as Hired?')) return;
+  // Flip status to Hired in ob_employees
+  emp.status = 'Hired';
+  if (emp._sheetRow) sheetsWriteCell('Onboarding', emp._sheetRow, OB_COL.status, 'Hired');
+  // Build roster entry and add to ROSTER_EMPLOYEES
+  const newRep = {
+    id:     emp.repId || ('ob_' + Date.now()),
+    name:   ob_cap(emp.name),
+    office: emp.office || '',
+    squad:  emp.squad  || '',
+    role:   'Sales Manager',
+    mobile: emp.mobile || '',
+    email:  emp.homeEmail || '',
+    status: 'Active'
+  };
+  ROSTER_EMPLOYEES.unshift(newRep);
+  // Append to Roster sheet
+  var rosterRow = [newRep.id, newRep.name, newRep.role, newRep.office, newRep.squad, newRep.mobile, newRep.email, ''];
+  sheetsAppendRow('Roster', rosterRow).then(function(ok) {
+    if (ok) showSyncBanner('✓ ' + newRep.name + ' added to Roster');
+  });
+  ob_closeInfoModal();
+  ob_showToast('✓ ' + ob_cap(emp.name) + ' → Roster');
+  ob_renderTable();
+  if (typeof renderRoster === 'function') renderRoster();
+}
+
+function ob_deleteFromModal() {
+  const id = ob_infoModalId;
+  ob_closeInfoModal();
+  ob_deleteEmployee(id);
 }
 
 // ── STATS ──────────────────────────────────────────────────────────────────
@@ -4834,6 +4931,53 @@ function ob_deleteEmployee(id) {
   });
   // Also send email notification (best-effort)
   sendDeleteNotification(emp);
+}
+
+// ── NEW HIRES SYNC ──────────────────────────────────────────────────────────
+// Matches ob_employees against NEW_HIRE_EMPLOYEES by name containment
+// (first+last tokens of one name contained within the other, case-insensitive).
+// On match: fills emp.startDate (step 9 / Hire Date) and emp.repId from New Hires.
+// Also auto-sets bgClear=true when a Hire Date exists.
+// Writes changed fields back to the Onboarding sheet if signed in.
+function ob_nameMatch(a, b) {
+  const norm = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const na = norm(a), nb = norm(b);
+  if (!na || !nb) return false;
+  // tokens = first + last (skip middle names for matching)
+  const tokA = na.split(' '), tokB = nb.split(' ');
+  const firstA = tokA[0], lastA = tokA[tokA.length - 1];
+  const firstB = tokB[0], lastB = tokB[tokB.length - 1];
+  // both first and last of A appear somewhere in B, or vice versa
+  const aInB = nb.includes(firstA) && nb.includes(lastA);
+  const bInA = na.includes(firstB) && na.includes(lastB);
+  return aInB || bInA;
+}
+
+function ob_syncNewHires() {
+  if (!NEW_HIRE_EMPLOYEES.length || !ob_employees.length) return;
+  ob_employees.forEach(function(emp) {
+    const match = NEW_HIRE_EMPLOYEES.find(function(nh) { return ob_nameMatch(emp.name, nh.name); });
+    if (!match) return;
+    let changed = false;
+    // Fill Hire Date (startDate = step 9, col 20)
+    if (match.hireDate && !emp.startDate) {
+      emp.startDate = match.hireDate;
+      changed = true;
+      if (emp._sheetRow) sheetsWriteCell('Onboarding', emp._sheetRow, OB_COL.startDate, emp.startDate);
+    }
+    // Fill Rep ID (col 22)
+    if (match.id && !emp.repId) {
+      emp.repId = String(match.id);
+      changed = true;
+      if (emp._sheetRow) sheetsWriteCell('Onboarding', emp._sheetRow, 22, emp.repId);
+    }
+    // Auto-set BG Clear (step 4) when Hire Date present
+    if (emp.startDate && !emp.bgClear) {
+      emp.bgClear = true;
+      changed = true;
+      if (emp._sheetRow) sheetsWriteCell('Onboarding', emp._sheetRow, OB_COL.bgClear, 'TRUE');
+    }
+  });
 }
 
 function ob_toggleDuplicateFilter() {
@@ -5253,6 +5397,7 @@ function ob_addEmployee() {
     squadAssign: document.getElementById('ob-f-squadAssign').checked,
     hired: document.getElementById('ob-f-hired-cb').checked,
     bootcamp: document.getElementById('ob-f-bootcamp').checked,
+    repId: '',
   };
   ob_employees.unshift(emp);
   ob_populateOfficeFilter();
@@ -5272,7 +5417,7 @@ function ob_addEmployee() {
 
 // ── EXPORT ──────────────────────────────────────────────────────────────────
 function ob_exportCSV() {
-  const header = ',name,mobile,referral_name,leader,Pro/Squad,Office,Home Email,Address,Input Date,interview date,Info Call,Job Offer,I9,BG Clear,Chat,Skool,Squad Assign,Bootcamp,Start Date,Notes';
+  const header = ',name,mobile,referral_name,leader,Pro/Squad,Office,Home Email,Address,First Contact,Interview Date,Link,Offer,I9,BG Clear,Chat,Skool,Squad Assign,Bootcamp,Hire Date,Notes';
   const rows = ob_employees.map(e => [
     e.status, e.name, e.mobile, e.referral, e.leader, e.squad,
     e.office, e.homeEmail||'', e.address, e.inputDate||'', e.interviewDate,
@@ -5315,212 +5460,21 @@ function ob_showToast(msg) {
 }
 
 // ── TAB SWITCHING ──────────────────────────────────────────────────────────
-function ob_switchTab(tab) {
-  const tracker   = document.getElementById('ob-trackerView');
-  const dashboard = document.getElementById('ob-dashboardView');
-  const tBtn = document.getElementById('ob-tab-tracker');
-  const dBtn = document.getElementById('ob-tab-dashboard');
 
-  if (tab === 'dashboard') {
-    tracker.classList.add('hidden');
-    dashboard.classList.add('visible');
-    tBtn.classList.remove('active');
-    dBtn.classList.add('active');
-    ob_renderDashboard();
-  } else {
-    dashboard.classList.remove('visible');
-    tracker.classList.remove('hidden');
-    dBtn.classList.remove('active');
-    tBtn.classList.add('active');
-  }
-}
-
-function ob_goToEmployee(id) {
-  // Open the global rep detail modal if the rep exists in the Roster/Rankings
-  // Fall back to switching to the tracker tab and highlighting the row
-  const emp = ob_employees.find(e => String(e.id) === id);
-  if (!emp) return;
-
-  // Try to open the rep card modal (works if rep is in ROSTER_EMPLOYEES)
-  const rosterMatch = ROSTER_EMPLOYEES.find(r =>
-    r.name && emp.name &&
-    r.name.trim().toLowerCase() === emp.name.trim().toLowerCase()
-  );
-  if (rosterMatch) {
-    openRepModal(rosterMatch.id);
-    return;
-  }
-
-  // Fallback: switch to tracker tab and highlight row
-  ob_switchTab('tracker');
-  document.getElementById('ob-searchInput').value = '';
-  document.getElementById('ob-filterStatus').value = '';
-  document.getElementById('ob-filterOffice').value = '';
-  document.getElementById('ob-filterLeader').value = '';
-  document.getElementById('ob-filterReferral').value = '';
-  document.getElementById('ob-filterProgress').value = '';
-  if (ob_showingDupes) {
-    ob_showingDupes = false;
-    const btn = document.getElementById('ob-btnDupes');
-    if (btn) { btn.style.background = ''; btn.textContent = '⚑ Find Duplicates'; }
-  }
-  ob_renderTable();
-  requestAnimationFrame(() => {
-    const rows = document.querySelectorAll('#tableBody tr');
-    const filtered = ob_sortedEmployees(ob_getFiltered());
-    const rowIndex = filtered.findIndex(e => String(e.id) === id);
-    if (rowIndex >= 0 && rows[rowIndex]) {
-      const row = rows[rowIndex];
-      row.classList.remove('row-highlight');
-      void row.offsetWidth;
-      row.classList.add('row-highlight');
-      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => row.classList.remove('row-highlight'), 2000);
-    }
-  });
-}
 
 // ── DASHBOARD ──────────────────────────────────────────────────────────────
-let ob_dashOfficeFilter = 'Riverside';
 
-function ob_setDashOffice(btn) {
-  document.querySelectorAll('.dash-chip').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-  ob_dashOfficeFilter = btn.dataset.office;
-  ob_renderDashboard();
-}
 
-function ob_renderDashboard() {
-  const dashSearch = document.getElementById('ob-dashSearch');
-  const container = document.getElementById('ob-dashContent');
-  if (!dashSearch || !container) return;
-  const q = (dashSearch.value || '').toLowerCase();
 
-  // Auto-add any employees with a Start Date to Roster (silently, once each)
-  ob_employees.forEach(emp => {
-    if (emp.startDate && emp.startDate.trim() && !emp._addedToRoster) {
-      emp._addedToRoster = true;
-      ob_autoAddToRoster(emp);
-    }
-  });
-
-  // Filter ob_employees — exclude anyone with a Start Date (graduated)
-  let pool = ob_employees.filter(e => e.name && e.name.trim() && !(e.startDate && e.startDate.trim()));
-  if (ob_dashOfficeFilter) pool = pool.filter(e => e.office === ob_dashOfficeFilter);
-  if (q) pool = pool.filter(e =>
-    `${e.name} ${e.squad} ${e.leader} ${e.office}`.toLowerCase().includes(q)
-  );
-
-  if (!pool.length) {
-    container.innerHTML = `<div class="empty" style="padding:60px 0;text-align:center;color:var(--text-muted)"><div style="font-size:40px;margin-bottom:12px;">◈</div><p>No reps match your filters.</p></div>`;
-    return;
-  }
-
-  // Group by leader (emp.leader takes priority over squad)
-  const groups = {};
-  pool.forEach(emp => {
-    const leader = (emp.leader || emp.squad || '').trim() || '— Unassigned —';
-    if (!groups[leader]) groups[leader] = [];
-    groups[leader].push(emp);
-  });
-
-  // Sort leaders alphabetically; unassigned last
-  const sortedLeaders = Object.keys(groups).sort((a, b) => {
-    if (a === '— Unassigned —') return 1;
-    if (b === '— Unassigned —') return -1;
-    return a.localeCompare(b);
-  });
-
-  const STEP_LABELS = ['IC','JO','I9','BG','Ch','Sk','SA','Bc'];
-  const STEP_KEYS   = ['infoCall','jobOffer','i9','bgClear','pronto','skool','squadAssign','bootcamp'];
-  const STEP_TIPS   = ['Info Call','Job Offer','I9','BG Clear','Chat','Skool','Squad Assign','Bootcamp'];
-
-  container.innerHTML = sortedLeaders.map(leader => {
-    const reps = groups[leader];
-
-    // Sort reps descending by interview date (newest → oldest left to right)
-    // Reps with no interview date sort to the far left
-    reps.sort((a, b) => {
-      const hasA = !!a.interviewDate, hasB = !!b.interviewDate;
-      if (!hasA && !hasB) return 0;
-      if (!hasA) return -1;
-      if (!hasB) return 1;
-      const da = new Date(a.interviewDate), db = new Date(b.interviewDate);
-      return db - da;
-    });
-
-    const total    = reps.length;
-    const complete = reps.filter(r => ob_getProgress(r).pct === 100).length;
-    const avgPct   = Math.round(reps.reduce((s, r) => s + ob_getProgress(r).pct, 0) / total);
-    const initials = leader === '— Unassigned —' ? '?' :
-      leader.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-
-    const cards = reps.map(emp => {
-      const p = ob_getProgress(emp);
-      const isComplete = p.pct === 100;
-      const progColor = isComplete ? '#2DC48E' : p.pct >= 50 ? 'var(--cyan-light)' : p.pct > 0 ? 'var(--cyan-light)' : 'var(--border)';
-
-      const steps = STEP_KEYS.map((key, i) => {
-        const done = !!emp[key];
-        return `<span class="rep-step${done ? ' done' : ''}" title="${STEP_TIPS[i]}" data-label="${STEP_LABELS[i]}"></span>`;
-      }).join('');
-
-      const officeShort = (emp.office || '').replace('Orange County','OC').replace('Newport Beach','NB').replace('Riverside','RV');
-      const statusHtml = emp.status ? ob_statusBadge(emp.status) : '';
-
-      // Contact row: call/SMS + email
-      const phoneBtn = emp.mobile
-        ? `<a href="tel:${emp.mobile}" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid rgba(170,221,221,0.25);color:var(--cyan-light);font-family:Helvetica Neue,sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;transition:border-color .15s;" title="${emp.mobile}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.06 6.06l1.27-.88a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</a>`
-        : '';
-      const smsBtn = emp.mobile
-        ? `<a href="sms:${emp.mobile}" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid rgba(170,221,221,0.25);color:var(--cyan-light);font-family:Helvetica Neue,sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;transition:border-color .15s;" title="Text ${emp.mobile}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Text</a>`
-        : '';
-      const emailBtn = emp.email
-        ? `<a href="mailto:${emp.email}" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid rgba(170,221,221,0.25);color:var(--cyan-light);font-family:Helvetica Neue,sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;transition:border-color .15s;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Email</a>`
-        : '';
-      const contactRow = (phoneBtn || smsBtn || emailBtn)
-        ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">${phoneBtn}${smsBtn}${emailBtn}</div>`
-        : '';
-
-      return `<button class="rep-card${isComplete ? ' complete' : ''}" data-eid="${emp.id}" onclick="ob_goToEmployee(this.dataset.eid)">
-        <div class="rep-card-top">
-          <div>
-            <div class="rep-name">${ob_cap(emp.name)}</div>
-            <div class="rep-office">${officeShort}${emp.startDate ? ' · ' + ob_fmtDate(emp.startDate) : ''}</div>
-          </div>
-          ${statusHtml}
-        </div>
-        ${contactRow}
-        <div class="rep-prog-wrap">
-          <div class="rep-prog-label">
-            <span>Progress</span>
-            <span class="rep-prog-pct" style="color:${progColor}">${p.pct}%</span>
-          </div>
-          <div class="rep-prog-bar">
-            <div class="rep-prog-fill" style="width:${p.pct}%;background:${progColor};"></div>
-          </div>
-        </div>
-        <div class="rep-steps">${steps}</div>
-      </button>`;
-    }).join('');
-
-    const isUnassigned = leader === '— Unassigned —';
-    const summaryColor = avgPct === 100 ? '#2DC48E' : avgPct >= 50 ? 'var(--cyan-light)' : 'var(--text-muted)';
-
-    return `<div class="leader-section">
-      <div class="leader-section-header">
-        <div class="leader-avatar">${initials}</div>
-        <span class="leader-name">${isUnassigned ? '<span class="unassigned-label">Unassigned</span>' : leader}</span>
-        <span class="leader-progress-summary" style="color:${summaryColor};border-color:${summaryColor};background:transparent;">${avgPct}% avg</span>
-        <span class="leader-meta">${complete}/${total} complete</span>
-      </div>
-      <div class="rep-grid">${cards}</div>
-    </div>`;
-  }).join('');
-}
 
 // INIT
-try { ob_loadBuiltIn(); setTimeout(function(){ try{ob_renderDashboard();}catch(e){} }, 50); } catch(e) { console.warn("OB:", e); }
+try { ob_loadBuiltIn(); setTimeout(function(){
+  try {
+    const offSel = document.getElementById('ob-filterOffice');
+    if (offSel) { offSel.value = 'Orange County'; }
+    ob_renderTable();
+  } catch(e) {}
+}, 50); } catch(e) { console.warn("OB:", e); }
 
 
 // ── STATUS INCENTIVE ──
@@ -6471,7 +6425,8 @@ function onboardRowToEmployee(r, idx) {
     bootcamp:      sheetsBool(r['step 8']),
     startDate:     sheetsSerialToDate(r['step 9']),
     notes:         String(r['notes'] || ''),
-    hired:         false
+    hired:         false,
+    repId:         String(r['rep id'] || '')
   };
 }
 
@@ -6707,6 +6662,7 @@ async function fetchSheetsData(opts) {
       return { id, name: String(r['name']||''), office: shortOffice(String(r['office']||'')), hireDate: String(r['hire date']||''), termDate: String(r['term date']||''), hireTime: csvNum(r['hire time']), hireSorting: csvNum(r['hire sorting']), compliance: String(r['compliance']||''), repBasic: String(r['rep basic']||'') };
     }).filter(Boolean);
     if (nhRows.length) { NEW_HIRE_EMPLOYEES.length = 0; nhRows.forEach(function(e){ NEW_HIRE_EMPLOYEES.push(e); }); }
+    ob_syncNewHires();
   } catch(e) { errors.push('New Hires: ' + e.message); }
 
   // ── Game Changers ─────────────────────────────────────────────────────────────
@@ -7062,8 +7018,8 @@ document.addEventListener('keydown', function(e) {
   <div class="stat"><span class="stat-val" id="ob-s-other" style="color:var(--text-muted)">0</span><span class="stat-lbl">Other</span></div>
   <div style="width:1px;background:var(--border);height:36px;"></div>
   <div class="stat stat-complete"><span class="stat-val" id="ob-s-complete">0</span><span class="stat-lbl">Fully Complete</span></div>
-  <div class="stat"><span class="stat-val" id="ob-s-infoCall" style="color:var(--off-white)">0</span><span class="stat-lbl">Info Call</span></div>
-  <div class="stat"><span class="stat-val" id="ob-s-jobOffer" style="color:var(--off-white)">0</span><span class="stat-lbl">Job Offer</span></div>
+  <div class="stat"><span class="stat-val" id="ob-s-infoCall" style="color:var(--off-white)">0</span><span class="stat-lbl">Link ✅</span></div>
+  <div class="stat"><span class="stat-val" id="ob-s-jobOffer" style="color:var(--off-white)">0</span><span class="stat-lbl">Offer</span></div>
   <div class="stat"><span class="stat-val" id="ob-s-i9" style="color:var(--off-white)">0</span><span class="stat-lbl">I9</span></div>
   <div class="stat"><span class="stat-val" id="ob-s-bgClear" style="color:var(--off-white)">0</span><span class="stat-lbl">BG Clear</span></div>
   <div class="stat"><span class="stat-val" id="ob-s-skool" style="color:var(--off-white)">0</span><span class="stat-lbl">Skool</span></div>
@@ -7127,25 +7083,18 @@ document.addEventListener('keydown', function(e) {
       <tr>
         <th style="cursor:default;text-align:center;color:var(--sand);letter-spacing:1px;">Convey</th>
         <th onclick="ob_sortBy('status')" data-col="status">Status<i class="sort-icon"></i></th>
-        <th onclick="ob_sortBy('name')" data-col="name">Name<i class="sort-icon"></i></th>
-        <th onclick="ob_sortBy('mobile')" data-col="mobile">Mobile<i class="sort-icon"></i></th>
-        <th onclick="ob_sortBy('referral')" data-col="referral">Referral<i class="sort-icon"></i></th>
+        <th onclick="ob_sortBy('name')" data-col="name" style="min-width:160px;">Name + Progress<i class="sort-icon"></i></th>
         <th onclick="ob_sortBy('leader')" data-col="leader">Leader<i class="sort-icon"></i></th>
-        <th onclick="ob_sortBy('squad')" data-col="squad">Squad<i class="sort-icon"></i></th>
-        <th onclick="ob_sortBy('office')" data-col="office">Office<i class="sort-icon"></i></th>
-        <th onclick="ob_sortBy('interviewDate')" data-col="interviewDate">Interview Date<i class="sort-icon"></i></th>
-        <th class="th-check">Info Call</th>
-        <th class="th-check">Job Offer</th>
+        <th class="th-check">Link ✅</th>
+        <th class="th-check">Offer</th>
         <th class="th-check">I9</th>
-        <th class="th-check">BG Clear</th>
+        <th class="th-check">BG</th>
         <th class="th-check">Chat</th>
         <th class="th-check">Skool</th>
-        <th class="th-check">Squad Assign</th>
+        <th class="th-check">Squad</th>
         <th class="th-check">Bootcamp</th>
-        <th onclick="ob_sortBy('startDate')" data-col="startDate">Start Date<i class="sort-icon"></i></th>
-        <th onclick="ob_sortBy('progress')" data-col="progress">Progress<i class="sort-icon"></i></th>
-        <th style="cursor:default;">Notes</th>
-        <th style="cursor:default;text-align:right;color:#444;">Delete</th>
+        <th onclick="ob_sortBy('startDate')" data-col="startDate">Hire Date<i class="sort-icon"></i></th>
+        <th onclick="ob_sortBy('inputDate')" data-col="inputDate">First Contact<i class="sort-icon"></i></th>
       </tr>
     </thead>
     <tbody id="ob-tableBody"></tbody>
@@ -7153,6 +7102,84 @@ document.addEventListener('keydown', function(e) {
 </div>
 
 </div><!-- end #trackerView -->
+
+<!-- INFO MODAL — opens when clicking a candidate name -->
+<div class="modal-overlay" id="ob-infoModal" onclick="if(event.target===this)ob_closeInfoModal()">
+  <div class="modal" style="max-width:540px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <h2 style="font-size:14px;color:var(--cyan-dark);letter-spacing:2px;text-transform:uppercase;font-weight:400;">Candidate Info</h2>
+      <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;" onclick="ob_closeInfoModal()">✕</button>
+    </div>
+    <!-- Name (editable) -->
+    <div class="form-group full" style="margin-bottom:14px;">
+      <label>Name <span style="color:var(--text-muted);font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;">— edit if hiring paperwork uses a nickname</span></label>
+      <input id="ob-im-name" style="font-size:16px;font-weight:600;">
+    </div>
+    <!-- Progress bar + steps -->
+    <div style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:5px;">
+        <span>Onboarding Progress</span><span id="ob-im-pct" style="font-weight:700;"></span>
+      </div>
+      <div style="height:4px;background:rgba(255,255,255,0.1);margin-bottom:8px;overflow:hidden;">
+        <div id="ob-im-progfill" style="height:100%;transition:width .3s;"></div>
+      </div>
+      <div id="ob-im-steps" style="display:flex;gap:4px;flex-wrap:wrap;"></div>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;">
+    <!-- Contact & placement fields -->
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Mobile</label>
+        <input id="ob-im-mobile" type="tel" placeholder="(555) 555-5555">
+      </div>
+      <div class="form-group">
+        <label>Interview Date</label>
+        <input id="ob-im-idate" type="date">
+      </div>
+      <div class="form-group">
+        <label>Office</label>
+        <select id="ob-im-office">
+          <option value="">— Select —</option>
+          <option value="Riverside">Riverside</option>
+          <option value="Orange County">Orange County</option>
+          <option value="Newport Beach">Newport Beach</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Squad / Leader</label>
+        <input id="ob-im-squad" placeholder="Squad name">
+      </div>
+      <div class="form-group">
+        <label>Leader Contact</label>
+        <input id="ob-im-leader" placeholder="Leader name">
+      </div>
+      <div class="form-group">
+        <label>Referral</label>
+        <input id="ob-im-referral" placeholder="Referred by">
+      </div>
+      <div class="form-group full">
+        <label>Notes</label>
+        <input id="ob-im-notes" placeholder="Any notes…">
+      </div>
+      <div class="form-group full" id="ob-im-hiredate-wrap" style="display:none;">
+        <label>Hire Date <span style="color:#2DC48E;margin-left:6px;font-size:9px;letter-spacing:1px;">● synced from New Hires</span></label>
+        <input id="ob-im-hiredate" readonly style="color:#2DC48E;opacity:0.9;cursor:default;">
+      </div>
+    </div>
+    <!-- Actions: all four buttons -->
+    <div class="modal-actions" style="justify-content:space-between;margin-top:20px;">
+      <div style="display:flex;gap:8px;">
+        <button class="btn" style="background:rgba(45,196,142,.12);border:1px solid rgba(45,196,142,.4);color:#2DC48E;" onclick="ob_sendToRoster()">→ Send to Roster</button>
+        <button class="btn btn-outline" style="border-color:rgba(240,82,82,.35);color:#F05252;" onclick="ob_deleteFromModal()">🗑 Remove</button>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-outline" onclick="ob_closeInfoModal()">Cancel</button>
+        <button class="btn" onclick="ob_saveInfoModal()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ADD EMPLOYEE MODAL — lives inside panel-onboard-employee so it displays correctly -->
 <div class="modal-overlay" id="ob-addModal">
@@ -7240,8 +7267,8 @@ document.addEventListener('keydown', function(e) {
       <div class="form-group full">
         <label>Onboarding Checklist</label>
         <div class="checkboxes-grid">
-          <label class="cb-item"><input type="checkbox" id="ob-f-infoCall"> Info Call</label>
-          <label class="cb-item"><input type="checkbox" id="ob-f-jobOffer"> Job Offer</label>
+          <label class="cb-item"><input type="checkbox" id="ob-f-infoCall"> Link ✅</label>
+          <label class="cb-item"><input type="checkbox" id="ob-f-jobOffer"> Offer</label>
           <label class="cb-item"><input type="checkbox" id="ob-f-i9"> I9</label>
           <label class="cb-item"><input type="checkbox" id="ob-f-bgClear"> BG Clear</label>
           <label class="cb-item"><input type="checkbox" id="ob-f-pronto"> Chat</label>
@@ -7343,58 +7370,6 @@ document.addEventListener('keydown', function(e) {
 <div class="toast" id="ob-toast">
 </div></div>
 
-<div class="tab-panel" id="panel-onboard-progress"><div class="ob-prog-inner">
-<div class="dash-header">
-    <h2>Leader <span>Dashboard</span></h2>
-    <div class="dash-search">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input id="ob-dashSearch" placeholder="Search reps…" oninput="ob_renderDashboard()">
-    </div>
-    <div class="dash-filter-group">
-      <button class="dash-chip active" data-office="" onclick="ob_setDashOffice(this)">All Offices</button>
-      <button class="dash-chip" data-office="Orange County" onclick="ob_setDashOffice(this)">OC</button>
-      <button class="dash-chip" data-office="Riverside" class="active" onclick="ob_setDashOffice(this)">Riverside</button>
-      <button class="dash-chip" data-office="Newport Beach" onclick="ob_setDashOffice(this)">Newport Beach</button>
-    </div>
-  </div>
-  <div id="ob-dashContent"></div>
-</div>
-</div>
-
-
-<!-- Add Employee Modal -->
-<div class="rc-modal-overlay" id="rc-add-modal" style="display:none" onclick="if(event.target===this)closeAddModal()">
-  <div class="rc-modal">
-    <div class="rc-modal-title">Add Existing Employee</div>
-    <div class="rc-modal-field"><label>Employee ID</label><input type="text" id="modal-empid" placeholder="Sunrun Employee ID"></div>
-    <div class="rc-modal-field"><label>Full Name *</label><input type="text" id="modal-name" placeholder="First Last"></div>
-    <div class="rc-modal-field"><label>Role</label>
-      <select id="modal-role">
-        <option value="">— Select —</option>
-        <option>Sales Manager</option>
-        <option>Market Leader</option>
-        <option>Squad Leader</option>
-        <option>PerformancePro</option>
-        <option>Director</option>
-      </select>
-    </div>
-    <div class="rc-modal-field"><label>Office</label>
-      <select id="modal-office">
-        <option value="">— Select —</option>
-        <option>Riverside</option>
-        <option>Newport Beach</option>
-        <option>Orange County</option>
-      </select>
-    </div>
-    <div class="rc-modal-field"><label>Squad</label><input type="text" id="modal-squad" placeholder="Squad name"></div>
-    <div class="rc-modal-field"><label>Mobile</label><input type="text" id="modal-mobile" placeholder="(555) 555-5555"></div>
-    <div class="rc-modal-field"><label>Email</label><input type="email" id="modal-email" placeholder="name@sunrun.com"></div>
-    <div class="rc-modal-actions">
-      <button class="rc-modal-cancel" onclick="closeAddModal()">Cancel</button>
-      <button class="rc-modal-save" onclick="saveNewEmployee()">Add Existing Employee</button>
-    </div>
-  </div>
-</div>
 <div class="tab-panel" id="panel-rankings">
   <!-- STATS BAR -->
   <div class="rankings-stats" id="rankings-stats-bar"></div>
