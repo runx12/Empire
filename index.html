@@ -1447,6 +1447,7 @@ body.light-mode #panel-status-incentive .filter-btn.active{
 #panel-onboard-employee .modal{
     background: #2d2829; border: 0.5px solid var(--border);
     padding: 28px 32px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+    color: var(--off-white); color-scheme: dark;
   }
 #panel-onboard-employee .modal h2{
     font-size: 18px; font-weight: 600; color: var(--off-white);
@@ -1461,10 +1462,11 @@ body.light-mode #panel-status-incentive .filter-btn.active{
   }
 #panel-onboard-employee .form-group input, #panel-onboard-employee .form-group input:focus, #panel-onboard-employee .form-group select option{ background: #2d2829; color: var(--off-white); }
 #panel-onboard-employee .form-group textarea{ resize: vertical; min-height: 60px; }
-#ob-infoModal .form-group input, #ob-infoModal .form-group select, #ob-infoModal .form-group textarea { background:rgba(255,255,255,0.05); border:0.5px solid rgba(170,221,221,0.25); color:var(--off-white); font-family:Helvetica Neue,sans-serif; font-size:14px; padding:9px 12px; outline:none; width:100%; transition:border-color .15s; color-scheme:dark; }
+#ob-infoModal .form-group input, #ob-infoModal .form-group select, #ob-infoModal .form-group textarea { background:rgba(255,255,255,0.05); border:0.5px solid rgba(170,221,221,0.25); color:var(--off-white) !important; font-family:Helvetica Neue,sans-serif; font-size:14px; padding:9px 12px; outline:none; width:100%; transition:border-color .15s; color-scheme:dark; }
 #ob-infoModal .form-group input:focus, #ob-infoModal .form-group select:focus { border-color:var(--cyan-light); }
 #ob-infoModal .form-group select option { background:#2d2829; color:var(--off-white); }
-#ob-infoModal input[readonly] { color:#2DC48E; opacity:0.9; cursor:default; }
+#ob-infoModal input[readonly] { color:#2DC48E !important; opacity:0.9; cursor:default; }
+#ob-infoModal input, #ob-infoModal select, #ob-infoModal textarea { color:var(--off-white) !important; color-scheme:dark; }
 #panel-onboard-employee .checkboxes-grid{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 4px; }
 #panel-onboard-employee .cb-item{ display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--off-white); }
 #panel-onboard-employee .cb-item input[type=checkbox]{ width: 15px; height: 15px; accent-color: var(--cyan-light); cursor: pointer; }
@@ -6418,7 +6420,7 @@ function squadRowToEntry(r) {
 function onboardRowToEmployee(r, idx) {
   // Field names match ob_rowToEmployee exactly so rendering works unchanged
   // Sheet columns: status,name,mobile,referral,leader,squad,office,
-  //   email,address,hire date,interview date,
+  //   email,address,first contact (col 10),interview date (col 11),
   //   step 1,step 2,step 3,step 4,step 5,step 6,step 7,step 8,step 9,notes
   var name = String(r['name'] || '');
   if (!name) return null;
@@ -6435,8 +6437,8 @@ function onboardRowToEmployee(r, idx) {
     office:        shortOffice(String(r['office'] || '')),
     homeEmail:     String(r['email'] || ''),
     address:       String(r['address'] || ''),
-    inputDate:     sheetsSerialToDate(r['hire date']),
-    interviewDate: sheetsSerialToDate(r['interview date']),
+    inputDate:     sheetsSerialToDate(r['first contact'] || r['hire date'] || r['input date'] || r['first_contact'] || ''),
+    interviewDate: sheetsSerialToDate(r['interview date'] || r['interviewdate'] || ''),
     infoCall:      sheetsBool(r['step 1']),
     jobOffer:      sheetsBool(r['step 2']),
     i9:            sheetsBool(r['step 3']),
@@ -8279,7 +8281,7 @@ let sheetsAuthToken = null; // set after user grants access
 
 // ── COLUMN MAP: field name → 1-based column index in Onboarding sheet ────────
 // Matches: status,name,mobile,referral,leader,squad,office,email,address,
-//          hire date,interview date,step 1..9,notes
+//          First Contact (col 10),interview date,step 1..9,notes
 const OB_COL = {
   status:      1,
   name:        2,
@@ -8290,7 +8292,7 @@ const OB_COL = {
   office:      7,
   email:       8,
   address:     9,
-  hireDate:   10,
+  hireDate:   10,  // "First Contact" — the timestamp when form was submitted
   interviewDate: 11,
   infoCall:   12,  // step 1
   jobOffer:   13,  // step 2
