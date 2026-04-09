@@ -1459,8 +1459,12 @@ body.light-mode #panel-status-incentive .filter-btn.active{
     display: block; font-family:Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 9px;
     letter-spacing: 2px; text-transform: uppercase; color: var(--cyan-dark); margin-bottom: 2px;
   }
-#panel-onboard-employee .form-group input, #panel-onboard-employee .form-group input:focus, #panel-onboard-employee .form-group select option{ background: #2d2829; }
+#panel-onboard-employee .form-group input, #panel-onboard-employee .form-group input:focus, #panel-onboard-employee .form-group select option{ background: #2d2829; color: var(--off-white); }
 #panel-onboard-employee .form-group textarea{ resize: vertical; min-height: 60px; }
+#ob-infoModal .form-group input, #ob-infoModal .form-group select, #ob-infoModal .form-group textarea { background:rgba(255,255,255,0.05); border:0.5px solid rgba(170,221,221,0.25); color:var(--off-white); font-family:Helvetica Neue,sans-serif; font-size:14px; padding:9px 12px; outline:none; width:100%; transition:border-color .15s; color-scheme:dark; }
+#ob-infoModal .form-group input:focus, #ob-infoModal .form-group select:focus { border-color:var(--cyan-light); }
+#ob-infoModal .form-group select option { background:#2d2829; color:var(--off-white); }
+#ob-infoModal input[readonly] { color:#2DC48E; opacity:0.9; cursor:default; }
 #panel-onboard-employee .checkboxes-grid{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 4px; }
 #panel-onboard-employee .cb-item{ display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--off-white); }
 #panel-onboard-employee .cb-item input[type=checkbox]{ width: 15px; height: 15px; accent-color: var(--cyan-light); cursor: pointer; }
@@ -4568,7 +4572,21 @@ function ob_getFiltered() {
 
 function ob_fmtDate(d) {
   if (!d) return '';
-  const dt = new Date(d);
+  // Strip time component from datetime strings like "2026-04-08 23:47:47"
+  const s = String(d).replace(/\s+\d{2}:\d{2}:\d{2}.*$/, '');
+  // M/D/YYYY — parse manually to avoid UTC/local ambiguity
+  const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (mdy) {
+    const dt = new Date(parseInt(mdy[3]), parseInt(mdy[1])-1, parseInt(mdy[2]));
+    return dt.toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+  }
+  // YYYY-MM-DD — parse as local date to avoid UTC shift
+  const ymd = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (ymd) {
+    const dt = new Date(parseInt(ymd[1]), parseInt(ymd[2])-1, parseInt(ymd[3]));
+    return dt.toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+  }
+  const dt = new Date(s);
   if (isNaN(dt)) return d;
   return dt.toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
 }
@@ -4763,11 +4781,15 @@ function ob_toInputDate(d) {
   if (!d) return '';
   // Already YYYY-MM-DD?
   if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
-  const dt = new Date(d);
-  if (isNaN(dt)) return '';
-  const mm = String(dt.getMonth() + 1).padStart(2, '0');
-  const dd = String(dt.getDate()).padStart(2, '0');
-  return dt.getFullYear() + '-' + mm + '-' + dd;
+  // M/D/YYYY or M/D/YY — parse manually to avoid timezone issues
+  const mdy = d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (mdy) {
+    return mdy[3] + '-' + String(mdy[1]).padStart(2,'0') + '-' + String(mdy[2]).padStart(2,'0');
+  }
+  // Datetime string YYYY-MM-DD HH:MM:SS — take date part only
+  const dtPart = d.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (dtPart) return dtPart[1];
+  return '';
 }
 
 // Convert YYYY-MM-DD → M/D/YYYY for storage (matching sheetsSerialToDate output)
@@ -6659,7 +6681,7 @@ async function fetchSheetsData(opts) {
     var nhRows = sheetsRowsToObjects((await nhRes.json()).values || []).map(function(r) {
       var id = String(r['rep id'] || '').trim();
       if (!id || !/^\d+$/.test(id)) return null;
-      return { id, name: String(r['name']||''), office: shortOffice(String(r['office']||'')), hireDate: String(r['hire date']||''), termDate: String(r['term date']||''), hireTime: csvNum(r['hire time']), hireSorting: csvNum(r['hire sorting']), compliance: String(r['compliance']||''), repBasic: String(r['rep basic']||'') };
+      return { id, name: String(r['name']||''), office: shortOffice(String(r['office']||'')), hireDate: sheetsSerialToDate(r['hire date']), termDate: sheetsSerialToDate(r['term date']), hireTime: csvNum(r['hire time']), hireSorting: csvNum(r['hire sorting']), compliance: String(r['compliance']||''), repBasic: String(r['rep basic']||'') };
     }).filter(Boolean);
     if (nhRows.length) { NEW_HIRE_EMPLOYEES.length = 0; nhRows.forEach(function(e){ NEW_HIRE_EMPLOYEES.push(e); }); }
     ob_syncNewHires();
@@ -7113,7 +7135,7 @@ document.addEventListener('keydown', function(e) {
     <!-- Name (editable) -->
     <div class="form-group full" style="margin-bottom:14px;">
       <label>Name <span style="color:var(--text-muted);font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;">— edit if hiring paperwork uses a nickname</span></label>
-      <input id="ob-im-name" style="font-size:16px;font-weight:600;">
+      <input id="ob-im-name" style="font-size:16px;font-weight:600;background:rgba(255,255,255,0.05);border:0.5px solid rgba(170,221,221,0.25);color:var(--off-white);font-family:Helvetica Neue,sans-serif;padding:9px 12px;outline:none;width:100%;transition:border-color .15s;color-scheme:dark;">
     </div>
     <!-- Progress bar + steps -->
     <div style="margin-bottom:16px;">
