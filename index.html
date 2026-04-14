@@ -1911,7 +1911,7 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
 
 <header>
   <div class="header-left">
-    <span class="brand-logo">twelve</span>
+    <span class="brand-logo" id="header-brand-logo">twelve</span>
     <span class="brand-tag">■ Consul</span>
   </div>
   <div class="header-right">
@@ -2281,14 +2281,15 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
 // ══════════════════════════════════════════════════════════════════════════════
 const CONSUL_CONFIG = {
   // ── Branding ─────────────────────────────────────────────────────────────
-  brand:   'EMPIRE',
-  tagline: 'THE BEST OFFICE IN THE COMPANY',
+  brand:         'EMPIRE',
+  primary_label: 'Riverside',          // Label shown on the primary Overview block
+  tagline:       'THE BEST OFFICE IN THE COMPANY',
 
   // ── Google Infrastructure ─────────────────────────────────────────────────
   sheets_id:       '1Awy-KgfNtf8IBAZf-nY8pmv26n0juNk28IRTfN0usn4',
   oauth_client_id: '824495442632-o4v639jl9rcsj7dq2fgvfcr6joj98s2c.apps.googleusercontent.com',
 
-  // ── Program Administrator (Adam — stays constant across all deployments) ──
+  // ── Program Administrator (Adam — constant across all deployments) ────────
   admin_email: 'adam.howle@sunrun.com',
   admin_phone: '5625371559',
 
@@ -2297,10 +2298,18 @@ const CONSUL_CONFIG = {
   office_admin_phone: '5625371559',
 
   // ── Office Configuration ──────────────────────────────────────────────────
+  // `offices` = this deployment's own offices (drives filter bars, dropdowns).
   offices: ['Riverside'],
 
+  // `compare_offices` = external offices available as Overview compare targets.
+  // Can be offices outside this deployment — useful for benchmarking.
+  // Empty array = no compare bar shown.
+  compare_offices: ['Orange County', 'Newport Beach'],
+
   office_colors: {
-    'Riverside': '#FF6200',
+    'Riverside':     '#FF6200',
+    'Orange County': '#F2CF9C',   // used in compare section
+    'Newport Beach': '#AADDDD',   // used in compare section
   },
 
   office_meeting_info: {
@@ -2332,6 +2341,10 @@ function applyBranding() {
   // Footer brand spans (all tabs)
   document.querySelectorAll('.footer-brand').forEach(el => { el.textContent = footerText; });
 
+  // ── Header brand logo (large word mark)
+  const headerLogo = document.getElementById('header-brand-logo');
+  if (headerLogo) headerLogo.textContent = brand.toLowerCase();
+
   // Auth screen logo brand tag
   const authLogo = document.getElementById('xii-auth-logo');
   if (authLogo) authLogo.innerHTML = brand.toLowerCase() + '<span>\u25a0 Performance Dashboard</span>';
@@ -2360,15 +2373,21 @@ function applyBranding() {
 
   // ── Overview compare bar ──────────────────────────────────────────────────
   const ovBar = document.getElementById('ov-compare-filter-bar');
+  const compareOffices = CONSUL_CONFIG.compare_offices || [];
   if (ovBar) {
-    // First office is active by default; rest are secondary compare options
-    const compareOffices = offices.slice(1); // all but primary
-    ovBar.innerHTML = compareOffices.map((o, i) => {
-      const id = 'ov-c-off-' + i;
-      const active = i === 0 ? ' active' : '';
-      return `<button class="filter-btn${active}" id="${id}" data-office="${o}" onclick="ovSetCompare('${o}')">${o}</button>`;
-    }).join('');
-    ovCompareOffice = compareOffices[0] || null;
+    if (compareOffices.length === 0) {
+      ovBar.innerHTML = '';
+      ovCompareOffice = null;
+    } else {
+      // First button is "None" (default — no compare), then each compare office
+      ovBar.innerHTML =
+        '<button class="filter-btn active" id="ov-c-none" data-office="" onclick="ovSetCompare(null)">None</button>' +
+        compareOffices.map((o, i) => {
+          const id = 'ov-c-off-' + i;
+          return `<button class="filter-btn" id="${id}" data-office="${o}" onclick="ovSetCompare('${o}')">${o}</button>`;
+        }).join('');
+      ovCompareOffice = null; // default: no compare selected
+    }
   }
 
   // ── Status-Incentive (Chasers) filter bar ────────────────────────────────
@@ -3132,27 +3151,29 @@ function buildProgressCard(cat, target, actual, pace, prefix){
 }
 // ── OVERVIEW OFFICE STATE ──
 // Primary block is always Newport Beach + Orange County ("twelve") — not user-configurable
-let ovCompareOffice = CONSUL_CONFIG.offices[1] || CONSUL_CONFIG.offices[0]; // null = hidden
+let ovCompareOffice = null; // null = compare section hidden; set by applyBranding
 
 function ovSetCompare(office) {
-  ovCompareOffice = office;
+  ovCompareOffice = office; // null = hide compare section
   // Close targets panel when switching offices
   const panel = document.getElementById('ov-targets-panel');
   if (panel) { panel.classList.remove('visible'); panel.style.display = 'none'; }
   const btn = document.getElementById('ov-targets-btn');
   if (btn) btn.classList.remove('open');
-  // Toggle active state on dynamically-generated compare buttons
+  // Toggle active state — match null (None button) or office name
   const bar = document.getElementById('ov-compare-filter-bar');
   if (bar) bar.querySelectorAll('.filter-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.office === office);
+    b.classList.toggle('active', b.dataset.office === (office || ''));
   });
   // Update compare labels
-  const ovLabel    = document.getElementById('ov-compare-label');
-  const ovLabelQtd = document.getElementById('ov-compare-label-qtd');
-  const ovTargetLbl = document.getElementById('ov-targets-panel-label');
-  if (ovLabel)    ovLabel.textContent    = office;
-  if (ovLabelQtd) ovLabelQtd.textContent = office;
-  if (ovTargetLbl) ovTargetLbl.textContent = 'Targets \u2014 ' + office;
+  if (office) {
+    const ovLabel    = document.getElementById('ov-compare-label');
+    const ovLabelQtd = document.getElementById('ov-compare-label-qtd');
+    const ovTargetLbl = document.getElementById('ov-targets-panel-label');
+    if (ovLabel)    ovLabel.textContent    = office;
+    if (ovLabelQtd) ovLabelQtd.textContent = office;
+    if (ovTargetLbl) ovTargetLbl.textContent = 'Targets \u2014 ' + office;
+  }
   renderOverview();
 }
 
@@ -3240,8 +3261,8 @@ function renderLeadershipPulse(qtdPace) {
   var ap = calcActiveProductive();
 
   // QTD IC — primary (twelve = NB + OC)
-  // Primary XII offices (NB + OC) — update if your office structure changes
-  var primaryFilter = function(e) { return e.office === 'Newport Beach' || e.office === 'Orange County'; };
+  // Primary offices = CONSUL_CONFIG.offices
+  var primaryFilter = function(e) { return CONSUL_CONFIG.offices.includes(e.office); };
   var qtdIC = ROSTER_EMPLOYEES.filter(primaryFilter).reduce(function(s, e) {
     var q = QTD_MAP[e.id] || {};
     return s + (q.qtr_ic != null ? q.qtr_ic : (q.qtd_ic || 0));
@@ -3300,8 +3321,8 @@ function renderOverview(){
   // (moved to after qtdPace is available — see call site below)
 
   // ── Primary block always = Newport Beach + Orange County ("twelve") ──
-  // Primary XII offices (NB + OC) — update if your office structure changes
-  const primaryFilter = e => e.office === 'Newport Beach' || e.office === 'Orange County';
+  // Primary offices = CONSUL_CONFIG.offices
+  const primaryFilter = e => CONSUL_CONFIG.offices.includes(e.office);
 
   // ── WTD Actual — primary ──
   const wtdReps = ROSTER_EMPLOYEES.filter(primaryFilter).map(e => WTD_MAP[e.id] || {});
@@ -3315,14 +3336,14 @@ function renderOverview(){
   // ── QTD Actual — primary (Newport Beach + Orange County) ──
   // Reads directly from TOTALS_OFFICE (authoritative Totals sheet sums).
   // Falls back to rep-by-rep QTD_MAP sum if Totals not yet loaded.
-  const _totNB  = TOTALS_OFFICE['Newport Beach']  || null;
-  const _totOC  = TOTALS_OFFICE['Orange County']  || null;
-  const _hasTot = _totNB || _totOC;
+  const _primaryTots = CONSUL_CONFIG.offices.map(o => TOTALS_OFFICE[o] || null);
+  const _hasTot = _primaryTots.some(t => t !== null);
+  const _totSum = (key) => _primaryTots.reduce((s, t) => s + (t ? (t[key] || 0) : 0), 0);
   const qtdActual = _hasTot ? {
-    CS:  (_totNB ? _totNB.cs  : 0) + (_totOC ? _totOC.cs  : 0),
-    SRA: (_totNB ? _totNB.sra : 0) + (_totOC ? _totOC.sra : 0),
-    CAP: (_totNB ? _totNB.cap : 0) + (_totOC ? _totOC.cap : 0),
-    IC:  (_totNB ? _totNB.ic  : 0) + (_totOC ? _totOC.ic  : 0),
+    CS:  _totSum('cs'),
+    SRA: _totSum('sra'),
+    CAP: _totSum('cap'),
+    IC:  _totSum('ic'),
   } : (() => {
     const qtdReps = ROSTER_EMPLOYEES.filter(primaryFilter).map(e => QTD_MAP[e.id] || {});
     return {
@@ -3333,9 +3354,10 @@ function renderOverview(){
     };
   })();
 
-  // Primary label is always "twelve"
-  document.getElementById('ov-primary-label').textContent = 'twelve';
-  document.getElementById('ov-primary-label-qtd').textContent = 'twelve';
+  // Primary label from config
+  const _primaryLbl = CONSUL_CONFIG.primary_label || CONSUL_CONFIG.brand;
+  document.getElementById('ov-primary-label').textContent = _primaryLbl;
+  document.getElementById('ov-primary-label-qtd').textContent = _primaryLbl;
 
   // ── WTD Pace — derived from CSV date ──
   const wtdDateStr = document.getElementById('wtd-date-input').value;
