@@ -2292,31 +2292,20 @@ const CONSUL_CONFIG = {
   tagline:       'THE BEST OFFICE IN THE COMPANY',
   sheets_id:       '1Awy-KgfNtf8IBAZf-nY8pmv26n0juNk28IRTfN0usn4',
   oauth_client_id: '824495442632-o4v639jl9rcsj7dq2fgvfcr6joj98s2c.apps.googleusercontent.com',
-  admin_email: 'adam.howle@sunrun.com',
-  admin_phone: '5625371559',
-  office_admin_email: 'adam.howle@sunrun.com',
-  office_admin_phone: '5625371559',
+  admin_email: 'adam.howle@sunrun.com',  admin_phone: '5625371559',
+  office_admin_email: 'adam.howle@sunrun.com',  office_admin_phone: '5625371559',
   offices: ['Riverside'],
   compare_offices: ['Orange County'],
-  office_colors: {
-    'Riverside':     '#FF6200',
-    'Orange County': '#F2CF9C',
-  },
+  office_colors: { 'Riverside': '#FF6200', 'Orange County': '#F2CF9C' },
   office_meeting_info: {
     'Riverside': { days: 'Tuesday & Thursdays', time: '11:00am', address: '1550 Magnolia Ave, Corona, CA' },
   },
-  // Skin accent colors — single source of truth. applyBranding() injects into CSS vars.
+  // Skin accent colors — pure black background, orange brand
   accent: {
-    cyan_light:       '#FF6200',
-    cyan_dark:        '#C44B00',
-    near_black:       '#000000',
-    border:           'rgba(255,98,0,0.22)',
-    row_hover:        'rgba(255,98,0,0.08)',
-    light_cyan_light: '#CC4F00',
-    light_cyan_dark:  '#8B3600',
-    light_near_black: '#E7E5E4',
-    light_border:     'rgba(180,70,0,0.22)',
-    light_row_hover:  'rgba(180,70,0,0.06)',
+    cyan_light: '#FF6200', cyan_dark: '#C44B00', near_black: '#000000',
+    border: 'rgba(255,98,0,0.22)', row_hover: 'rgba(255,98,0,0.08)',
+    light_cyan_light: '#CC4F00', light_cyan_dark: '#8B3600', light_near_black: '#F5F0EB',
+    light_border: 'rgba(180,70,0,0.22)', light_row_hover: 'rgba(180,70,0,0.06)',
   },
 };
 
@@ -2337,9 +2326,12 @@ const OFFICE_MEETING_INFO = CONSUL_CONFIG.office_meeting_info;
 // Stamps brand text into footer/header elements and dynamically generates
 // all office filter buttons and dropdowns from CONSUL_CONFIG.offices.
 function applyBranding() {
+  // Helper: ordered office list — own offices first, then compare, never NB
+  function _filterOffices() {
+    return [...new Set([...CONSUL_CONFIG.offices, ...(CONSUL_CONFIG.compare_offices||[])])].filter(o => o !== 'Newport Beach');
+  }
   const brand   = CONSUL_CONFIG.brand;
   const tagline = CONSUL_CONFIG.tagline;
-
   // Inject skin accent colors into CSS vars
   const acc = CONSUL_CONFIG.accent;
   if (acc) {
@@ -2387,17 +2379,12 @@ function applyBranding() {
   // ── WTD filter bar ────────────────────────────────────────────────────────
   const wtdBar = document.getElementById('wtd-office-filter-bar');
   if (wtdBar) {
-    // Office list: own + compare, never Newport Beach
-    const wtdOfficeList = [...new Set([...CONSUL_CONFIG.offices, ...(CONSUL_CONFIG.compare_offices||[])])].filter(o => o !== 'Newport Beach');
+    const _wOff = _filterOffices();
     wtdBar.innerHTML =
       '<button class="filter-btn active" id="wtd-f-all" onclick="wtdToggleOffice(\'all\')">All</button>' +
-      wtdOfficeList.map((o, i) => {
-        const id = 'wtd-f-off-' + i;
-        return `<button class="filter-btn" id="${id}" data-office="${o}" onclick="wtdToggleOffice('${o}')">${o}</button>`;
-      }).join('') +
+      _wOff.map((o,i) => `<button class="filter-btn" id="wtd-f-off-${i}" data-office="${o}" onclick="wtdToggleOffice('${o}')">${o}</button>`).join('') +
       '<button class="filter-btn" id="wtd-f-active" onclick="wtdToggleOffice(\'active\')">Has Activity</button>';
-    // Default: All offices shown
-    wtdOffices = new Set(wtdOfficeList);
+    wtdOffices = new Set(_wOff);
   }
 
   // ── Overview compare bar ──────────────────────────────────────────────────
@@ -2422,12 +2409,12 @@ function applyBranding() {
   // ── Status-Incentive (Chasers) filter bar ────────────────────────────────
   const siBar = document.getElementById('si-office-filter-bar');
   if (siBar) {
+    const _sOff = _filterOffices();
     siBar.innerHTML =
-      '<button class="filter-btn active" id="si-btn-all" onclick="setOfficeFilter(null,this)">All</button>' +
-      offices.map((o, i) => {
-        const id = 'si-btn-off-' + i;
+      '<button class="filter-btn" id="si-btn-all" onclick="setOfficeFilter(null,this)">All</button>' +
+      _sOff.map((o, i) => {
         const active = o === defaultOff ? ' active' : '';
-        return `<button class="filter-btn${active}" id="${id}" data-office="${o}" onclick="setOfficeFilter('${o}',this)">${o}</button>`;
+        return `<button class="filter-btn${active}" id="si-btn-off-${i}" data-office="${o}" onclick="setOfficeFilter('${o}',this)">${o}</button>`;
       }).join('');
     activeOffice = defaultOff;
   }
@@ -2435,9 +2422,10 @@ function applyBranding() {
   // ── Roster filter bar ─────────────────────────────────────────────────────
   const rosterBar = document.getElementById('roster-office-filter-bar');
   if (rosterBar) {
+    const _rOff = _filterOffices();
     rosterBar.innerHTML =
       '<button class="filter-btn" onclick="rosterFilter(\'all\',this)">All</button>' +
-      offices.map((o, i) => {
+      _rOff.map((o, i) => {
         const active = o === defaultOff ? ' active' : '';
         return `<button class="filter-btn${active}" data-office="${o}" onclick="rosterFilter('${o}',this)">${o}</button>`;
       }).join('');
@@ -2447,12 +2435,12 @@ function applyBranding() {
   // ── Combine tab filter bar ────────────────────────────────────────────────
   const combineBar = document.getElementById('combine-office-filter-bar');
   if (combineBar) {
+    const _cOff = _filterOffices();
     combineBar.innerHTML =
       '<button class="filter-btn" id="cbtn-all" onclick="combineToggleOffice(\'all\',this)">All</button>' +
-      offices.map((o, i) => {
-        const id = 'cbtn-off-' + i;
+      _cOff.map((o, i) => {
         const active = o === defaultOff ? ' active' : '';
-        return `<button class="filter-btn${active}" id="${id}" data-office="${o}" onclick="combineToggleOffice('${o}',this)">${o}</button>`;
+        return `<button class="filter-btn${active}" id="cbtn-off-${i}" data-office="${o}" onclick="combineToggleOffice('${o}',this)">${o}</button>`;
       }).join('');
     combineState.offices = new Set([defaultOff]);
   }
@@ -2460,7 +2448,8 @@ function applyBranding() {
   // ── Productivity tab office pills ─────────────────────────────────────────
   const prodPills = document.getElementById('prod-office-pills');
   if (prodPills) {
-    prodPills.innerHTML = offices.map((o, i) => {
+    const _pOff = _filterOffices();
+    prodPills.innerHTML = _pOff.map((o, i) => {
       const active = o === defaultOff ? ' active' : '';
       return `<span class="prod-pill${active}" data-office="${o}" onclick="prodToggleOffice('${o}',this)">${o}</span>`;
     }).join('');
@@ -2557,18 +2546,44 @@ buildPerfMaps();
 const WTD_TARGETS = {CS:55, SRA:50, CAP:32, IC:18};
 const QTD_TARGETS = {CS:649, SRA:595, CAP:390, IC:223};
 
-// Per-office targets — editable via the Targets button on each compare block
-// Keys match office names exactly. Edit these values to bake in new defaults.
+// Per-office targets — loaded from 'Office Goals' Sheets tab at runtime.
+// Defaults below are used until Sheets data arrives. Edit the sheet, not here.
 const OFFICE_WTD_TARGETS = {
-  'Newport Beach': {CS:36, SRA:32, CAP:23, IC:12},
-  'Orange County':  {CS:19, SRA:18, CAP:9,  IC:6},
-  'Riverside':      {CS:52, SRA:45, CAP:23, IC:12},
+  'Newport Beach': {CS:36,  SRA:32,  CAP:23, IC:12},
+  'Orange County':  {CS:55,  SRA:50,  CAP:32, IC:18},
+  'Riverside':      {CS:52,  SRA:45,  CAP:23, IC:12},
 };
 const OFFICE_QTD_TARGETS = {
-  'Newport Beach': {CS:424, SRA:386, CAP:279, IC:152},
-  'Orange County':  {CS:225, SRA:209, CAP:111, IC:71},
-  'Riverside':      {CS:617, SRA:538, CAP:280, IC:156},
+  'Newport Beach': {CS:424,  SRA:386, CAP:279, IC:152},
+  'Orange County':  {CS:649,  SRA:595, CAP:390, IC:223},
+  'Riverside':      {CS:617,  SRA:538, CAP:280, IC:156},
 };
+
+// loadOfficeGoals() populates OFFICE_WTD_TARGETS and OFFICE_QTD_TARGETS from Sheets
+async function loadOfficeGoals() {
+  try {
+    var res = await fetchWithTimeout(sheetsUrl('Office Goals'));
+    if (!res.ok) return;
+    var rows = sheetsRowsToObjects((await res.json()).values || []);
+    rows.forEach(function(r) {
+      var office = String(r['office'] || '').trim();
+      if (!office) return;
+      OFFICE_WTD_TARGETS[office] = {
+        CS:  csvNum(r['wtd_cs']  || r['cs']  || 0) || OFFICE_WTD_TARGETS[office]?.CS,
+        SRA: csvNum(r['wtd_sra'] || r['sra'] || 0) || OFFICE_WTD_TARGETS[office]?.SRA,
+        CAP: csvNum(r['wtd_cap'] || r['cap'] || 0) || OFFICE_WTD_TARGETS[office]?.CAP,
+        IC:  csvNum(r['wtd_ic']  || r['ic']  || 0) || OFFICE_WTD_TARGETS[office]?.IC,
+      };
+      OFFICE_QTD_TARGETS[office] = {
+        CS:  csvNum(r['qtd_cs']  || 0) || OFFICE_QTD_TARGETS[office]?.CS,
+        SRA: csvNum(r['qtd_sra'] || 0) || OFFICE_QTD_TARGETS[office]?.SRA,
+        CAP: csvNum(r['qtd_cap'] || 0) || OFFICE_QTD_TARGETS[office]?.CAP,
+        IC:  csvNum(r['qtd_ic']  || 0) || OFFICE_QTD_TARGETS[office]?.IC,
+      };
+    });
+    console.log('[Office Goals] loaded targets for', rows.map(r=>r['office']).filter(Boolean));
+  } catch(e) { console.warn('[Office Goals]', e.message); }
+}
 
 // ── DATE / PACE HELPERS ──────────────────────────────────────────────────────
 // Returns the Monday of the week containing `date` (week runs Mon–Fri)
@@ -3514,26 +3529,20 @@ function wtdSetWeek(mode, el) {
 }
 
 function wtdToggleOffice(val){
-  // 'active' toggles Has Activity filter independently.
-  // 'all' shows all offices. Specific office = radio: shows ONLY that office.
   const bar = document.getElementById('wtd-office-filter-bar');
+  const allOff = [...new Set([...CONSUL_CONFIG.offices,...(CONSUL_CONFIG.compare_offices||[])])].filter(o=>o!=='Newport Beach');
   if(val==='active'){
     wtdActiveExtra = wtdActiveExtra==='active' ? null : 'active';
     const actBtn = document.getElementById('wtd-f-active');
     if(actBtn) actBtn.classList.toggle('active', wtdActiveExtra==='active');
   } else if(val==='all'){
-    const all = [...new Set([...CONSUL_CONFIG.offices,...(CONSUL_CONFIG.compare_offices||[])])].filter(o=>o!=='Newport Beach');
-    wtdOffices = new Set(all);
-    if(bar){
-      bar.querySelectorAll('.filter-btn[data-office]').forEach(b=>b.classList.add('active'));
-      const allBtn=document.getElementById('wtd-f-all'); if(allBtn) allBtn.classList.add('active');
-    }
+    wtdOffices = new Set(allOff);
+    if(bar) bar.querySelectorAll('.filter-btn[data-office]').forEach(b=>b.classList.add('active'));
+    const allBtn=document.getElementById('wtd-f-all'); if(allBtn) allBtn.classList.add('active');
   } else {
     wtdOffices = new Set([val]);
-    if(bar){
-      bar.querySelectorAll('.filter-btn[data-office]').forEach(b=>b.classList.toggle('active',b.dataset.office===val));
-      const allBtn=document.getElementById('wtd-f-all'); if(allBtn) allBtn.classList.remove('active');
-    }
+    if(bar) bar.querySelectorAll('.filter-btn[data-office]').forEach(b=>b.classList.toggle('active',b.dataset.office===val));
+    const allBtn=document.getElementById('wtd-f-all'); if(allBtn) allBtn.classList.remove('active');
   }
   renderWTD();
 }
@@ -3583,17 +3592,23 @@ function wtdSort(col){
 }
 function getWTDData(){
   const search=document.getElementById('wtd-search').value.toLowerCase();
-  // Join roster (identity) with WTD perf map + QTD context fields
+  const isLW=(wtdWeekMode==='last');
   let data=ROSTER_EMPLOYEES.map(r=>{
-    const p=WTD_MAP[r.id]||{};
+    const p=isLW?(LW_MAP[r.id]||{}):(WTD_MAP[r.id]||{});
     const q=QTD_MAP[r.id]||{};
     const rk=(RANKINGS_MAP[r.id]||{});
     return {
       id:r.id, name:r.name, office:r.office, squad:r.squad, role:r.role, pod:r.pod||'',
       mobile:r.mobile||'',
-      wtd_ac:p.wtd_ac||0, wtd_cs:p.wtd_cs||0, wtd_wc:p.wtd_wc||0,
-      wtd_sra:p.wtd_sra||0, wtd_cap:p.wtd_cap||0, wtd_ic:p.wtd_ic||0,
-      knocks:p.knocks||0, pitches:p.pitches||0, hours_knocked:p.hours_knocked||0,
+      wtd_ac:  isLW?(p.lw_ac||0) :(p.wtd_ac||0),
+      wtd_cs:  isLW?(p.lw_cs||0) :(p.wtd_cs||0),
+      wtd_wc:  isLW?0             :(p.wtd_wc||0),
+      wtd_sra: isLW?(p.lw_sra||0):(p.wtd_sra||0),
+      wtd_cap: isLW?(p.lw_cap||0):(p.wtd_cap||0),
+      wtd_ic:  isLW?(p.lw_ic||0) :(p.wtd_ic||0),
+      knocks:        isLW?0:(p.knocks||0),
+      pitches:       isLW?0:(p.pitches||0),
+      hours_knocked: isLW?0:(p.hours_knocked||0),
       qtr_status:q.qtr_status||p.qtr_status||'',
       qtr_sra:q.qtr_sra||0, qtr_cap:q.qtr_cap||0, qtr_ic:q.qtr_ic||0,
       qtd_cs:q.qtd_cs||0,
@@ -3606,7 +3621,8 @@ function getWTDData(){
       exp_title:rk.title||''
     };
   });
-  if(wtdOffices.size < ([...new Set([...CONSUL_CONFIG.offices,...(CONSUL_CONFIG.compare_offices||[])])].filter(o=>o!=='Newport Beach').length)) data=data.filter(e=>wtdOffices.has(e.office));
+  const _allWtd=[...new Set([...CONSUL_CONFIG.offices,...(CONSUL_CONFIG.compare_offices||[])])].filter(o=>o!=='Newport Beach');
+  if(wtdOffices.size < _allWtd.length) data=data.filter(e=>wtdOffices.has(e.office));
   if(wtdSquadFilter) data=data.filter(e=>e.squad===wtdSquadFilter);
   if(wtdActiveExtra==='active') data=data.filter(e=>e.wtd_cs||e.wtd_sra||e.wtd_cap||e.wtd_ic||e.wtd_ac);
   if(search) data=data.filter(e=>e.name.toLowerCase().includes(search));
@@ -4564,7 +4580,7 @@ function renderRoster(){
   document.getElementById('roster-stats').innerHTML=`
     <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${data.length}</div><div class="stat-sub">employees</div></div>
     <div class="stat-card"><div class="stat-label">Riverside</div><div class="stat-value">${data.filter(e=>e.office==='Riverside').length}</div><div class="stat-sub">reps</div></div>
-
+    <div class="stat-card"><div class="stat-label">Newport Beach</div><div class="stat-value">${data.filter(e=>e.office==='Newport Beach').length}</div><div class="stat-sub">reps</div></div>
     <div class="stat-card"><div class="stat-label">Orange County</div><div class="stat-value">${data.filter(e=>e.office==='Orange County').length}</div><div class="stat-sub">reps</div></div>
     <div class="stat-card"><div class="stat-label">No Squad</div><div class="stat-value" style="color:#F2CF9C">${data.filter(e=>!e.squad||e.squad==="Term'd"||e.squad==='').length}</div><div class="stat-sub">need action</div></div>`;
 
@@ -4782,14 +4798,14 @@ function renderSquadSnapshot(squadKey) {
     if(tab==='wtd') return ((WTD_MAP[b.id]||{}).wtd_sra||0)-((WTD_MAP[a.id]||{}).wtd_sra||0);
     return ((QTD_MAP[b.id]||{}).qtr_sra||0)-((QTD_MAP[a.id]||{}).qtr_sra||0);
   });
-  // Apply Has Activity filter
-  if(wtdActiveExtra==='active'){
-    sorted = tab==='wtd'
-      ? sorted.filter(e=>{const w=WTD_MAP[e.id]||{};return w.wtd_ac||w.wtd_cs||w.wtd_sra||w.wtd_cap||w.wtd_ic;})
-      : sorted.filter(e=>{const q=QTD_MAP[e.id]||{};return q.qtr_sra||q.qtr_cap||q.qtr_ic;});
+  // Always filter to reps with activity — WTD: any WTD number; QTD: any QTD number
+  if(tab==='wtd'){
+    sorted=sorted.filter(e=>{const w=WTD_MAP[e.id]||{};return w.wtd_ac||w.wtd_cs||w.wtd_sra||w.wtd_cap||w.wtd_ic;});
+  } else {
+    sorted=sorted.filter(e=>{const q=QTD_MAP[e.id]||{};return q.qtr_sra||q.qtr_cap||q.qtr_ic;});
   }
   if(!sorted.length){
-    body.innerHTML='<div style="padding:20px;color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;">No activity this week in this squad. Toggle Has Activity off to see everyone.</div>';
+    body.innerHTML='<div style="padding:20px;color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;">No activity yet this '+(tab==='wtd'?'week':'quarter')+' in this squad.</div>';
     document.getElementById('squad-snapshot-modal').style.display='flex';
     return;
   }
@@ -4801,9 +4817,9 @@ function renderSquadSnapshot(squadKey) {
   const tS='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+fs+'px;padding:'+pad+';border-bottom:1px solid rgba(170,221,221,0.06);text-align:center;color:var(--off-white);';
   const tNS='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+fs+'px;font-weight:600;padding:'+pad+';border-bottom:1px solid rgba(170,221,221,0.06);text-align:left;color:var(--off-white);white-space:nowrap;';
   function clsWTD(v,g){if(!v||v===0)return 'color:rgba(248,249,249,0.15)';if(v>g)return 'color:var(--v-exceeds);text-shadow:0 0 8px rgba(39,217,217,0.4)';return 'color:var(--off-white)';}
-  function sraIndicator(days){if(!days)return '';const col=days>14?'#F05252':days>7?'#EF9F27':'#2DC48E';return '<span title="Days since last SRA: '+days+'" style="margin-left:6px;display:inline-block;width:7px;height:7px;border-radius:50%;background:'+col+';vertical-align:middle;flex-shrink:0"></span>';}
+  function sraIndicator(d){if(!d)return '';const col=d>14?'#F05252':d>7?'#EF9F27':'#2DC48E';return '<span title="Days since last SRA: '+d+'" style="margin-left:6px;display:inline-block;width:7px;height:7px;border-radius:50%;background:'+col+';vertical-align:middle;flex-shrink:0"></span>';}
   function rkBadge(id,q){const r=(q&&q.exp_rank)?q.exp_rank:((RANKINGS_MAP[id]||{}).currentRank||'');return r?rkRankBadge(r):'<span style="color:rgba(248,249,249,.25)">—</span>';}
-  // QTD summary bar (always shown)
+  // QTD squad summary bar (always shown at top)
   const qG_sra=sqCfg.qtr_sra||0,qG_ic=sqCfg.qtr_ic||0;
   const qT_sra=rosterMembers.reduce((s,e)=>s+((QTD_MAP[e.id]||{}).qtr_sra||0),0);
   const qT_cap=rosterMembers.reduce((s,e)=>s+((QTD_MAP[e.id]||{}).qtr_cap||0),0);
@@ -4822,37 +4838,43 @@ function renderSquadSnapshot(squadKey) {
     subtitleEl.textContent='This Week'+(wk?'  ·  Week of '+wk:'');
     const tot=sorted.reduce((t,e)=>{const w=WTD_MAP[e.id]||{};t.ac+=w.wtd_ac||0;t.cs+=w.wtd_cs||0;t.sra+=w.wtd_sra||0;t.cap+=w.wtd_cap||0;t.ic+=w.wtd_ic||0;t.pit+=w.pitches||0;return t;},{ac:0,cs:0,sra:0,cap:0,ic:0,pit:0});
     hdr='<tr><th style="'+hNS+'">Name</th><th style="'+hS+'">AC</th><th style="'+hS+'">CS</th><th style="'+hS+'">SRA</th><th style="'+hS+'">CAP</th><th style="'+hS+'">IC</th><th style="'+hS+'">Pitches</th><th style="'+hS+'">Days/SRA</th></tr>';
-    const totRow='<tr style="background:rgba(39,217,217,0.05)"><td style="'+tNS+'font-weight:700;color:var(--cyan-dark)">TOTALS</td><td style="'+tS+'font-weight:700">'+(tot.ac||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cs||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.sra||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cap||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.ic||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.pit||'—')+'</td><td style="'+tS+'"></td></tr>';
+    const totRow='<tr style="background:rgba(39,217,217,0.05)"><td style="'+tNS+'font-weight:700;color:var(--cyan-dark)">TOTALS</td>'
+      +'<td style="'+tS+'font-weight:700">'+(tot.ac||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cs||'—')+'</td>'
+      +'<td style="'+tS+'font-weight:700">'+(tot.sra||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cap||'—')+'</td>'
+      +'<td style="'+tS+'font-weight:700">'+(tot.ic||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.pit||'—')+'</td><td style="'+tS+'"></td></tr>';
     rows=sorted.map(e=>{
       const w=WTD_MAP[e.id]||{},q=QTD_MAP[e.id]||{},il=e.name===leader;
       const days=q.days_since_sra||0;
-      const dsStyle=days>14?'font-weight:700;color:#F05252':days>7?'color:#EF9F27':days>0?'color:#2DC48E':'color:rgba(248,249,249,0.25)';
+      const ds=days>14?'font-weight:700;color:#F05252':days>7?'color:#EF9F27':days>0?'color:#2DC48E':'color:rgba(248,249,249,0.25)';
       const chg=q.status_change?changeIcon(q.status_change):'';
-      return '<tr><td style="'+tNS+(il?'color:var(--cyan-light);':'')+'"><span style="display:inline-flex;align-items:center">'+e.name+(il?' <span style="font-size:9px;letter-spacing:1px;color:var(--cyan-dark);margin-left:5px">LEADER</span>':'')+(chg?'<span style="margin-left:4px">'+chg+'</span>':'')+(days?sraIndicator(days):'')+'</span></td>'
+      return '<tr><td style="'+tNS+(il?'color:var(--cyan-light);':'')+'"><span style="display:inline-flex;align-items:center">'+e.name
+        +(il?' <span style="font-size:9px;letter-spacing:1px;color:var(--cyan-dark);margin-left:5px">LEADER</span>':'')
+        +(chg?'<span style="margin-left:4px">'+chg+'</span>':'')+(days?sraIndicator(days):'')+'</span></td>'
         +'<td style="'+tS+clsWTD(w.wtd_ac,WTD_GOALS.ac)+'">'+(w.wtd_ac||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.wtd_cs,WTD_GOALS.cs)+'">'+(w.wtd_cs||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.wtd_sra,WTD_GOALS.sra)+'">'+(w.wtd_sra||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.wtd_cap,WTD_GOALS.cap)+'">'+(w.wtd_cap||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.wtd_ic,WTD_GOALS.ic)+'">'+(w.wtd_ic||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.pitches,WTD_GOALS.pitches)+'">'+(w.pitches||'—')+'</td>'
-        +'<td style="'+tS+dsStyle+'">'+(days||'—')+'</td></tr>';
+        +'<td style="'+tS+ds+'">'+(days||'—')+'</td></tr>';
     }).join('')+totRow;
   } else {
     subtitleEl.textContent='QTD Detail';
     const tot=sorted.reduce((t,e)=>{const q=QTD_MAP[e.id]||{};t.sra+=q.qtr_sra||0;t.cap+=q.qtr_cap||0;t.ic+=q.qtr_ic||0;return t;},{sra:0,cap:0,ic:0});
     hdr='<tr><th style="'+hNS+'">Name</th><th style="'+hS+'">QTR SRA</th><th style="'+hS+'">QTR CAP</th><th style="'+hS+'">QTR IC</th><th style="'+hS+'">Days/SRA</th><th style="'+hS+'">Rank</th></tr>';
-    const totRow='<tr style="background:rgba(39,217,217,0.05)"><td style="'+tNS+'font-weight:700;color:var(--cyan-dark)">TOTALS</td><td style="'+tS+'font-weight:700">'+(tot.sra||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cap||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.ic||'—')+'</td><td style="'+tS+'"></td><td style="'+tS+'"></td></tr>';
+    const totRow='<tr style="background:rgba(39,217,217,0.05)"><td style="'+tNS+'font-weight:700;color:var(--cyan-dark)">TOTALS</td>'
+      +'<td style="'+tS+'font-weight:700">'+(tot.sra||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cap||'—')+'</td>'
+      +'<td style="'+tS+'font-weight:700">'+(tot.ic||'—')+'</td><td style="'+tS+'"></td><td style="'+tS+'"></td></tr>';
     rows=sorted.map(e=>{
       const q=QTD_MAP[e.id]||{},il=e.name===leader;
       const days=q.days_since_sra||0;
-      const dsStyle=days>14?'font-weight:700;color:#F05252':days>7?'color:#EF9F27':days>0?'color:#2DC48E':'color:rgba(248,249,249,0.25)';
+      const ds=days>14?'font-weight:700;color:#F05252':days>7?'color:#EF9F27':days>0?'color:#2DC48E':'color:rgba(248,249,249,0.25)';
       const chg=q.status_change?changeIcon(q.status_change):'';
-      return '<tr><td style="'+tNS+(il?'color:var(--cyan-light);':'')+'"><span style="display:inline-flex;align-items:center">'+e.name+(il?' <span style="font-size:9px;letter-spacing:1px;color:var(--cyan-dark);margin-left:5px">LEADER</span>':'')+(chg?'<span style="margin-left:4px">'+chg+'</span>':'')+(days?sraIndicator(days):'')+'</span></td>'
-        +'<td style="'+tS+'">'+(q.qtr_sra||'—')+'</td>'
-        +'<td style="'+tS+'">'+(q.qtr_cap||'—')+'</td>'
-        +'<td style="'+tS+'">'+(q.qtr_ic||'—')+'</td>'
-        +'<td style="'+tS+dsStyle+'">'+(days||'—')+'</td>'
-        +'<td style="'+tS+'">'+rkBadge(e.id,q)+'</td></tr>';
+      return '<tr><td style="'+tNS+(il?'color:var(--cyan-light);':'')+'"><span style="display:inline-flex;align-items:center">'+e.name
+        +(il?' <span style="font-size:9px;letter-spacing:1px;color:var(--cyan-dark);margin-left:5px">LEADER</span>':'')
+        +(chg?'<span style="margin-left:4px">'+chg+'</span>':'')+(days?sraIndicator(days):'')+'</span></td>'
+        +'<td style="'+tS+'">'+(q.qtr_sra||'—')+'</td><td style="'+tS+'">'+(q.qtr_cap||'—')+'</td><td style="'+tS+'">'+(q.qtr_ic||'—')+'</td>'
+        +'<td style="'+tS+ds+'">'+(days||'—')+'</td><td style="'+tS+'">'+rkBadge(e.id,q)+'</td></tr>';
     }).join('')+totRow;
   }
   body.innerHTML=qtdBar+'<table style="width:100%;border-collapse:collapse;">'+hdr+'<tbody>'+rows+'</tbody></table>';
@@ -4909,19 +4931,11 @@ function renderPodSnapshot(podName, squadKey) {
     return;
   }
 
-  // Has Activity filter
-  let filteredMembers = members;
-  if (wtdActiveExtra === 'active') {
-    if (_podSnapMode === 'wtd') {
-      filteredMembers = members.filter(e => { const w=WTD_MAP[e.id]||{}; return w.wtd_ac||w.wtd_cs||w.wtd_sra||w.wtd_cap||w.wtd_ic; });
-    } else {
-      filteredMembers = members.filter(e => { const q=QTD_MAP[e.id]||{}; return q.qtr_sra||q.qtr_cap||q.qtr_ic; });
-    }
-    if (!filteredMembers.length) {
-      body.innerHTML = '<div style="color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;padding:16px 0;">No activity this week. Toggle Has Activity off to see all members.</div>';
-      return;
-    }
-  }
+  // Always filter to reps with activity
+  const activeMembers = _podSnapMode==='wtd'
+    ? members.filter(e=>{const w=WTD_MAP[e.id]||{};return w.wtd_ac||w.wtd_cs||w.wtd_sra||w.wtd_cap||w.wtd_ic;})
+    : members.filter(e=>{const q=QTD_MAP[e.id]||{};return q.qtr_sra||q.qtr_cap||q.qtr_ic;});
+  const showMembers = activeMembers.length ? activeMembers : members; // Fall back to all if none active
 
   const thS  = 'padding:8px 10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark);border-bottom:1px solid rgba(170,221,221,0.2);white-space:nowrap;';
   const tdS  = a => `padding:9px 10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;color:var(--off-white);border-bottom:1px solid rgba(170,221,221,0.07);text-align:${a};`;
@@ -4937,7 +4951,7 @@ function renderPodSnapshot(podName, squadKey) {
       {label:'Knocks', key:'knocks',       align:'center'},
       {label:'Hrs',    key:'hours_knocked',align:'center'},
     ];
-    const rows = filteredMembers.map(r=>({name:r.name,...(WTD_MAP[r.id]||{})}))
+    const rows = showMembers.map(r=>({name:r.name,...(WTD_MAP[r.id]||{})}))
                         .sort((a,b)=>(b.wtd_sra||0)-(a.wtd_sra||0));
     const tot  = {name:'TOTAL',wtd_ac:0,wtd_cs:0,wtd_sra:0,wtd_ic:0,knocks:0,hours_knocked:0};
     rows.forEach(r=>{ tot.wtd_ac+=r.wtd_ac||0; tot.wtd_cs+=r.wtd_cs||0; tot.wtd_sra+=r.wtd_sra||0; tot.wtd_ic+=r.wtd_ic||0; tot.knocks+=r.knocks||0; tot.hours_knocked+=r.hours_knocked||0; });
@@ -4950,7 +4964,7 @@ function renderPodSnapshot(podName, squadKey) {
       {label:'QTR CAP', key:'qtr_cap',align:'center'},
       {label:'QTD CS',  key:'qtd_cs', align:'center'},
     ];
-    const rows = filteredMembers.map(r=>({name:r.name,...(QTD_MAP[r.id]||{})}))
+    const rows = showMembers.map(r=>({name:r.name,...(QTD_MAP[r.id]||{})}))
                         .sort((a,b)=>(b.qtr_sra||0)-(a.qtr_sra||0));
     const tot  = {name:'TOTAL',qtr_sra:0,qtr_ic:0,qtr_cap:0,qtd_cs:0};
     rows.forEach(r=>{ tot.qtr_sra+=r.qtr_sra||0; tot.qtr_ic+=r.qtr_ic||0; tot.qtr_cap+=r.qtr_cap||0; tot.qtd_cs+=r.qtd_cs||0; });
@@ -7577,20 +7591,23 @@ async function fetchSheetsData(opts) {
 
   await sleep(350);
 
-  // ── Last Week (prior-week AC/CS/SRA/CAP/IC) ──────────────────────────────
+  // ── Office Goals (per-office WTD/QTD targets for overview compare bars) ────
+  await loadOfficeGoals();
+
+  await sleep(350);
+
+  // ── Last Week ────────────────────────────────────────────────────────────────
   try {
     var lwRes = await fetchWithTimeout(sheetsUrl('Last Week'));
     if (lwRes.ok) {
       LW_MAP = {};
       sheetsRowsToObjects((await lwRes.json()).values || []).forEach(function(r) {
-        var id = String(r['employee id'] || r['id'] || r['client user id'] || r['user id'] || '').trim();
+        var id = String(r['employee id']||r['id']||r['client user id']||r['user id']||'').trim();
         if (!id || !/^\d+$/.test(id)) return;
         LW_MAP[id] = {
-          lw_ac:  csvNum(r['ac']  || r['acs']      || 0),
-          lw_cs:  csvNum(r['cs']  || r['cs week']  || 0),
-          lw_sra: csvNum(r['sra'] || r['sra week'] || 0),
-          lw_cap: csvNum(r['cap'] || r['cap week'] || 0),
-          lw_ic:  csvNum(r['ic']  || r['ic week']  || 0),
+          lw_ac:  csvNum(r['ac']||r['acs']||0), lw_cs:  csvNum(r['cs']||r['cs week']||0),
+          lw_sra: csvNum(r['sra']||r['sra week']||0), lw_cap: csvNum(r['cap']||r['cap week']||0),
+          lw_ic:  csvNum(r['ic']||r['ic week']||0),
         };
       });
     } else { LW_MAP = {}; }
