@@ -2287,38 +2287,25 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
 // new office. Everything else in the file references these values automatically.
 // ══════════════════════════════════════════════════════════════════════════════
 const CONSUL_CONFIG = {
-  // ── Branding ─────────────────────────────────────────────────────────────
   brand:         'EMPIRE',
   primary_label: 'Riverside',
   tagline:       'THE BEST OFFICE IN THE COMPANY',
-
-  // ── Google Infrastructure ─────────────────────────────────────────────────
   sheets_id:       '1Awy-KgfNtf8IBAZf-nY8pmv26n0juNk28IRTfN0usn4',
   oauth_client_id: '824495442632-o4v639jl9rcsj7dq2fgvfcr6joj98s2c.apps.googleusercontent.com',
-
-  // ── Program Administrator (Adam — constant across all deployments) ────────
   admin_email: 'adam.howle@sunrun.com',
   admin_phone: '5625371559',
-
-  // ── Office Admin (changes per deployment) ────────────────────────────────
   office_admin_email: 'adam.howle@sunrun.com',
   office_admin_phone: '5625371559',
-
-  // ── Office Configuration ──────────────────────────────────────────────────
   offices: ['Riverside'],
-  compare_offices: ['Orange County'],  // NB removed; radio filter shows All/OC/Riverside
-
+  compare_offices: ['Orange County'],
   office_colors: {
     'Riverside':     '#FF6200',
     'Orange County': '#F2CF9C',
   },
-
   office_meeting_info: {
     'Riverside': { days: 'Tuesday & Thursdays', time: '11:00am', address: '1550 Magnolia Ave, Corona, CA' },
   },
-
-  // ── Skin accent colors — injected into CSS vars by applyBranding() ────────
-  // This is the single source of truth for what makes Empire look different from twelve.
+  // Skin accent colors — single source of truth. applyBranding() injects into CSS vars.
   accent: {
     cyan_light:       '#FF6200',
     cyan_dark:        '#C44B00',
@@ -2362,7 +2349,6 @@ function applyBranding() {
     if (acc.near_black)  rs.setProperty('--near-black',  acc.near_black);
     if (acc.border)      rs.setProperty('--border',      acc.border);
     if (acc.row_hover)   rs.setProperty('--row-hover',   acc.row_hover);
-    // Inject light-mode overrides as a style tag
     if (!document.getElementById('consul-accent-light')) {
       const lm = [];
       if (acc.light_cyan_light) lm.push('--cyan-light:' + acc.light_cyan_light);
@@ -2401,19 +2387,17 @@ function applyBranding() {
   // ── WTD filter bar ────────────────────────────────────────────────────────
   const wtdBar = document.getElementById('wtd-office-filter-bar');
   if (wtdBar) {
-    // Build the unique office list: own offices first, then compare offices
-    const allOfficeList = [...CONSUL_CONFIG.offices,
-      ...(CONSUL_CONFIG.compare_offices||[]).filter(o => !CONSUL_CONFIG.offices.includes(o))
-    ];
+    // Office list: own + compare, never Newport Beach
+    const wtdOfficeList = [...new Set([...CONSUL_CONFIG.offices, ...(CONSUL_CONFIG.compare_offices||[])])].filter(o => o !== 'Newport Beach');
     wtdBar.innerHTML =
       '<button class="filter-btn active" id="wtd-f-all" onclick="wtdToggleOffice(\'all\')">All</button>' +
-      allOfficeList.map((o, i) => {
+      wtdOfficeList.map((o, i) => {
         const id = 'wtd-f-off-' + i;
         return `<button class="filter-btn" id="${id}" data-office="${o}" onclick="wtdToggleOffice('${o}')">${o}</button>`;
       }).join('') +
       '<button class="filter-btn" id="wtd-f-active" onclick="wtdToggleOffice(\'active\')">Has Activity</button>';
     // Default: All offices shown
-    wtdOffices = new Set(allOfficeList);
+    wtdOffices = new Set(wtdOfficeList);
   }
 
   // ── Overview compare bar ──────────────────────────────────────────────────
@@ -3530,29 +3514,25 @@ function wtdSetWeek(mode, el) {
 }
 
 function wtdToggleOffice(val){
-  // Radio-style: clicking a specific office selects ONLY that office.
-  // 'all' selects all offices. 'active' toggles the Has Activity filter independently.
+  // 'active' toggles Has Activity filter independently.
+  // 'all' shows all offices. Specific office = radio: shows ONLY that office.
   const bar = document.getElementById('wtd-office-filter-bar');
   if(val==='active'){
     wtdActiveExtra = wtdActiveExtra==='active' ? null : 'active';
     const actBtn = document.getElementById('wtd-f-active');
     if(actBtn) actBtn.classList.toggle('active', wtdActiveExtra==='active');
   } else if(val==='all'){
-    wtdOffices = new Set(CONSUL_CONFIG.offices);
-    if(bar) {
-      bar.querySelectorAll('.filter-btn[data-office]').forEach(b => b.classList.add('active'));
-      const allBtn = document.getElementById('wtd-f-all');
-      if(allBtn) allBtn.classList.add('active');
+    const all = [...new Set([...CONSUL_CONFIG.offices,...(CONSUL_CONFIG.compare_offices||[])])].filter(o=>o!=='Newport Beach');
+    wtdOffices = new Set(all);
+    if(bar){
+      bar.querySelectorAll('.filter-btn[data-office]').forEach(b=>b.classList.add('active'));
+      const allBtn=document.getElementById('wtd-f-all'); if(allBtn) allBtn.classList.add('active');
     }
   } else {
-    // Radio: set exactly this office
     wtdOffices = new Set([val]);
-    if(bar) {
-      bar.querySelectorAll('.filter-btn[data-office]').forEach(b =>
-        b.classList.toggle('active', b.dataset.office === val)
-      );
-      const allBtn = document.getElementById('wtd-f-all');
-      if(allBtn) allBtn.classList.remove('active');
+    if(bar){
+      bar.querySelectorAll('.filter-btn[data-office]').forEach(b=>b.classList.toggle('active',b.dataset.office===val));
+      const allBtn=document.getElementById('wtd-f-all'); if(allBtn) allBtn.classList.remove('active');
     }
   }
   renderWTD();
@@ -3603,23 +3583,17 @@ function wtdSort(col){
 }
 function getWTDData(){
   const search=document.getElementById('wtd-search').value.toLowerCase();
-  const isLW = (wtdWeekMode === 'last');
+  // Join roster (identity) with WTD perf map + QTD context fields
   let data=ROSTER_EMPLOYEES.map(r=>{
-    const p = isLW ? (LW_MAP[r.id]||{}) : (WTD_MAP[r.id]||{});
+    const p=WTD_MAP[r.id]||{};
     const q=QTD_MAP[r.id]||{};
     const rk=(RANKINGS_MAP[r.id]||{});
     return {
       id:r.id, name:r.name, office:r.office, squad:r.squad, role:r.role, pod:r.pod||'',
       mobile:r.mobile||'',
-      wtd_ac:  isLW ? (p.lw_ac||0)  : (p.wtd_ac||0),
-      wtd_cs:  isLW ? (p.lw_cs||0)  : (p.wtd_cs||0),
-      wtd_wc:  isLW ? 0              : (p.wtd_wc||0),
-      wtd_sra: isLW ? (p.lw_sra||0) : (p.wtd_sra||0),
-      wtd_cap: isLW ? (p.lw_cap||0) : (p.wtd_cap||0),
-      wtd_ic:  isLW ? (p.lw_ic||0)  : (p.wtd_ic||0),
-      knocks:        isLW ? 0 : (p.knocks||0),
-      pitches:       isLW ? 0 : (p.pitches||0),
-      hours_knocked: isLW ? 0 : (p.hours_knocked||0),
+      wtd_ac:p.wtd_ac||0, wtd_cs:p.wtd_cs||0, wtd_wc:p.wtd_wc||0,
+      wtd_sra:p.wtd_sra||0, wtd_cap:p.wtd_cap||0, wtd_ic:p.wtd_ic||0,
+      knocks:p.knocks||0, pitches:p.pitches||0, hours_knocked:p.hours_knocked||0,
       qtr_status:q.qtr_status||p.qtr_status||'',
       qtr_sra:q.qtr_sra||0, qtr_cap:q.qtr_cap||0, qtr_ic:q.qtr_ic||0,
       qtd_cs:q.qtd_cs||0,
@@ -3632,8 +3606,7 @@ function getWTDData(){
       exp_title:rk.title||''
     };
   });
-  if(wtdOffices.size < CONSUL_CONFIG.offices.length + (CONSUL_CONFIG.compare_offices||[]).length)
-    data=data.filter(e=>wtdOffices.has(e.office));
+  if(wtdOffices.size < ([...new Set([...CONSUL_CONFIG.offices,...(CONSUL_CONFIG.compare_offices||[])])].filter(o=>o!=='Newport Beach').length)) data=data.filter(e=>wtdOffices.has(e.office));
   if(wtdSquadFilter) data=data.filter(e=>e.squad===wtdSquadFilter);
   if(wtdActiveExtra==='active') data=data.filter(e=>e.wtd_cs||e.wtd_sra||e.wtd_cap||e.wtd_ic||e.wtd_ac);
   if(search) data=data.filter(e=>e.name.toLowerCase().includes(search));
@@ -4591,7 +4564,7 @@ function renderRoster(){
   document.getElementById('roster-stats').innerHTML=`
     <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${data.length}</div><div class="stat-sub">employees</div></div>
     <div class="stat-card"><div class="stat-label">Riverside</div><div class="stat-value">${data.filter(e=>e.office==='Riverside').length}</div><div class="stat-sub">reps</div></div>
-    <div class="stat-card"><div class="stat-label">Newport Beach</div><div class="stat-value">${data.filter(e=>e.office==='Newport Beach').length}</div><div class="stat-sub">reps</div></div>
+
     <div class="stat-card"><div class="stat-label">Orange County</div><div class="stat-value">${data.filter(e=>e.office==='Orange County').length}</div><div class="stat-sub">reps</div></div>
     <div class="stat-card"><div class="stat-label">No Squad</div><div class="stat-value" style="color:#F2CF9C">${data.filter(e=>!e.squad||e.squad==="Term'd"||e.squad==='').length}</div><div class="stat-sub">need action</div></div>`;
 
@@ -4792,10 +4765,9 @@ function closeSquadSnapshot() {
 
 function squadSnapSetMode(mode) {
   _squadSnapMode = mode;
-  const wb = document.getElementById('squad-snap-wtd-btn');
-  const qb = document.getElementById('squad-snap-qtd-btn');
-  if (wb) { wb.style.borderColor=mode==='wtd'?'var(--cyan-light)':'rgba(248,249,249,0.2)'; wb.style.color=mode==='wtd'?'var(--cyan-light)':'var(--text-muted)'; wb.style.background=mode==='wtd'?'rgba(170,221,221,0.1)':'transparent'; }
-  if (qb) { qb.style.borderColor=mode==='qtd'?'var(--cyan-light)':'rgba(248,249,249,0.2)'; qb.style.color=mode==='qtd'?'var(--cyan-light)':'var(--text-muted)'; qb.style.background=mode==='qtd'?'rgba(170,221,221,0.1)':'transparent'; }
+  const wb=document.getElementById('squad-snap-wtd-btn'), qb=document.getElementById('squad-snap-qtd-btn');
+  if(wb){wb.style.borderColor=mode==='wtd'?'var(--cyan-light)':'rgba(248,249,249,0.2)';wb.style.color=mode==='wtd'?'var(--cyan-light)':'var(--text-muted)';wb.style.background=mode==='wtd'?'rgba(170,221,221,0.1)':'transparent';}
+  if(qb){qb.style.borderColor=mode==='qtd'?'var(--cyan-light)':'rgba(248,249,249,0.2)';qb.style.color=mode==='qtd'?'var(--cyan-light)':'var(--text-muted)';qb.style.background=mode==='qtd'?'rgba(170,221,221,0.1)':'transparent';}
   renderSquadSnapshot(_squadSnapCurrent);
 }
 
@@ -4804,14 +4776,23 @@ function renderSquadSnapshot(squadKey) {
   const subtitleEl=document.getElementById('squad-snapshot-subtitle');
   const rosterMembers=ROSTER_EMPLOYEES.filter(e=>e.squad===squadKey);
   if(!rosterMembers.length||!body) return;
-  const sqCfg=SQUAD_DB[squadKey]||{};
-  const leader=sqCfg.leader||'';
-  const tab=_squadSnapMode;
-  const sorted=[...rosterMembers].sort((a,b)=>{
+  const sqCfg=SQUAD_DB[squadKey]||{}, leader=sqCfg.leader||'', tab=_squadSnapMode;
+  let sorted=[...rosterMembers].sort((a,b)=>{
     if(a.name===leader) return -1; if(b.name===leader) return 1;
     if(tab==='wtd') return ((WTD_MAP[b.id]||{}).wtd_sra||0)-((WTD_MAP[a.id]||{}).wtd_sra||0);
     return ((QTD_MAP[b.id]||{}).qtr_sra||0)-((QTD_MAP[a.id]||{}).qtr_sra||0);
   });
+  // Apply Has Activity filter
+  if(wtdActiveExtra==='active'){
+    sorted = tab==='wtd'
+      ? sorted.filter(e=>{const w=WTD_MAP[e.id]||{};return w.wtd_ac||w.wtd_cs||w.wtd_sra||w.wtd_cap||w.wtd_ic;})
+      : sorted.filter(e=>{const q=QTD_MAP[e.id]||{};return q.qtr_sra||q.qtr_cap||q.qtr_ic;});
+  }
+  if(!sorted.length){
+    body.innerHTML='<div style="padding:20px;color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;">No activity this week in this squad. Toggle Has Activity off to see everyone.</div>';
+    document.getElementById('squad-snapshot-modal').style.display='flex';
+    return;
+  }
   const n=sorted.length;
   const fs=n<=10?14:n<=15?12:n<=20?11:n<=28?10:9;
   const pad=fs<=10?'6px 10px':'8px 14px';
@@ -4819,70 +4800,63 @@ function renderSquadSnapshot(squadKey) {
   const hNS='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+(fs-2)+'px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark);padding:'+pad+';text-align:left;border-bottom:1px solid rgba(170,221,221,0.18);';
   const tS='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+fs+'px;padding:'+pad+';border-bottom:1px solid rgba(170,221,221,0.06);text-align:center;color:var(--off-white);';
   const tNS='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+fs+'px;font-weight:600;padding:'+pad+';border-bottom:1px solid rgba(170,221,221,0.06);text-align:left;color:var(--off-white);white-space:nowrap;';
-  function clsWTD(v,g){ if(!v||v===0) return 'color:rgba(248,249,249,0.15)'; if(v>g) return 'color:var(--v-exceeds);text-shadow:0 0 8px rgba(39,217,217,0.4)'; return 'color:var(--off-white)'; }
-  function sraIndicator(days){ if(!days) return ''; const col=days>14?'#F05252':days>7?'#EF9F27':'#2DC48E'; return '<span title="Days since last SRA: '+days+'" style="margin-left:6px;display:inline-block;width:7px;height:7px;border-radius:50%;background:'+col+';vertical-align:middle;flex-shrink:0"></span>'; }
-  function rkBadge(id,q){ const r=(q&&q.exp_rank)?q.exp_rank:((RANKINGS_MAP[id]||{}).currentRank||''); return r?rkRankBadge(r):'<span style="color:rgba(248,249,249,.25)">—</span>'; }
+  function clsWTD(v,g){if(!v||v===0)return 'color:rgba(248,249,249,0.15)';if(v>g)return 'color:var(--v-exceeds);text-shadow:0 0 8px rgba(39,217,217,0.4)';return 'color:var(--off-white)';}
+  function sraIndicator(days){if(!days)return '';const col=days>14?'#F05252':days>7?'#EF9F27':'#2DC48E';return '<span title="Days since last SRA: '+days+'" style="margin-left:6px;display:inline-block;width:7px;height:7px;border-radius:50%;background:'+col+';vertical-align:middle;flex-shrink:0"></span>';}
+  function rkBadge(id,q){const r=(q&&q.exp_rank)?q.exp_rank:((RANKINGS_MAP[id]||{}).currentRank||'');return r?rkRankBadge(r):'<span style="color:rgba(248,249,249,.25)">—</span>';}
   // QTD summary bar (always shown)
-  const qtdGoalSRA=sqCfg.qtr_sra||0, qtdGoalIC=sqCfg.qtr_ic||0;
-  const qtdTotSRA=rosterMembers.reduce((s,e)=>s+((QTD_MAP[e.id]||{}).qtr_sra||0),0);
-  const qtdTotCAP=rosterMembers.reduce((s,e)=>s+((QTD_MAP[e.id]||{}).qtr_cap||0),0);
-  const qtdTotIC=rosterMembers.reduce((s,e)=>s+((QTD_MAP[e.id]||{}).qtr_ic||0),0);
-  const sraSumCol=qtdGoalSRA&&qtdTotSRA>=qtdGoalSRA?'#2DC48E':qtdGoalSRA&&qtdTotSRA>=qtdGoalSRA*.75?'#EF9F27':'var(--cyan-light)';
-  const icSumCol=qtdGoalIC&&qtdTotIC>=qtdGoalIC?'#2DC48E':qtdGoalIC&&qtdTotIC>=qtdGoalIC*.75?'#EF9F27':'var(--cyan-light)';
-  const qtdSummary='<div style="display:flex;align-items:center;gap:24px;padding:12px 0 16px;border-bottom:1px solid rgba(170,221,221,0.2);margin-bottom:16px;flex-wrap:wrap">'
+  const qG_sra=sqCfg.qtr_sra||0,qG_ic=sqCfg.qtr_ic||0;
+  const qT_sra=rosterMembers.reduce((s,e)=>s+((QTD_MAP[e.id]||{}).qtr_sra||0),0);
+  const qT_cap=rosterMembers.reduce((s,e)=>s+((QTD_MAP[e.id]||{}).qtr_cap||0),0);
+  const qT_ic=rosterMembers.reduce((s,e)=>s+((QTD_MAP[e.id]||{}).qtr_ic||0),0);
+  const sCol=qG_sra&&qT_sra>=qG_sra?'#2DC48E':qG_sra&&qT_sra>=qG_sra*.75?'#EF9F27':'var(--cyan-light)';
+  const iCol=qG_ic&&qT_ic>=qG_ic?'#2DC48E':qG_ic&&qT_ic>=qG_ic*.75?'#EF9F27':'var(--cyan-light)';
+  const qtdBar='<div style="display:flex;align-items:center;gap:24px;padding:12px 0 16px;border-bottom:1px solid rgba(170,221,221,0.2);margin-bottom:16px;flex-wrap:wrap">'
     +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark)">QTD Squad</div>'
-    +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:'+sraSumCol+'">SRA '+qtdTotSRA+(qtdGoalSRA?' <span style="font-weight:400;color:rgba(248,249,249,0.4);font-size:11px">/ '+qtdGoalSRA+'</span>':'')+'</div>'
-    +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:var(--off-white)">CAP '+qtdTotCAP+'</div>'
-    +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:'+icSumCol+'">IC '+qtdTotIC+(qtdGoalIC?' <span style="font-weight:400;color:rgba(248,249,249,0.4);font-size:11px">/ '+qtdGoalIC+'</span>':'')+'</div>'
+    +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:'+sCol+'">SRA '+qT_sra+(qG_sra?' <span style="font-weight:400;color:rgba(248,249,249,0.4);font-size:11px">/ '+qG_sra+'</span>':'')+'</div>'
+    +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:var(--off-white)">CAP '+qT_cap+'</div>'
+    +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:'+iCol+'">IC '+qT_ic+(qG_ic?' <span style="font-weight:400;color:rgba(248,249,249,0.4);font-size:11px">/ '+qG_ic+'</span>':'')+'</div>'
     +'</div>';
-  let headerRow, rows;
+  let hdr,rows;
   if(tab==='wtd'){
-    const week=document.getElementById('wtd-date-input')?.value||'';
-    subtitleEl.textContent='This Week'+(week?'  ·  Week of '+week:'');
-    const tot=sorted.reduce((t,e)=>{ const w=WTD_MAP[e.id]||{}; t.ac+=w.wtd_ac||0;t.cs+=w.wtd_cs||0;t.sra+=w.wtd_sra||0;t.cap+=w.wtd_cap||0;t.ic+=w.wtd_ic||0;t.pit+=w.pitches||0; return t; },{ac:0,cs:0,sra:0,cap:0,ic:0,pit:0});
-    headerRow='<tr><th style="'+hNS+'">Name</th><th style="'+hS+'">AC</th><th style="'+hS+'">CS</th><th style="'+hS+'">SRA</th><th style="'+hS+'">CAP</th><th style="'+hS+'">IC</th><th style="'+hS+'">Pitches</th><th style="'+hS+'">Days/SRA</th></tr>';
+    const wk=document.getElementById('wtd-date-input')?.value||'';
+    subtitleEl.textContent='This Week'+(wk?'  ·  Week of '+wk:'');
+    const tot=sorted.reduce((t,e)=>{const w=WTD_MAP[e.id]||{};t.ac+=w.wtd_ac||0;t.cs+=w.wtd_cs||0;t.sra+=w.wtd_sra||0;t.cap+=w.wtd_cap||0;t.ic+=w.wtd_ic||0;t.pit+=w.pitches||0;return t;},{ac:0,cs:0,sra:0,cap:0,ic:0,pit:0});
+    hdr='<tr><th style="'+hNS+'">Name</th><th style="'+hS+'">AC</th><th style="'+hS+'">CS</th><th style="'+hS+'">SRA</th><th style="'+hS+'">CAP</th><th style="'+hS+'">IC</th><th style="'+hS+'">Pitches</th><th style="'+hS+'">Days/SRA</th></tr>';
     const totRow='<tr style="background:rgba(39,217,217,0.05)"><td style="'+tNS+'font-weight:700;color:var(--cyan-dark)">TOTALS</td><td style="'+tS+'font-weight:700">'+(tot.ac||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cs||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.sra||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cap||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.ic||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.pit||'—')+'</td><td style="'+tS+'"></td></tr>';
     rows=sorted.map(e=>{
-      const w=WTD_MAP[e.id]||{}; const q=QTD_MAP[e.id]||{}; const il=e.name===leader;
+      const w=WTD_MAP[e.id]||{},q=QTD_MAP[e.id]||{},il=e.name===leader;
       const days=q.days_since_sra||0;
       const dsStyle=days>14?'font-weight:700;color:#F05252':days>7?'color:#EF9F27':days>0?'color:#2DC48E':'color:rgba(248,249,249,0.25)';
       const chg=q.status_change?changeIcon(q.status_change):'';
-      return '<tr><td style="'+tNS+(il?'color:var(--cyan-light);':'')+'"><span style="display:inline-flex;align-items:center">'
-        +e.name+(il?' <span style="font-size:9px;letter-spacing:1px;color:var(--cyan-dark);margin-left:5px">LEADER</span>':'')
-        +(chg?'<span style="margin-left:4px">'+chg+'</span>':'')
-        +(days?sraIndicator(days):'')+'</span></td>'
+      return '<tr><td style="'+tNS+(il?'color:var(--cyan-light);':'')+'"><span style="display:inline-flex;align-items:center">'+e.name+(il?' <span style="font-size:9px;letter-spacing:1px;color:var(--cyan-dark);margin-left:5px">LEADER</span>':'')+(chg?'<span style="margin-left:4px">'+chg+'</span>':'')+(days?sraIndicator(days):'')+'</span></td>'
         +'<td style="'+tS+clsWTD(w.wtd_ac,WTD_GOALS.ac)+'">'+(w.wtd_ac||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.wtd_cs,WTD_GOALS.cs)+'">'+(w.wtd_cs||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.wtd_sra,WTD_GOALS.sra)+'">'+(w.wtd_sra||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.wtd_cap,WTD_GOALS.cap)+'">'+(w.wtd_cap||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.wtd_ic,WTD_GOALS.ic)+'">'+(w.wtd_ic||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.pitches,WTD_GOALS.pitches)+'">'+(w.pitches||'—')+'</td>'
-        +'<td style="'+tS+dsStyle+'">'+(days||'—')+'</td>'
-        +'</tr>';
+        +'<td style="'+tS+dsStyle+'">'+(days||'—')+'</td></tr>';
     }).join('')+totRow;
   } else {
     subtitleEl.textContent='QTD Detail';
-    const tot=sorted.reduce((t,e)=>{ const q=QTD_MAP[e.id]||{}; t.sra+=q.qtr_sra||0;t.cap+=q.qtr_cap||0;t.ic+=q.qtr_ic||0; return t; },{sra:0,cap:0,ic:0});
-    headerRow='<tr><th style="'+hNS+'">Name</th><th style="'+hS+'">QTR SRA</th><th style="'+hS+'">QTR CAP</th><th style="'+hS+'">QTR IC</th><th style="'+hS+'">Days/SRA</th><th style="'+hS+'">Rank</th></tr>';
+    const tot=sorted.reduce((t,e)=>{const q=QTD_MAP[e.id]||{};t.sra+=q.qtr_sra||0;t.cap+=q.qtr_cap||0;t.ic+=q.qtr_ic||0;return t;},{sra:0,cap:0,ic:0});
+    hdr='<tr><th style="'+hNS+'">Name</th><th style="'+hS+'">QTR SRA</th><th style="'+hS+'">QTR CAP</th><th style="'+hS+'">QTR IC</th><th style="'+hS+'">Days/SRA</th><th style="'+hS+'">Rank</th></tr>';
     const totRow='<tr style="background:rgba(39,217,217,0.05)"><td style="'+tNS+'font-weight:700;color:var(--cyan-dark)">TOTALS</td><td style="'+tS+'font-weight:700">'+(tot.sra||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cap||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.ic||'—')+'</td><td style="'+tS+'"></td><td style="'+tS+'"></td></tr>';
     rows=sorted.map(e=>{
-      const q=QTD_MAP[e.id]||{}; const il=e.name===leader;
+      const q=QTD_MAP[e.id]||{},il=e.name===leader;
       const days=q.days_since_sra||0;
       const dsStyle=days>14?'font-weight:700;color:#F05252':days>7?'color:#EF9F27':days>0?'color:#2DC48E':'color:rgba(248,249,249,0.25)';
       const chg=q.status_change?changeIcon(q.status_change):'';
-      return '<tr><td style="'+tNS+(il?'color:var(--cyan-light);':'')+'"><span style="display:inline-flex;align-items:center">'
-        +e.name+(il?' <span style="font-size:9px;letter-spacing:1px;color:var(--cyan-dark);margin-left:5px">LEADER</span>':'')
-        +(chg?'<span style="margin-left:4px">'+chg+'</span>':'')
-        +(days?sraIndicator(days):'')+'</span></td>'
+      return '<tr><td style="'+tNS+(il?'color:var(--cyan-light);':'')+'"><span style="display:inline-flex;align-items:center">'+e.name+(il?' <span style="font-size:9px;letter-spacing:1px;color:var(--cyan-dark);margin-left:5px">LEADER</span>':'')+(chg?'<span style="margin-left:4px">'+chg+'</span>':'')+(days?sraIndicator(days):'')+'</span></td>'
         +'<td style="'+tS+'">'+(q.qtr_sra||'—')+'</td>'
         +'<td style="'+tS+'">'+(q.qtr_cap||'—')+'</td>'
         +'<td style="'+tS+'">'+(q.qtr_ic||'—')+'</td>'
         +'<td style="'+tS+dsStyle+'">'+(days||'—')+'</td>'
-        +'<td style="'+tS+'">'+rkBadge(e.id,q)+'</td>'
-        +'</tr>';
+        +'<td style="'+tS+'">'+rkBadge(e.id,q)+'</td></tr>';
     }).join('')+totRow;
   }
-  body.innerHTML=qtdSummary+'<table style="width:100%;border-collapse:collapse;">'+headerRow+'<tbody>'+rows+'</tbody></table>';
+  body.innerHTML=qtdBar+'<table style="width:100%;border-collapse:collapse;">'+hdr+'<tbody>'+rows+'</tbody></table>';
+  document.getElementById('squad-snapshot-modal').style.display='flex';
 }
 
 // ── POD SNAPSHOT ─────────────────────────────────────────────────────────────
@@ -4923,42 +4897,72 @@ function openPodSnapshot(podName, squadKey) {
 
 function renderPodSnapshot(podName, squadKey) {
   const body = document.getElementById('pod-snapshot-body');
-  if (!body) return;
-  const memberRoster = ROSTER_EMPLOYEES.filter(e => e.pod && e.pod.trim()===podName && (!squadKey||e.squad===squadKey));
-  if (!memberRoster.length) { body.innerHTML='<div style="color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;padding:16px 0;">No members found in this pod.</div>'; return; }
-  const thS='padding:8px 10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark);border-bottom:1px solid rgba(170,221,221,0.2);white-space:nowrap;';
-  const tdS=a=>`padding:9px 10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;color:var(--off-white);border-bottom:1px solid rgba(170,221,221,0.07);text-align:${a};`;
-  const totS=a=>`padding:9px 10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;color:var(--cyan-light);border-top:1px solid rgba(170,221,221,0.2);text-align:${a};`;
-  function sraIndicator(days){ if(!days) return ''; const col=days>14?'#F05252':days>7?'#EF9F27':'#2DC48E'; return `<span title="Days since last SRA: ${days}" style="margin-left:6px;display:inline-block;width:7px;height:7px;border-radius:50%;background:${col};vertical-align:middle;flex-shrink:0"></span>`; }
-  function clsWTD(v,g){ if(!v||v===0) return 'color:rgba(248,249,249,0.15)'; if(v>g) return 'color:var(--v-exceeds);text-shadow:0 0 8px rgba(39,217,217,0.4)'; return 'color:var(--off-white)'; }
-  if (_podSnapMode==='wtd') {
-    const rows=memberRoster.map(r=>({_r:r,name:r.name,...(WTD_MAP[r.id]||{}),_q:(QTD_MAP[r.id]||{})})).sort((a,b)=>(b.wtd_sra||0)-(a.wtd_sra||0));
-    const tot={ac:0,cs:0,sra:0,cap:0,ic:0,pit:0};
-    rows.forEach(r=>{tot.ac+=r.wtd_ac||0;tot.cs+=r.wtd_cs||0;tot.sra+=r.wtd_sra||0;tot.cap+=r.wtd_cap||0;tot.ic+=r.wtd_ic||0;tot.pit+=r.pitches||0;});
-    const hdr=`<tr><th style="${thS}text-align:left">Name</th><th style="${thS}text-align:center">AC</th><th style="${thS}text-align:center">CS</th><th style="${thS}text-align:center">SRA</th><th style="${thS}text-align:center">CAP</th><th style="${thS}text-align:center">IC</th><th style="${thS}text-align:center">Pitches</th><th style="${thS}text-align:center">Days/SRA</th></tr>`;
-    const dataRows=rows.map(r=>{
-      const days=r._q.days_since_sra||0;
-      const dsStyle=days>14?'font-weight:700;color:#F05252':days>7?'color:#EF9F27':days>0?'color:#2DC48E':'color:rgba(248,249,249,0.25)';
-      const chg=r._q.status_change?changeIcon(r._q.status_change):'';
-      return `<tr><td style="${tdS('left')}"><span style="display:inline-flex;align-items:center">${r.name}${chg?'<span style="margin-left:4px">'+chg+'</span>':''}${days?sraIndicator(days):''}</span></td><td style="${tdS('center')};${clsWTD(r.wtd_ac,WTD_GOALS.ac)}">${fmtN(r.wtd_ac)}</td><td style="${tdS('center')};${clsWTD(r.wtd_cs,WTD_GOALS.cs)}">${fmtN(r.wtd_cs)}</td><td style="${tdS('center')};${clsWTD(r.wtd_sra,WTD_GOALS.sra)}">${fmtN(r.wtd_sra)}</td><td style="${tdS('center')};${clsWTD(r.wtd_cap,WTD_GOALS.cap)}">${fmtN(r.wtd_cap)}</td><td style="${tdS('center')};${clsWTD(r.wtd_ic,WTD_GOALS.ic)}">${fmtN(r.wtd_ic)}</td><td style="${tdS('center')};${clsWTD(r.pitches,WTD_GOALS.pitches)}">${fmtN(r.pitches)}</td><td style="${tdS('center')};${dsStyle}">${days||'—'}</td></tr>`;
-    }).join('');
-    const footRow=`<tr><td style="${totS('left')}">TOTAL</td><td style="${totS('center')}">${fmtN(tot.ac)}</td><td style="${totS('center')}">${fmtN(tot.cs)}</td><td style="${totS('center')}">${fmtN(tot.sra)}</td><td style="${totS('center')}">${fmtN(tot.cap)}</td><td style="${totS('center')}">${fmtN(tot.ic)}</td><td style="${totS('center')}">${fmtN(tot.pit)}</td><td style="${totS('center')}"></td></tr>`;
-    body.innerHTML=`<table style="width:100%;border-collapse:collapse;"><thead>${hdr}</thead><tbody>${dataRows}${footRow}</tbody></table>`;
-  } else {
-    const rows=memberRoster.map(r=>({_r:r,name:r.name,...(QTD_MAP[r.id]||{})})).sort((a,b)=>(b.qtr_sra||0)-(a.qtr_sra||0));
-    const tot={sra:0,cap:0,ic:0};
-    rows.forEach(r=>{tot.sra+=r.qtr_sra||0;tot.cap+=r.qtr_cap||0;tot.ic+=r.qtr_ic||0;});
-    const hdr=`<tr><th style="${thS}text-align:left">Name</th><th style="${thS}text-align:center">QTR SRA</th><th style="${thS}text-align:center">QTR CAP</th><th style="${thS}text-align:center">QTR IC</th><th style="${thS}text-align:center">Days/SRA</th><th style="${thS}text-align:center">Rank</th></tr>`;
-    const dataRows=rows.map(r=>{
-      const days=r.days_since_sra||0;
-      const dsStyle=days>14?'font-weight:700;color:#F05252':days>7?'color:#EF9F27':days>0?'color:#2DC48E':'color:rgba(248,249,249,0.25)';
-      const chg=r.status_change?changeIcon(r.status_change):'';
-      const rkB=(r.exp_rank||RANKINGS_MAP[r._r.id]?.currentRank)?rkRankBadge(r.exp_rank||RANKINGS_MAP[r._r.id]?.currentRank):'<span style="color:rgba(248,249,249,.25)">—</span>';
-      return `<tr><td style="${tdS('left')}"><span style="display:inline-flex;align-items:center">${r.name}${chg?'<span style="margin-left:4px">'+chg+'</span>':''}${days?sraIndicator(days):''}</span></td><td style="${tdS('center')}">${fmtN(r.qtr_sra)}</td><td style="${tdS('center')}">${fmtN(r.qtr_cap)}</td><td style="${tdS('center')}">${fmtN(r.qtr_ic)}</td><td style="${tdS('center')};${dsStyle}">${days||'—'}</td><td style="${tdS('center')}">${rkB}</td></tr>`;
-    }).join('');
-    const footRow=`<tr><td style="${totS('left')}">TOTAL</td><td style="${totS('center')}">${fmtN(tot.sra)}</td><td style="${totS('center')}">${fmtN(tot.cap)}</td><td style="${totS('center')}">${fmtN(tot.ic)}</td><td style="${totS('center')}"></td><td style="${totS('center')}"></td></tr>`;
-    body.innerHTML=`<table style="width:100%;border-collapse:collapse;"><thead>${hdr}</thead><tbody>${dataRows}${footRow}</tbody></table>`;
+  if(!body) return;
+
+  const members = ROSTER_EMPLOYEES.filter(e =>
+    e.pod && e.pod.trim() === podName &&
+    (!squadKey || e.squad === squadKey)
+  );
+
+  if(!members.length){
+    body.innerHTML = '<div style="color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;padding:16px 0;">No members found in this pod.</div>';
+    return;
   }
+
+  // Has Activity filter
+  let filteredMembers = members;
+  if (wtdActiveExtra === 'active') {
+    if (_podSnapMode === 'wtd') {
+      filteredMembers = members.filter(e => { const w=WTD_MAP[e.id]||{}; return w.wtd_ac||w.wtd_cs||w.wtd_sra||w.wtd_cap||w.wtd_ic; });
+    } else {
+      filteredMembers = members.filter(e => { const q=QTD_MAP[e.id]||{}; return q.qtr_sra||q.qtr_cap||q.qtr_ic; });
+    }
+    if (!filteredMembers.length) {
+      body.innerHTML = '<div style="color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;padding:16px 0;">No activity this week. Toggle Has Activity off to see all members.</div>';
+      return;
+    }
+  }
+
+  const thS  = 'padding:8px 10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark);border-bottom:1px solid rgba(170,221,221,0.2);white-space:nowrap;';
+  const tdS  = a => `padding:9px 10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;color:var(--off-white);border-bottom:1px solid rgba(170,221,221,0.07);text-align:${a};`;
+  const totS = a => `padding:9px 10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;color:var(--cyan-light);border-top:1px solid rgba(170,221,221,0.2);text-align:${a};`;
+
+  if(_podSnapMode === 'wtd'){
+    const cols = [
+      {label:'Name',   key:'name',         align:'left'},
+      {label:'AC',     key:'wtd_ac',       align:'center'},
+      {label:'CS',     key:'wtd_cs',       align:'center'},
+      {label:'SRA',    key:'wtd_sra',      align:'center'},
+      {label:'IC',     key:'wtd_ic',       align:'center'},
+      {label:'Knocks', key:'knocks',       align:'center'},
+      {label:'Hrs',    key:'hours_knocked',align:'center'},
+    ];
+    const rows = filteredMembers.map(r=>({name:r.name,...(WTD_MAP[r.id]||{})}))
+                        .sort((a,b)=>(b.wtd_sra||0)-(a.wtd_sra||0));
+    const tot  = {name:'TOTAL',wtd_ac:0,wtd_cs:0,wtd_sra:0,wtd_ic:0,knocks:0,hours_knocked:0};
+    rows.forEach(r=>{ tot.wtd_ac+=r.wtd_ac||0; tot.wtd_cs+=r.wtd_cs||0; tot.wtd_sra+=r.wtd_sra||0; tot.wtd_ic+=r.wtd_ic||0; tot.knocks+=r.knocks||0; tot.hours_knocked+=r.hours_knocked||0; });
+    body.innerHTML = _podTable(cols,rows,tot,thS,tdS,totS);
+  } else {
+    const cols = [
+      {label:'Name',    key:'name',   align:'left'},
+      {label:'QTR SRA', key:'qtr_sra',align:'center'},
+      {label:'QTR IC',  key:'qtr_ic', align:'center'},
+      {label:'QTR CAP', key:'qtr_cap',align:'center'},
+      {label:'QTD CS',  key:'qtd_cs', align:'center'},
+    ];
+    const rows = filteredMembers.map(r=>({name:r.name,...(QTD_MAP[r.id]||{})}))
+                        .sort((a,b)=>(b.qtr_sra||0)-(a.qtr_sra||0));
+    const tot  = {name:'TOTAL',qtr_sra:0,qtr_ic:0,qtr_cap:0,qtd_cs:0};
+    rows.forEach(r=>{ tot.qtr_sra+=r.qtr_sra||0; tot.qtr_ic+=r.qtr_ic||0; tot.qtr_cap+=r.qtr_cap||0; tot.qtd_cs+=r.qtd_cs||0; });
+    body.innerHTML = _podTable(cols,rows,tot,thS,tdS,totS);
+  }
+}
+
+function _podTable(cols,rows,tot,thS,tdS,totS){
+  const hdr = `<tr>${cols.map(c=>`<th style="${thS}text-align:${c.align}">${c.label}</th>`).join('')}</tr>`;
+  const body = rows.map(row=>`<tr>${cols.map(c=>`<td style="${tdS(c.align)}">${c.key==='name'?(row.name||'—'):fmtN(row[c.key])}</td>`).join('')}</tr>`).join('');
+  const foot = `<tr>${cols.map(c=>`<td style="${totS(c.align)}">${c.key==='name'?'TOTAL':fmtN(tot[c.key])}</td>`).join('')}</tr>`;
+  return `<table style="width:100%;border-collapse:collapse;"><thead>${hdr}</thead><tbody>${body}${foot}</tbody></table>`;
 }
 
 function openSquadSnapshot(squadKey, tab) {
@@ -4967,10 +4971,7 @@ function openSquadSnapshot(squadKey, tab) {
   _squadSnapMode    = tab || 'wtd';
   document.getElementById('squad-snapshot-title').textContent = squadKey;
   squadSnapSetMode(_squadSnapMode);
-  document.getElementById('squad-snapshot-modal').style.display = 'flex';
 }
-
-
 // ── EXPORT CSV ──
 function exportCSV(tab){
   let rows=[], headers=[];
@@ -7592,12 +7593,8 @@ async function fetchSheetsData(opts) {
           lw_ic:  csvNum(r['ic']  || r['ic week']  || 0),
         };
       });
-      console.log('[Last Week] loaded', Object.keys(LW_MAP).length, 'entries');
-    } else {
-      LW_MAP = {};
-      console.warn('[Last Week] tab not found (HTTP', lwRes.status, ') — toggle will show no data');
-    }
-  } catch(e) { LW_MAP = {}; console.warn('[Last Week]', e.message); }
+    } else { LW_MAP = {}; }
+  } catch(e) { LW_MAP = {}; }
 
   await sleep(350);
 
