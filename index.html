@@ -2289,7 +2289,7 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
 const CONSUL_CONFIG = {
   // ── Branding ─────────────────────────────────────────────────────────────
   brand:         'EMPIRE',
-  primary_label: 'Riverside',          // Label shown on the primary Overview block
+  primary_label: 'Riverside',
   tagline:       'THE BEST OFFICE IN THE COMPANY',
 
   // ── Google Infrastructure ─────────────────────────────────────────────────
@@ -2305,22 +2305,31 @@ const CONSUL_CONFIG = {
   office_admin_phone: '5625371559',
 
   // ── Office Configuration ──────────────────────────────────────────────────
-  // `offices` = this deployment's own offices (drives filter bars, dropdowns).
   offices: ['Riverside'],
-
-  // `compare_offices` = external offices available as Overview compare targets.
-  // Can be offices outside this deployment — useful for benchmarking.
-  // Empty array = no compare bar shown.
-  compare_offices: ['Orange County', 'Newport Beach'],
+  compare_offices: ['Orange County'],  // NB removed; radio filter shows All/OC/Riverside
 
   office_colors: {
     'Riverside':     '#FF6200',
-    'Orange County': '#F2CF9C',   // used in compare section
-    'Newport Beach': '#AADDDD',   // used in compare section
+    'Orange County': '#F2CF9C',
   },
 
   office_meeting_info: {
     'Riverside': { days: 'Tuesday & Thursdays', time: '11:00am', address: '1550 Magnolia Ave, Corona, CA' },
+  },
+
+  // ── Skin accent colors — injected into CSS vars by applyBranding() ────────
+  // This is the single source of truth for what makes Empire look different from twelve.
+  accent: {
+    cyan_light:       '#FF6200',
+    cyan_dark:        '#C44B00',
+    near_black:       '#000000',
+    border:           'rgba(255,98,0,0.22)',
+    row_hover:        'rgba(255,98,0,0.08)',
+    light_cyan_light: '#CC4F00',
+    light_cyan_dark:  '#8B3600',
+    light_near_black: '#E7E5E4',
+    light_border:     'rgba(180,70,0,0.22)',
+    light_row_hover:  'rgba(180,70,0,0.06)',
   },
 };
 
@@ -2343,6 +2352,32 @@ const OFFICE_MEETING_INFO = CONSUL_CONFIG.office_meeting_info;
 function applyBranding() {
   const brand   = CONSUL_CONFIG.brand;
   const tagline = CONSUL_CONFIG.tagline;
+
+  // Inject skin accent colors into CSS vars
+  const acc = CONSUL_CONFIG.accent;
+  if (acc) {
+    const rs = document.documentElement.style;
+    if (acc.cyan_light)  rs.setProperty('--cyan-light',  acc.cyan_light);
+    if (acc.cyan_dark)   rs.setProperty('--cyan-dark',   acc.cyan_dark);
+    if (acc.near_black)  rs.setProperty('--near-black',  acc.near_black);
+    if (acc.border)      rs.setProperty('--border',      acc.border);
+    if (acc.row_hover)   rs.setProperty('--row-hover',   acc.row_hover);
+    // Inject light-mode overrides as a style tag
+    if (!document.getElementById('consul-accent-light')) {
+      const lm = [];
+      if (acc.light_cyan_light) lm.push('--cyan-light:' + acc.light_cyan_light);
+      if (acc.light_cyan_dark)  lm.push('--cyan-dark:'  + acc.light_cyan_dark);
+      if (acc.light_near_black) lm.push('--near-black:' + acc.light_near_black);
+      if (acc.light_border)     lm.push('--border:'     + acc.light_border);
+      if (acc.light_row_hover)  lm.push('--row-hover:'  + acc.light_row_hover);
+      if (lm.length) {
+        const st = document.createElement('style');
+        st.id = 'consul-accent-light';
+        st.textContent = 'body.light-mode{' + lm.join(';') + '}';
+        document.head.appendChild(st);
+      }
+    }
+  }
   const footerText = '\u25a0 ' + brand + ' \u2014 ' + tagline + ' \u25a0';
 
   // Footer brand spans (all tabs)
@@ -2366,16 +2401,19 @@ function applyBranding() {
   // ── WTD filter bar ────────────────────────────────────────────────────────
   const wtdBar = document.getElementById('wtd-office-filter-bar');
   if (wtdBar) {
+    // Build the unique office list: own offices first, then compare offices
+    const allOfficeList = [...CONSUL_CONFIG.offices,
+      ...(CONSUL_CONFIG.compare_offices||[]).filter(o => !CONSUL_CONFIG.offices.includes(o))
+    ];
     wtdBar.innerHTML =
       '<button class="filter-btn active" id="wtd-f-all" onclick="wtdToggleOffice(\'all\')">All</button>' +
-      offices.map((o, i) => {
+      allOfficeList.map((o, i) => {
         const id = 'wtd-f-off-' + i;
-        const active = o === defaultOff ? ' active' : '';
-        return `<button class="filter-btn${active}" id="${id}" data-office="${o}" onclick="wtdToggleOffice('${o}')">${o}</button>`;
+        return `<button class="filter-btn" id="${id}" data-office="${o}" onclick="wtdToggleOffice('${o}')">${o}</button>`;
       }).join('') +
       '<button class="filter-btn" id="wtd-f-active" onclick="wtdToggleOffice(\'active\')">Has Activity</button>';
-    // Sync state
-    wtdOffices = new Set([defaultOff]);
+    // Default: All offices shown
+    wtdOffices = new Set(allOfficeList);
   }
 
   // ── Overview compare bar ──────────────────────────────────────────────────
@@ -2520,8 +2558,8 @@ function shortOffice(o) {
 
 // ── Performance lookup maps (rebuilt whenever roster changes) ──
 let WTD_MAP = {}, QTD_MAP = {};
-let LW_MAP = {};           // Last Week data keyed by id: {lw_ac, lw_cs, lw_sra, lw_cap, lw_ic}
-let wtdWeekMode = 'this';  // 'this' | 'last' — controlled by This Week / Last Week toggle
+let LW_MAP = {};
+let wtdWeekMode = "this";
 // Authoritative QTD office totals from Totals sheet — keyed by office name
 // e.g. { 'Newport Beach': {cs:12, sra:8, cap:3, ic:2}, ... }
 let TOTALS_OFFICE = {};
@@ -2691,8 +2729,8 @@ function toggleChrome(){
   if(btn)btn.textContent='▼ Hide tabs & filters';
 })();
 function changeIcon(c){
-  if(c==='Up')return '<span class="change-up">▲ Up</span>';
-  if(c==='Down')return '<span class="change-down">▼ Down</span>';
+  if(c==='Up')return '<span class="change-up" style="font-size:11px">▲</span>';
+  if(c==='Down')return '<span class="change-down" style="font-size:11px">▼</span>';
   if(c==='Same')return '';
   return '';
 }
@@ -3488,36 +3526,34 @@ function wtdSetWeek(mode, el) {
   wtdWeekMode = mode;
   document.getElementById('wtd-week-this').classList.toggle('active', mode==='this');
   document.getElementById('wtd-week-last').classList.toggle('active', mode==='last');
-  // When Last Week is active, Has Activity filter stays independent
   renderWTD();
 }
 
 function wtdToggleOffice(val){
+  // Radio-style: clicking a specific office selects ONLY that office.
+  // 'all' selects all offices. 'active' toggles the Has Activity filter independently.
   const bar = document.getElementById('wtd-office-filter-bar');
-  if(val==='all'){
-    wtdOffices = new Set(CONSUL_CONFIG.offices);
-    wtdActiveExtra = null;
-    if(bar) bar.querySelectorAll('.filter-btn[data-office]').forEach(b => b.classList.add('active'));
-    const allBtn = document.getElementById('wtd-f-all');
-    if(allBtn) allBtn.classList.add('active');
-    const actBtn = document.getElementById('wtd-f-active');
-    if(actBtn) actBtn.classList.remove('active');
-  } else if(val==='active'){
-    wtdActiveExtra = wtdActiveExtra==='active'?null:'active';
+  if(val==='active'){
+    wtdActiveExtra = wtdActiveExtra==='active' ? null : 'active';
     const actBtn = document.getElementById('wtd-f-active');
     if(actBtn) actBtn.classList.toggle('active', wtdActiveExtra==='active');
-  } else {
-    if(wtdOffices.has(val)){
-      wtdOffices.delete(val);
-    } else {
-      wtdOffices.add(val);
+  } else if(val==='all'){
+    wtdOffices = new Set(CONSUL_CONFIG.offices);
+    if(bar) {
+      bar.querySelectorAll('.filter-btn[data-office]').forEach(b => b.classList.add('active'));
+      const allBtn = document.getElementById('wtd-f-all');
+      if(allBtn) allBtn.classList.add('active');
     }
-    if(bar) bar.querySelectorAll('.filter-btn[data-office]').forEach(b => {
-      b.classList.toggle('active', wtdOffices.has(b.dataset.office));
-    });
-    const allOn = wtdOffices.size === CONSUL_CONFIG.offices.length;
-    const allBtn = document.getElementById('wtd-f-all');
-    if(allBtn) allBtn.classList.toggle('active', allOn);
+  } else {
+    // Radio: set exactly this office
+    wtdOffices = new Set([val]);
+    if(bar) {
+      bar.querySelectorAll('.filter-btn[data-office]').forEach(b =>
+        b.classList.toggle('active', b.dataset.office === val)
+      );
+      const allBtn = document.getElementById('wtd-f-all');
+      if(allBtn) allBtn.classList.remove('active');
+    }
   }
   renderWTD();
 }
@@ -3568,12 +3604,10 @@ function wtdSort(col){
 function getWTDData(){
   const search=document.getElementById('wtd-search').value.toLowerCase();
   const isLW = (wtdWeekMode === 'last');
-  // Join roster (identity) with WTD perf map + QTD context fields
   let data=ROSTER_EMPLOYEES.map(r=>{
     const p = isLW ? (LW_MAP[r.id]||{}) : (WTD_MAP[r.id]||{});
     const q=QTD_MAP[r.id]||{};
     const rk=(RANKINGS_MAP[r.id]||{});
-    // Last Week only has AC/CS/SRA/CAP/IC — map lw_ fields to standard wtd_ names
     return {
       id:r.id, name:r.name, office:r.office, squad:r.squad, role:r.role, pod:r.pod||'',
       mobile:r.mobile||'',
@@ -3583,9 +3617,9 @@ function getWTDData(){
       wtd_sra: isLW ? (p.lw_sra||0) : (p.wtd_sra||0),
       wtd_cap: isLW ? (p.lw_cap||0) : (p.wtd_cap||0),
       wtd_ic:  isLW ? (p.lw_ic||0)  : (p.wtd_ic||0),
-      knocks:       isLW ? 0 : (p.knocks||0),
-      pitches:      isLW ? 0 : (p.pitches||0),
-      hours_knocked:isLW ? 0 : (p.hours_knocked||0),
+      knocks:        isLW ? 0 : (p.knocks||0),
+      pitches:       isLW ? 0 : (p.pitches||0),
+      hours_knocked: isLW ? 0 : (p.hours_knocked||0),
       qtr_status:q.qtr_status||p.qtr_status||'',
       qtr_sra:q.qtr_sra||0, qtr_cap:q.qtr_cap||0, qtr_ic:q.qtr_ic||0,
       qtd_cs:q.qtd_cs||0,
@@ -3598,7 +3632,8 @@ function getWTDData(){
       exp_title:rk.title||''
     };
   });
-  if(wtdOffices.size<3) data=data.filter(e=>wtdOffices.has(e.office));
+  if(wtdOffices.size < CONSUL_CONFIG.offices.length + (CONSUL_CONFIG.compare_offices||[]).length)
+    data=data.filter(e=>wtdOffices.has(e.office));
   if(wtdSquadFilter) data=data.filter(e=>e.squad===wtdSquadFilter);
   if(wtdActiveExtra==='active') data=data.filter(e=>e.wtd_cs||e.wtd_sra||e.wtd_cap||e.wtd_ic||e.wtd_ac);
   if(search) data=data.filter(e=>e.name.toLowerCase().includes(search));
@@ -4088,7 +4123,7 @@ function renderWTD(){
     const e=r.emp;
     const oc=OFFICE_COLORS[e.office]||'#888';
     function wtdCls(val,goal){if(!val||val===0)return 'nil';if(val>goal)return 'exceeds';return 'pos';}
-    const trendHtml = e.status_change ? `<span style="margin-left:5px;font-size:11px;vertical-align:middle">${changeIcon(e.status_change)}</span>` : '';
+    const trendHtml = e.status_change ? changeIcon(e.status_change) : '';
     var sraLightColor = '';
     if (e.days_since_sra > 14)     sraLightColor = '#F05252';
     else if (e.days_since_sra > 7) sraLightColor = '#EF9F27';
@@ -4757,161 +4792,97 @@ function closeSquadSnapshot() {
 
 function squadSnapSetMode(mode) {
   _squadSnapMode = mode;
-  const wtdBtn = document.getElementById('squad-snap-wtd-btn');
-  const qtdBtn = document.getElementById('squad-snap-qtd-btn');
-  if (wtdBtn) {
-    wtdBtn.style.borderColor = mode==='wtd' ? 'var(--cyan-light)' : 'rgba(248,249,249,0.2)';
-    wtdBtn.style.color       = mode==='wtd' ? 'var(--cyan-light)' : 'var(--text-muted)';
-    wtdBtn.style.background  = mode==='wtd' ? 'rgba(170,221,221,0.1)' : 'transparent';
-  }
-  if (qtdBtn) {
-    qtdBtn.style.borderColor = mode==='qtd' ? 'var(--cyan-light)' : 'rgba(248,249,249,0.2)';
-    qtdBtn.style.color       = mode==='qtd' ? 'var(--cyan-light)' : 'var(--text-muted)';
-    qtdBtn.style.background  = mode==='qtd' ? 'rgba(170,221,221,0.1)' : 'transparent';
-  }
+  const wb = document.getElementById('squad-snap-wtd-btn');
+  const qb = document.getElementById('squad-snap-qtd-btn');
+  if (wb) { wb.style.borderColor=mode==='wtd'?'var(--cyan-light)':'rgba(248,249,249,0.2)'; wb.style.color=mode==='wtd'?'var(--cyan-light)':'var(--text-muted)'; wb.style.background=mode==='wtd'?'rgba(170,221,221,0.1)':'transparent'; }
+  if (qb) { qb.style.borderColor=mode==='qtd'?'var(--cyan-light)':'rgba(248,249,249,0.2)'; qb.style.color=mode==='qtd'?'var(--cyan-light)':'var(--text-muted)'; qb.style.background=mode==='qtd'?'rgba(170,221,221,0.1)':'transparent'; }
   renderSquadSnapshot(_squadSnapCurrent);
 }
 
 function renderSquadSnapshot(squadKey) {
-  const body       = document.getElementById('squad-snapshot-body');
-  const subtitleEl = document.getElementById('squad-snapshot-subtitle');
-  const rosterMembers = ROSTER_EMPLOYEES.filter(e => e.squad === squadKey);
-  if (!rosterMembers.length || !body) return;
-
-  const sqCfg  = SQUAD_DB[squadKey] || {};
-  const leader = sqCfg.leader || '';
-  const tab    = _squadSnapMode;
-
-  const sorted = [...rosterMembers].sort((a, b) => {
-    if (a.name === leader) return -1;
-    if (b.name === leader) return 1;
-    if (tab === 'wtd') return ((WTD_MAP[b.id]||{}).wtd_sra||0) - ((WTD_MAP[a.id]||{}).wtd_sra||0);
-    return ((QTD_MAP[b.id]||{}).qtr_sra||0) - ((QTD_MAP[a.id]||{}).qtr_sra||0);
+  const body=document.getElementById('squad-snapshot-body');
+  const subtitleEl=document.getElementById('squad-snapshot-subtitle');
+  const rosterMembers=ROSTER_EMPLOYEES.filter(e=>e.squad===squadKey);
+  if(!rosterMembers.length||!body) return;
+  const sqCfg=SQUAD_DB[squadKey]||{};
+  const leader=sqCfg.leader||'';
+  const tab=_squadSnapMode;
+  const sorted=[...rosterMembers].sort((a,b)=>{
+    if(a.name===leader) return -1; if(b.name===leader) return 1;
+    if(tab==='wtd') return ((WTD_MAP[b.id]||{}).wtd_sra||0)-((WTD_MAP[a.id]||{}).wtd_sra||0);
+    return ((QTD_MAP[b.id]||{}).qtr_sra||0)-((QTD_MAP[a.id]||{}).qtr_sra||0);
   });
-
-  const n   = sorted.length;
-  const fs  = n <= 10 ? 14 : n <= 15 ? 12 : n <= 20 ? 11 : n <= 28 ? 10 : 9;
-  const pad = fs <= 10 ? '6px 10px' : '8px 14px';
-  const hS  = 'font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+(fs-2)+'px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark);padding:'+pad+';text-align:center;border-bottom:1px solid rgba(170,221,221,0.18);white-space:nowrap;';
-  const hNS = 'font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+(fs-2)+'px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark);padding:'+pad+';text-align:left;border-bottom:1px solid rgba(170,221,221,0.18);';
-  const tS  = 'font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+fs+'px;padding:'+pad+';border-bottom:1px solid rgba(170,221,221,0.06);text-align:center;color:var(--off-white);';
-  const tNS = 'font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+fs+'px;font-weight:600;padding:'+pad+';border-bottom:1px solid rgba(170,221,221,0.06);text-align:left;color:var(--off-white);white-space:nowrap;';
-
-  function clsWTD(val, goal) {
-    if (!val||val===0) return 'color:rgba(248,249,249,0.15)';
-    if (val > goal)    return 'color:var(--v-exceeds);text-shadow:0 0 8px rgba(39,217,217,0.4)';
-    return 'color:var(--off-white)';
-  }
-  function sraIndicator(days) {
-    if (!days || days === 0) return '';
-    const color = days > 14 ? '#F05252' : days > 7 ? '#EF9F27' : '#2DC48E';
-    return '<span title="Days since last SRA: '+days+'" style="margin-left:6px;display:inline-block;width:7px;height:7px;border-radius:50%;background:'+color+';vertical-align:middle;flex-shrink:0"></span>';
-  }
-  function rkBadge(id, q) {
-    const r = (q && q.exp_rank) ? q.exp_rank : ((RANKINGS_MAP[id]||{}).currentRank||'');
-    return r ? rkRankBadge(r) : '<span style="color:rgba(248,249,249,.25)">—</span>';
-  }
-
-  // ── QTD squad summary bar (always shown at top) ───────────────────────────
-  const qtdGoalSRA = sqCfg.qtr_sra || 0;
-  const qtdGoalIC  = sqCfg.qtr_ic  || 0;
-  const qtdTotSRA  = rosterMembers.reduce((s,e) => s + ((QTD_MAP[e.id]||{}).qtr_sra||0), 0);
-  const qtdTotCAP  = rosterMembers.reduce((s,e) => s + ((QTD_MAP[e.id]||{}).qtr_cap||0), 0);
-  const qtdTotIC   = rosterMembers.reduce((s,e) => s + ((QTD_MAP[e.id]||{}).qtr_ic||0),  0);
-  const sraSummColor = qtdGoalSRA && qtdTotSRA >= qtdGoalSRA ? '#2DC48E' : qtdGoalSRA && qtdTotSRA >= qtdGoalSRA * 0.75 ? '#EF9F27' : 'var(--cyan-light)';
-  const icSummColor  = qtdGoalIC  && qtdTotIC  >= qtdGoalIC  ? '#2DC48E' : qtdGoalIC  && qtdTotIC  >= qtdGoalIC  * 0.75 ? '#EF9F27' : 'var(--cyan-light)';
-  const qtdSummary = '<div style="display:flex;align-items:center;gap:24px;padding:12px 0 16px;border-bottom:1px solid rgba(170,221,221,0.2);margin-bottom:16px;flex-wrap:wrap">'
-    + '<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark)">QTD Squad</div>'
-    + '<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:'+sraSummColor+'">SRA '+qtdTotSRA+(qtdGoalSRA?' <span style="font-weight:400;color:rgba(248,249,249,0.4);font-size:11px">/ '+qtdGoalSRA+'</span>':'')+'</div>'
-    + '<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:var(--off-white)">CAP '+qtdTotCAP+'</div>'
-    + '<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:'+icSummColor+'">IC '+qtdTotIC+(qtdGoalIC?' <span style="font-weight:400;color:rgba(248,249,249,0.4);font-size:11px">/ '+qtdGoalIC+'</span>':'')+'</div>'
-    + '</div>';
-
+  const n=sorted.length;
+  const fs=n<=10?14:n<=15?12:n<=20?11:n<=28?10:9;
+  const pad=fs<=10?'6px 10px':'8px 14px';
+  const hS='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+(fs-2)+'px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark);padding:'+pad+';text-align:center;border-bottom:1px solid rgba(170,221,221,0.18);white-space:nowrap;';
+  const hNS='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+(fs-2)+'px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark);padding:'+pad+';text-align:left;border-bottom:1px solid rgba(170,221,221,0.18);';
+  const tS='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+fs+'px;padding:'+pad+';border-bottom:1px solid rgba(170,221,221,0.06);text-align:center;color:var(--off-white);';
+  const tNS='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+fs+'px;font-weight:600;padding:'+pad+';border-bottom:1px solid rgba(170,221,221,0.06);text-align:left;color:var(--off-white);white-space:nowrap;';
+  function clsWTD(v,g){ if(!v||v===0) return 'color:rgba(248,249,249,0.15)'; if(v>g) return 'color:var(--v-exceeds);text-shadow:0 0 8px rgba(39,217,217,0.4)'; return 'color:var(--off-white)'; }
+  function sraIndicator(days){ if(!days) return ''; const col=days>14?'#F05252':days>7?'#EF9F27':'#2DC48E'; return '<span title="Days since last SRA: '+days+'" style="margin-left:6px;display:inline-block;width:7px;height:7px;border-radius:50%;background:'+col+';vertical-align:middle;flex-shrink:0"></span>'; }
+  function rkBadge(id,q){ const r=(q&&q.exp_rank)?q.exp_rank:((RANKINGS_MAP[id]||{}).currentRank||''); return r?rkRankBadge(r):'<span style="color:rgba(248,249,249,.25)">—</span>'; }
+  // QTD summary bar (always shown)
+  const qtdGoalSRA=sqCfg.qtr_sra||0, qtdGoalIC=sqCfg.qtr_ic||0;
+  const qtdTotSRA=rosterMembers.reduce((s,e)=>s+((QTD_MAP[e.id]||{}).qtr_sra||0),0);
+  const qtdTotCAP=rosterMembers.reduce((s,e)=>s+((QTD_MAP[e.id]||{}).qtr_cap||0),0);
+  const qtdTotIC=rosterMembers.reduce((s,e)=>s+((QTD_MAP[e.id]||{}).qtr_ic||0),0);
+  const sraSumCol=qtdGoalSRA&&qtdTotSRA>=qtdGoalSRA?'#2DC48E':qtdGoalSRA&&qtdTotSRA>=qtdGoalSRA*.75?'#EF9F27':'var(--cyan-light)';
+  const icSumCol=qtdGoalIC&&qtdTotIC>=qtdGoalIC?'#2DC48E':qtdGoalIC&&qtdTotIC>=qtdGoalIC*.75?'#EF9F27':'var(--cyan-light)';
+  const qtdSummary='<div style="display:flex;align-items:center;gap:24px;padding:12px 0 16px;border-bottom:1px solid rgba(170,221,221,0.2);margin-bottom:16px;flex-wrap:wrap">'
+    +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark)">QTD Squad</div>'
+    +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:'+sraSumCol+'">SRA '+qtdTotSRA+(qtdGoalSRA?' <span style="font-weight:400;color:rgba(248,249,249,0.4);font-size:11px">/ '+qtdGoalSRA+'</span>':'')+'</div>'
+    +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:var(--off-white)">CAP '+qtdTotCAP+'</div>'
+    +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:'+icSumCol+'">IC '+qtdTotIC+(qtdGoalIC?' <span style="font-weight:400;color:rgba(248,249,249,0.4);font-size:11px">/ '+qtdGoalIC+'</span>':'')+'</div>'
+    +'</div>';
   let headerRow, rows;
-  if (tab === 'wtd') {
-    const week = document.getElementById('wtd-date-input')?.value || '';
-    subtitleEl.textContent = 'This Week' + (week ? '  ·  Week of ' + week : '');
-    const tot = sorted.reduce((t,e)=>{ const w=WTD_MAP[e.id]||{}; t.ac+=w.wtd_ac||0;t.cs+=w.wtd_cs||0;t.sra+=w.wtd_sra||0;t.cap+=w.wtd_cap||0;t.ic+=w.wtd_ic||0;t.pit+=w.pitches||0; return t; },{ac:0,cs:0,sra:0,cap:0,ic:0,pit:0});
-    headerRow = '<tr>'
-      +'<th style="'+hNS+'">Name</th>'
-      +'<th style="'+hS+'">AC</th>'
-      +'<th style="'+hS+'">CS</th>'
-      +'<th style="'+hS+'">SRA</th>'
-      +'<th style="'+hS+'">CAP</th>'
-      +'<th style="'+hS+'">IC</th>'
-      +'<th style="'+hS+'">Pitches</th>'
-      +'<th style="'+hS+'">Change</th>'
-      +'<th style="'+hS+'">Days / SRA</th>'
-      +'</tr>';
-    const totRow = '<tr style="background:rgba(39,217,217,0.05)">'
-      +'<td style="'+tNS+'font-weight:700;color:var(--cyan-dark)">TOTALS</td>'
-      +'<td style="'+tS+'font-weight:700">'+(tot.ac||'—')+'</td>'
-      +'<td style="'+tS+'font-weight:700">'+(tot.cs||'—')+'</td>'
-      +'<td style="'+tS+'font-weight:700">'+(tot.sra||'—')+'</td>'
-      +'<td style="'+tS+'font-weight:700">'+(tot.cap||'—')+'</td>'
-      +'<td style="'+tS+'font-weight:700">'+(tot.ic||'—')+'</td>'
-      +'<td style="'+tS+'font-weight:700">'+(tot.pit||'—')+'</td>'
-      +'<td style="'+tS+'"></td><td style="'+tS+'"></td>'
-      +'</tr>';
-    rows = sorted.map(e => {
-      const w  = WTD_MAP[e.id]||{};
-      const q  = QTD_MAP[e.id]||{};
-      const il = e.name===leader;
-      const days = q.days_since_sra||0;
-      const dsraStyle = days>14 ? 'font-weight:700;color:#F05252' : days>7 ? 'color:#EF9F27' : days>0 ? 'color:#2DC48E' : 'color:rgba(248,249,249,0.25)';
-      return '<tr>'
-        +'<td style="'+tNS+(il?'color:var(--cyan-light);':'')+'"><span style="display:inline-flex;align-items:center">'+(e.name)
-          +(il?' <span style="font-size:9px;letter-spacing:1px;color:var(--cyan-dark);margin-left:5px">LEADER</span>':'')
-          +(days?sraIndicator(days):'')+'</span></td>'
+  if(tab==='wtd'){
+    const week=document.getElementById('wtd-date-input')?.value||'';
+    subtitleEl.textContent='This Week'+(week?'  ·  Week of '+week:'');
+    const tot=sorted.reduce((t,e)=>{ const w=WTD_MAP[e.id]||{}; t.ac+=w.wtd_ac||0;t.cs+=w.wtd_cs||0;t.sra+=w.wtd_sra||0;t.cap+=w.wtd_cap||0;t.ic+=w.wtd_ic||0;t.pit+=w.pitches||0; return t; },{ac:0,cs:0,sra:0,cap:0,ic:0,pit:0});
+    headerRow='<tr><th style="'+hNS+'">Name</th><th style="'+hS+'">AC</th><th style="'+hS+'">CS</th><th style="'+hS+'">SRA</th><th style="'+hS+'">CAP</th><th style="'+hS+'">IC</th><th style="'+hS+'">Pitches</th><th style="'+hS+'">Days/SRA</th></tr>';
+    const totRow='<tr style="background:rgba(39,217,217,0.05)"><td style="'+tNS+'font-weight:700;color:var(--cyan-dark)">TOTALS</td><td style="'+tS+'font-weight:700">'+(tot.ac||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cs||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.sra||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cap||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.ic||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.pit||'—')+'</td><td style="'+tS+'"></td></tr>';
+    rows=sorted.map(e=>{
+      const w=WTD_MAP[e.id]||{}; const q=QTD_MAP[e.id]||{}; const il=e.name===leader;
+      const days=q.days_since_sra||0;
+      const dsStyle=days>14?'font-weight:700;color:#F05252':days>7?'color:#EF9F27':days>0?'color:#2DC48E':'color:rgba(248,249,249,0.25)';
+      const chg=q.status_change?changeIcon(q.status_change):'';
+      return '<tr><td style="'+tNS+(il?'color:var(--cyan-light);':'')+'"><span style="display:inline-flex;align-items:center">'
+        +e.name+(il?' <span style="font-size:9px;letter-spacing:1px;color:var(--cyan-dark);margin-left:5px">LEADER</span>':'')
+        +(chg?'<span style="margin-left:4px">'+chg+'</span>':'')
+        +(days?sraIndicator(days):'')+'</span></td>'
         +'<td style="'+tS+clsWTD(w.wtd_ac,WTD_GOALS.ac)+'">'+(w.wtd_ac||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.wtd_cs,WTD_GOALS.cs)+'">'+(w.wtd_cs||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.wtd_sra,WTD_GOALS.sra)+'">'+(w.wtd_sra||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.wtd_cap,WTD_GOALS.cap)+'">'+(w.wtd_cap||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.wtd_ic,WTD_GOALS.ic)+'">'+(w.wtd_ic||'—')+'</td>'
         +'<td style="'+tS+clsWTD(w.pitches,WTD_GOALS.pitches)+'">'+(w.pitches||'—')+'</td>'
-        +'<td style="'+tS+'">'+(q.status_change ? changeIcon(q.status_change) : '<span style="color:rgba(248,249,249,.2)">—</span>')+'</td>'
-        +'<td style="'+tS+dsraStyle+'">'+(days||'—')+'</td>'
+        +'<td style="'+tS+dsStyle+'">'+(days||'—')+'</td>'
         +'</tr>';
-    }).join('') + totRow;
+    }).join('')+totRow;
   } else {
-    subtitleEl.textContent = 'QTD Detail';
-    const tot = sorted.reduce((t,e)=>{ const q=QTD_MAP[e.id]||{}; t.sra+=q.qtr_sra||0;t.cap+=q.qtr_cap||0;t.ic+=q.qtr_ic||0; return t; },{sra:0,cap:0,ic:0});
-    headerRow = '<tr>'
-      +'<th style="'+hNS+'">Name</th>'
-      +'<th style="'+hS+'">QTR SRA</th>'
-      +'<th style="'+hS+'">QTR CAP</th>'
-      +'<th style="'+hS+'">QTR IC</th>'
-      +'<th style="'+hS+'">Change</th>'
-      +'<th style="'+hS+'">Days / SRA</th>'
-      +'<th style="'+hS+'">Rank</th>'
-      +'</tr>';
-    const totRow = '<tr style="background:rgba(39,217,217,0.05)">'
-      +'<td style="'+tNS+'font-weight:700;color:var(--cyan-dark)">TOTALS</td>'
-      +'<td style="'+tS+'font-weight:700">'+(tot.sra||'—')+'</td>'
-      +'<td style="'+tS+'font-weight:700">'+(tot.cap||'—')+'</td>'
-      +'<td style="'+tS+'font-weight:700">'+(tot.ic||'—')+'</td>'
-      +'<td style="'+tS+'"></td><td style="'+tS+'"></td><td style="'+tS+'"></td>'
-      +'</tr>';
-    rows = sorted.map(e => {
-      const q    = QTD_MAP[e.id]||{};
-      const il   = e.name===leader;
-      const days = q.days_since_sra||0;
-      const dsraStyle = days>14 ? 'font-weight:700;color:#F05252' : days>7 ? 'color:#EF9F27' : days>0 ? 'color:#2DC48E' : 'color:rgba(248,249,249,0.25)';
-      return '<tr>'
-        +'<td style="'+tNS+(il?'color:var(--cyan-light);':'')+'"><span style="display:inline-flex;align-items:center">'+(e.name)
-          +(il?' <span style="font-size:9px;letter-spacing:1px;color:var(--cyan-dark);margin-left:5px">LEADER</span>':'')
-          +(days?sraIndicator(days):'')+'</span></td>'
+    subtitleEl.textContent='QTD Detail';
+    const tot=sorted.reduce((t,e)=>{ const q=QTD_MAP[e.id]||{}; t.sra+=q.qtr_sra||0;t.cap+=q.qtr_cap||0;t.ic+=q.qtr_ic||0; return t; },{sra:0,cap:0,ic:0});
+    headerRow='<tr><th style="'+hNS+'">Name</th><th style="'+hS+'">QTR SRA</th><th style="'+hS+'">QTR CAP</th><th style="'+hS+'">QTR IC</th><th style="'+hS+'">Days/SRA</th><th style="'+hS+'">Rank</th></tr>';
+    const totRow='<tr style="background:rgba(39,217,217,0.05)"><td style="'+tNS+'font-weight:700;color:var(--cyan-dark)">TOTALS</td><td style="'+tS+'font-weight:700">'+(tot.sra||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cap||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.ic||'—')+'</td><td style="'+tS+'"></td><td style="'+tS+'"></td></tr>';
+    rows=sorted.map(e=>{
+      const q=QTD_MAP[e.id]||{}; const il=e.name===leader;
+      const days=q.days_since_sra||0;
+      const dsStyle=days>14?'font-weight:700;color:#F05252':days>7?'color:#EF9F27':days>0?'color:#2DC48E':'color:rgba(248,249,249,0.25)';
+      const chg=q.status_change?changeIcon(q.status_change):'';
+      return '<tr><td style="'+tNS+(il?'color:var(--cyan-light);':'')+'"><span style="display:inline-flex;align-items:center">'
+        +e.name+(il?' <span style="font-size:9px;letter-spacing:1px;color:var(--cyan-dark);margin-left:5px">LEADER</span>':'')
+        +(chg?'<span style="margin-left:4px">'+chg+'</span>':'')
+        +(days?sraIndicator(days):'')+'</span></td>'
         +'<td style="'+tS+'">'+(q.qtr_sra||'—')+'</td>'
         +'<td style="'+tS+'">'+(q.qtr_cap||'—')+'</td>'
         +'<td style="'+tS+'">'+(q.qtr_ic||'—')+'</td>'
-        +'<td style="'+tS+'">'+(q.status_change ? changeIcon(q.status_change) : '<span style="color:rgba(248,249,249,.2)">—</span>')+'</td>'
-        +'<td style="'+tS+dsraStyle+'">'+(days||'—')+'</td>'
+        +'<td style="'+tS+dsStyle+'">'+(days||'—')+'</td>'
         +'<td style="'+tS+'">'+rkBadge(e.id,q)+'</td>'
         +'</tr>';
-    }).join('') + totRow;
+    }).join('')+totRow;
   }
-
-  body.innerHTML = qtdSummary + '<table style="width:100%;border-collapse:collapse;">'+headerRow+'<tbody>'+rows+'</tbody></table>';
+  body.innerHTML=qtdSummary+'<table style="width:100%;border-collapse:collapse;">'+headerRow+'<tbody>'+rows+'</tbody></table>';
 }
 
 // ── POD SNAPSHOT ─────────────────────────────────────────────────────────────
@@ -4953,122 +4924,45 @@ function openPodSnapshot(podName, squadKey) {
 function renderPodSnapshot(podName, squadKey) {
   const body = document.getElementById('pod-snapshot-body');
   if (!body) return;
-
-  const memberRoster = ROSTER_EMPLOYEES.filter(e =>
-    e.pod && e.pod.trim() === podName &&
-    (!squadKey || e.squad === squadKey)
-  );
-
-  if (!memberRoster.length) {
-    body.innerHTML = '<div style="color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;padding:16px 0;">No members found in this pod.</div>';
-    return;
-  }
-
-  const thS = 'padding:8px 10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark);border-bottom:1px solid rgba(170,221,221,0.2);white-space:nowrap;';
-  const tdS = a => `padding:9px 10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;color:var(--off-white);border-bottom:1px solid rgba(170,221,221,0.07);text-align:${a};`;
-  const totS = a => `padding:9px 10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;color:var(--cyan-light);border-top:1px solid rgba(170,221,221,0.2);text-align:${a};`;
-
-  function sraIndicator(days) {
-    if (!days || days === 0) return '';
-    const color = days > 14 ? '#F05252' : days > 7 ? '#EF9F27' : '#2DC48E';
-    return `<span title="Days since last SRA: ${days}" style="margin-left:6px;display:inline-block;width:7px;height:7px;border-radius:50%;background:${color};vertical-align:middle;flex-shrink:0"></span>`;
-  }
-  function clsWTD(val, goal) {
-    if (!val || val === 0) return 'color:rgba(248,249,249,0.15)';
-    if (val > goal) return 'color:var(--v-exceeds);text-shadow:0 0 8px rgba(39,217,217,0.4)';
-    return 'color:var(--off-white)';
-  }
-
-  if (_podSnapMode === 'wtd') {
-    const rows = memberRoster.map(r => ({_r:r, name:r.name, ...(WTD_MAP[r.id]||{}), _q:(QTD_MAP[r.id]||{})}))
-                             .sort((a,b) => (b.wtd_sra||0) - (a.wtd_sra||0));
-    const tot = {ac:0,cs:0,sra:0,cap:0,ic:0,pit:0};
-    rows.forEach(r => { tot.ac+=r.wtd_ac||0; tot.cs+=r.wtd_cs||0; tot.sra+=r.wtd_sra||0; tot.cap+=r.wtd_cap||0; tot.ic+=r.wtd_ic||0; tot.pit+=r.pitches||0; });
-
-    const hdr = `<tr>
-      <th style="${thS}text-align:left">Name</th>
-      <th style="${thS}text-align:center">AC</th>
-      <th style="${thS}text-align:center">CS</th>
-      <th style="${thS}text-align:center">SRA</th>
-      <th style="${thS}text-align:center">CAP</th>
-      <th style="${thS}text-align:center">IC</th>
-      <th style="${thS}text-align:center">Pitches</th>
-      <th style="${thS}text-align:center">Change</th>
-      <th style="${thS}text-align:center">Days / SRA</th>
-    </tr>`;
-    const dataRows = rows.map(r => {
-      const days = r._q.days_since_sra||0;
-      const dsraStyle = days>14 ? 'font-weight:700;color:#F05252' : days>7 ? 'color:#EF9F27' : days>0 ? 'color:#2DC48E' : 'color:rgba(248,249,249,0.25)';
-      return `<tr>
-        <td style="${tdS('left')}"><span style="display:inline-flex;align-items:center">${r.name}${days ? sraIndicator(days) : ''}</span></td>
-        <td style="${tdS('center')};${clsWTD(r.wtd_ac,WTD_GOALS.ac)}">${fmtN(r.wtd_ac)}</td>
-        <td style="${tdS('center')};${clsWTD(r.wtd_cs,WTD_GOALS.cs)}">${fmtN(r.wtd_cs)}</td>
-        <td style="${tdS('center')};${clsWTD(r.wtd_sra,WTD_GOALS.sra)}">${fmtN(r.wtd_sra)}</td>
-        <td style="${tdS('center')};${clsWTD(r.wtd_cap,WTD_GOALS.cap)}">${fmtN(r.wtd_cap)}</td>
-        <td style="${tdS('center')};${clsWTD(r.wtd_ic,WTD_GOALS.ic)}">${fmtN(r.wtd_ic)}</td>
-        <td style="${tdS('center')};${clsWTD(r.pitches,WTD_GOALS.pitches)}">${fmtN(r.pitches)}</td>
-        <td style="${tdS('center')}">${r._q.status_change ? changeIcon(r._q.status_change) : '<span style="color:rgba(248,249,249,.2)">—</span>'}</td>
-        <td style="${tdS('center')};${dsraStyle}">${days||'—'}</td>
-      </tr>`;
+  const memberRoster = ROSTER_EMPLOYEES.filter(e => e.pod && e.pod.trim()===podName && (!squadKey||e.squad===squadKey));
+  if (!memberRoster.length) { body.innerHTML='<div style="color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;padding:16px 0;">No members found in this pod.</div>'; return; }
+  const thS='padding:8px 10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark);border-bottom:1px solid rgba(170,221,221,0.2);white-space:nowrap;';
+  const tdS=a=>`padding:9px 10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;color:var(--off-white);border-bottom:1px solid rgba(170,221,221,0.07);text-align:${a};`;
+  const totS=a=>`padding:9px 10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;color:var(--cyan-light);border-top:1px solid rgba(170,221,221,0.2);text-align:${a};`;
+  function sraIndicator(days){ if(!days) return ''; const col=days>14?'#F05252':days>7?'#EF9F27':'#2DC48E'; return `<span title="Days since last SRA: ${days}" style="margin-left:6px;display:inline-block;width:7px;height:7px;border-radius:50%;background:${col};vertical-align:middle;flex-shrink:0"></span>`; }
+  function clsWTD(v,g){ if(!v||v===0) return 'color:rgba(248,249,249,0.15)'; if(v>g) return 'color:var(--v-exceeds);text-shadow:0 0 8px rgba(39,217,217,0.4)'; return 'color:var(--off-white)'; }
+  if (_podSnapMode==='wtd') {
+    const rows=memberRoster.map(r=>({_r:r,name:r.name,...(WTD_MAP[r.id]||{}),_q:(QTD_MAP[r.id]||{})})).sort((a,b)=>(b.wtd_sra||0)-(a.wtd_sra||0));
+    const tot={ac:0,cs:0,sra:0,cap:0,ic:0,pit:0};
+    rows.forEach(r=>{tot.ac+=r.wtd_ac||0;tot.cs+=r.wtd_cs||0;tot.sra+=r.wtd_sra||0;tot.cap+=r.wtd_cap||0;tot.ic+=r.wtd_ic||0;tot.pit+=r.pitches||0;});
+    const hdr=`<tr><th style="${thS}text-align:left">Name</th><th style="${thS}text-align:center">AC</th><th style="${thS}text-align:center">CS</th><th style="${thS}text-align:center">SRA</th><th style="${thS}text-align:center">CAP</th><th style="${thS}text-align:center">IC</th><th style="${thS}text-align:center">Pitches</th><th style="${thS}text-align:center">Days/SRA</th></tr>`;
+    const dataRows=rows.map(r=>{
+      const days=r._q.days_since_sra||0;
+      const dsStyle=days>14?'font-weight:700;color:#F05252':days>7?'color:#EF9F27':days>0?'color:#2DC48E':'color:rgba(248,249,249,0.25)';
+      const chg=r._q.status_change?changeIcon(r._q.status_change):'';
+      return `<tr><td style="${tdS('left')}"><span style="display:inline-flex;align-items:center">${r.name}${chg?'<span style="margin-left:4px">'+chg+'</span>':''}${days?sraIndicator(days):''}</span></td><td style="${tdS('center')};${clsWTD(r.wtd_ac,WTD_GOALS.ac)}">${fmtN(r.wtd_ac)}</td><td style="${tdS('center')};${clsWTD(r.wtd_cs,WTD_GOALS.cs)}">${fmtN(r.wtd_cs)}</td><td style="${tdS('center')};${clsWTD(r.wtd_sra,WTD_GOALS.sra)}">${fmtN(r.wtd_sra)}</td><td style="${tdS('center')};${clsWTD(r.wtd_cap,WTD_GOALS.cap)}">${fmtN(r.wtd_cap)}</td><td style="${tdS('center')};${clsWTD(r.wtd_ic,WTD_GOALS.ic)}">${fmtN(r.wtd_ic)}</td><td style="${tdS('center')};${clsWTD(r.pitches,WTD_GOALS.pitches)}">${fmtN(r.pitches)}</td><td style="${tdS('center')};${dsStyle}">${days||'—'}</td></tr>`;
     }).join('');
-    const footRow = `<tr>
-      <td style="${totS('left')}">TOTAL</td>
-      <td style="${totS('center')}">${fmtN(tot.ac)}</td>
-      <td style="${totS('center')}">${fmtN(tot.cs)}</td>
-      <td style="${totS('center')}">${fmtN(tot.sra)}</td>
-      <td style="${totS('center')}">${fmtN(tot.cap)}</td>
-      <td style="${totS('center')}">${fmtN(tot.ic)}</td>
-      <td style="${totS('center')}">${fmtN(tot.pit)}</td>
-      <td style="${totS('center')}"></td>
-      <td style="${totS('center')}"></td>
-    </tr>`;
-    body.innerHTML = `<table style="width:100%;border-collapse:collapse;"><thead>${hdr}</thead><tbody>${dataRows}${footRow}</tbody></table>`;
-
+    const footRow=`<tr><td style="${totS('left')}">TOTAL</td><td style="${totS('center')}">${fmtN(tot.ac)}</td><td style="${totS('center')}">${fmtN(tot.cs)}</td><td style="${totS('center')}">${fmtN(tot.sra)}</td><td style="${totS('center')}">${fmtN(tot.cap)}</td><td style="${totS('center')}">${fmtN(tot.ic)}</td><td style="${totS('center')}">${fmtN(tot.pit)}</td><td style="${totS('center')}"></td></tr>`;
+    body.innerHTML=`<table style="width:100%;border-collapse:collapse;"><thead>${hdr}</thead><tbody>${dataRows}${footRow}</tbody></table>`;
   } else {
-    const rows = memberRoster.map(r => ({_r:r, name:r.name, ...(QTD_MAP[r.id]||{})}))
-                             .sort((a,b) => (b.qtr_sra||0) - (a.qtr_sra||0));
-    const tot = {sra:0,cap:0,ic:0};
-    rows.forEach(r => { tot.sra+=r.qtr_sra||0; tot.cap+=r.qtr_cap||0; tot.ic+=r.qtr_ic||0; });
-
-    const hdr = `<tr>
-      <th style="${thS}text-align:left">Name</th>
-      <th style="${thS}text-align:center">QTR SRA</th>
-      <th style="${thS}text-align:center">QTR CAP</th>
-      <th style="${thS}text-align:center">QTR IC</th>
-      <th style="${thS}text-align:center">Change</th>
-      <th style="${thS}text-align:center">Days / SRA</th>
-      <th style="${thS}text-align:center">Rank</th>
-    </tr>`;
-    const dataRows = rows.map(r => {
-      const days = r.days_since_sra||0;
-      const dsraStyle = days>14 ? 'font-weight:700;color:#F05252' : days>7 ? 'color:#EF9F27' : days>0 ? 'color:#2DC48E' : 'color:rgba(248,249,249,0.25)';
-      const rkBadge = (r.exp_rank||RANKINGS_MAP[r._r.id]?.currentRank) ? rkRankBadge(r.exp_rank||RANKINGS_MAP[r._r.id]?.currentRank) : '<span style="color:rgba(248,249,249,.25)">—</span>';
-      return `<tr>
-        <td style="${tdS('left')}"><span style="display:inline-flex;align-items:center">${r.name}${days ? sraIndicator(days) : ''}</span></td>
-        <td style="${tdS('center')}">${fmtN(r.qtr_sra)}</td>
-        <td style="${tdS('center')}">${fmtN(r.qtr_cap)}</td>
-        <td style="${tdS('center')}">${fmtN(r.qtr_ic)}</td>
-        <td style="${tdS('center')}">${r.status_change ? changeIcon(r.status_change) : '<span style="color:rgba(248,249,249,.2)">—</span>'}</td>
-        <td style="${tdS('center')};${dsraStyle}">${days||'—'}</td>
-        <td style="${tdS('center')}">${rkBadge}</td>
-      </tr>`;
+    const rows=memberRoster.map(r=>({_r:r,name:r.name,...(QTD_MAP[r.id]||{})})).sort((a,b)=>(b.qtr_sra||0)-(a.qtr_sra||0));
+    const tot={sra:0,cap:0,ic:0};
+    rows.forEach(r=>{tot.sra+=r.qtr_sra||0;tot.cap+=r.qtr_cap||0;tot.ic+=r.qtr_ic||0;});
+    const hdr=`<tr><th style="${thS}text-align:left">Name</th><th style="${thS}text-align:center">QTR SRA</th><th style="${thS}text-align:center">QTR CAP</th><th style="${thS}text-align:center">QTR IC</th><th style="${thS}text-align:center">Days/SRA</th><th style="${thS}text-align:center">Rank</th></tr>`;
+    const dataRows=rows.map(r=>{
+      const days=r.days_since_sra||0;
+      const dsStyle=days>14?'font-weight:700;color:#F05252':days>7?'color:#EF9F27':days>0?'color:#2DC48E':'color:rgba(248,249,249,0.25)';
+      const chg=r.status_change?changeIcon(r.status_change):'';
+      const rkB=(r.exp_rank||RANKINGS_MAP[r._r.id]?.currentRank)?rkRankBadge(r.exp_rank||RANKINGS_MAP[r._r.id]?.currentRank):'<span style="color:rgba(248,249,249,.25)">—</span>';
+      return `<tr><td style="${tdS('left')}"><span style="display:inline-flex;align-items:center">${r.name}${chg?'<span style="margin-left:4px">'+chg+'</span>':''}${days?sraIndicator(days):''}</span></td><td style="${tdS('center')}">${fmtN(r.qtr_sra)}</td><td style="${tdS('center')}">${fmtN(r.qtr_cap)}</td><td style="${tdS('center')}">${fmtN(r.qtr_ic)}</td><td style="${tdS('center')};${dsStyle}">${days||'—'}</td><td style="${tdS('center')}">${rkB}</td></tr>`;
     }).join('');
-    const footRow = `<tr>
-      <td style="${totS('left')}">TOTAL</td>
-      <td style="${totS('center')}">${fmtN(tot.sra)}</td>
-      <td style="${totS('center')}">${fmtN(tot.cap)}</td>
-      <td style="${totS('center')}">${fmtN(tot.ic)}</td>
-      <td style="${totS('center')}"></td>
-      <td style="${totS('center')}"></td>
-      <td style="${totS('center')}"></td>
-    </tr>`;
-    body.innerHTML = `<table style="width:100%;border-collapse:collapse;"><thead>${hdr}</thead><tbody>${dataRows}${footRow}</tbody></table>`;
+    const footRow=`<tr><td style="${totS('left')}">TOTAL</td><td style="${totS('center')}">${fmtN(tot.sra)}</td><td style="${totS('center')}">${fmtN(tot.cap)}</td><td style="${totS('center')}">${fmtN(tot.ic)}</td><td style="${totS('center')}"></td><td style="${totS('center')}"></td></tr>`;
+    body.innerHTML=`<table style="width:100%;border-collapse:collapse;"><thead>${hdr}</thead><tbody>${dataRows}${footRow}</tbody></table>`;
   }
 }
 
 function openSquadSnapshot(squadKey, tab) {
-  const rosterMembers = ROSTER_EMPLOYEES.filter(e => e.squad === squadKey);
-  if (!rosterMembers.length) return;
+  if (!ROSTER_EMPLOYEES.some(e => e.squad === squadKey)) return;
   _squadSnapCurrent = squadKey;
   _squadSnapMode    = tab || 'wtd';
   document.getElementById('squad-snapshot-title').textContent = squadKey;
@@ -7701,7 +7595,7 @@ async function fetchSheetsData(opts) {
       console.log('[Last Week] loaded', Object.keys(LW_MAP).length, 'entries');
     } else {
       LW_MAP = {};
-      console.warn('[Last Week] tab not found (HTTP', lwRes.status, ')');
+      console.warn('[Last Week] tab not found (HTTP', lwRes.status, ') — toggle will show no data');
     }
   } catch(e) { LW_MAP = {}; console.warn('[Last Week]', e.message); }
 
