@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Howle Enterprises — Solar Energy Specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sun: #F5A623;
+    --sun-deep: #E08010;
+    --sky: #1B3A5C;
+    --sky-light: #2C5282;
+    --cream: #FAF7F2;
+    --warm-white: #FFFDF9;
+    --text: #1A1A1A;
+    --text-muted: #6B6B6B;
+    --border: rgba(27,58,92,0.12);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--warm-white);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    background: var(--sky);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 60% 30%, rgba(245,166,35,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 80% at 90% 80%, rgba(44,82,130,0.6) 0%, transparent 60%),
+      linear-gradient(165deg, #0F2236 0%, #1B3A5C 45%, #2C5282 100%);
+  }
+
+  /* Sun orb */
+  .sun-orb {
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #FFD166 0%, #F5A623 40%, rgba(245,166,35,0) 70%);
+    opacity: 0.25;
+    animation: pulse 6s ease-in-out infinite;
+  }
+  .sun-orb-2 {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #FFE580 0%, #F5A623 50%, transparent 70%);
+    opacity: 0.35;
+    animation: pulse 6s ease-in-out infinite 1s;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.25; }
+    50% { transform: scale(1.06); opacity: 0.35; }
+  }
+
+  /* Grid lines */
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 60px;
+  }
+
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+  .nav-logo span { color: var(--sun); }
+
+  .nav-cta {
+    background: var(--sun);
+    color: var(--sky);
+    border: none;
+    padding: 11px 26px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .nav-cta:hover { background: #FFD166; }
+
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 60px 80px;
+    max-width: 720px;
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sun);
+    margin-bottom: 22px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(48px, 7vw, 86px);
+    font-weight: 300;
+    line-height: 1.05;
+    color: #fff;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--sun);
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    font-weight: 300;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.72);
+    max-width: 520px;
+    margin-bottom: 44px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.6s;
+  }
+
+  .hero-buttons {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.8s;
+  }
+
+  .btn-primary {
+    background: var(--sun);
+    color: var(--sky);
+    border: none;
+    padding: 16px 36px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: #FFD166; transform: translateY(-1px); }
+
+  .btn-outline {
+    background: transparent;
+    color: rgba(255,255,255,0.85);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 16px 36px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-outline:hover { border-color: rgba(255,255,255,0.7); color: #fff; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Hero stats bar */
+  .hero-stats {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 0 60px;
+  }
+  .hero-stat {
+    flex: 1;
+    padding: 28px 0;
+    border-right: 1px solid rgba(255,255,255,0.1);
+  }
+  .hero-stat:last-child { border-right: none; }
+  .hero-stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 300;
+    color: var(--sun);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .hero-stat-label {
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* ── SUNRUN BADGE ── */
+  .sunrun-bar {
+    background: var(--cream);
+    padding: 22px 60px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sunrun-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .sunrun-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--sun);
+  }
+  .sunrun-text {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0.3px;
+  }
+  .sunrun-text strong { color: var(--text); font-weight: 500; }
+
+  /* ── ABOUT ── */
+  .section { padding: 100px 60px; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sun-deep);
+    margin-bottom: 18px;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4vw, 52px);
+    font-weight: 300;
+    line-height: 1.15;
+    color: var(--sky);
+    margin-bottom: 24px;
+  }
+  .section-title em { font-style: italic; color: var(--sun-deep); }
+
+  .section-body {
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .about-img-block {
+    position: relative;
+  }
+  .about-card {
+    background: var(--sky);
+    padding: 48px;
+    position: relative;
+  }
+  .about-card::before {
+    content: '';
+    position: absolute;
+    top: 16px; right: -16px;
+    width: 100%; height: 100%;
+    border: 1px solid var(--sun);
+    opacity: 0.3;
+    z-index: -1;
+  }
+  .about-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-style: italic;
+    font-weight: 300;
+    color: #fff;
+    line-height: 1.5;
+    margin-bottom: 28px;
+  }
+  .about-quote-attr {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--sun);
+  }
+
+  /* ── WHY SOLAR ── */
+  .why-section {
+    background: var(--cream);
+    padding: 100px 60px;
+  }
+
+  .benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 60px;
+    background: var(--border);
+  }
+
+  .benefit-card {
+    background: var(--warm-white);
+    padding: 44px 36px;
+    transition: background 0.2s;
+  }
+  .benefit-card:hover { background: var(--sky); }
+  .benefit-card:hover .benefit-title,
+  .benefit-card:hover .benefit-body { color: #fff; }
+  .benefit-card:hover .benefit-icon { color: var(--sun); }
+
+  .benefit-icon {
+    font-size: 28px;
+    color: var(--sky);
+    margin-bottom: 20px;
+    transition: color 0.2s;
+  }
+
+  .benefit-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--sky);
+    margin-bottom: 12px;
+    transition: color 0.2s;
+  }
+
+  .benefit-body {
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--text-muted);
+    transition: color 0.2s;
+  }
+
+  /* ── OPT-IN FORM ── */
+  .form-section {
+    background: var(--sky);
+    padding: 100px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .form-section::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,166,35,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .form-left .section-label { color: var(--sun); }
+  .form-left .section-title { color: #fff; }
+  .form-left .section-body { color: rgba(255,255,255,0.6); }
+
+  .form-box {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 44px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .form-group input,
+  .form-group select {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    padding: 13px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    -webkit-appearance: none;
+  }
+
+  .form-group input::placeholder { color: rgba(255,255,255,0.3); }
+  .form-group input:focus,
+  .form-group select:focus { border-color: var(--sun); }
+
+  .form-group select option { background: var(--sky); color: #fff; }
+
+  .consent-block {
+    background: rgba(0,0,0,0.2);
+    border-left: 3px solid var(--sun);
+    padding: 16px 18px;
+    margin-bottom: 22px;
+  }
+
+  .consent-text {
+    font-size: 11px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.55);
+  }
+
+  .consent-text a {
+    color: var(--sun);
+    text-decoration: underline;
+    text-decoration-color: rgba(245,166,35,0.4);
+  }
+  .consent-text a:hover { text-decoration-color: var(--sun); }
+
+  .form-submit {
+    background: var(--sun);
+    color: var(--sky);
+    border: none;
+    width: 100%;
+    padding: 17px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .form-submit:hover { background: #FFD166; transform: translateY(-1px); }
+
+  /* ── PROCESS ── */
+  .process-section { padding: 100px 60px; background: var(--warm-white); }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-top: 60px;
+    position: relative;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: var(--border);
+    z-index: 0;
+  }
+
+  .step {
+    padding: 0 24px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-num {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: var(--sky);
+  }
+
+  .step-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--sky);
+    margin-bottom: 10px;
+  }
+
+  .step-body {
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: #0D1F31;
+    padding: 60px 60px 40px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 60px;
+    padding-bottom: 44px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 32px;
+  }
+
+  .footer-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+  .footer-brand span { color: var(--sun); }
+
+  .footer-desc {
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.45);
+    max-width: 300px;
+  }
+
+  .footer-col-title {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 16px;
+  }
+
+  .footer-links { list-style: none; }
+  .footer-links li { margin-bottom: 10px; }
+  .footer-links a {
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 300;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--sun); }
+
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .footer-legal {
+    font-size: 11px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.3);
+    max-width: 680px;
+  }
+
+  .footer-legal a { color: rgba(255,255,255,0.5); text-decoration: underline; }
+  .footer-legal a:hover { color: var(--sun); }
+
+  .footer-copy {
+    font-size: 11px;
+    color: rgba(255,255,255,0.25);
+    white-space: nowrap;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    padding: 40px 20px;
+    overflow-y: auto;
+  }
+  .modal-overlay.active { display: flex; align-items: flex-start; justify-content: center; }
+
+  .modal {
+    background: var(--warm-white);
+    max-width: 680px;
+    width: 100%;
+    padding: 52px;
+    position: relative;
+    margin: auto;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 20px; right: 24px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-muted);
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--sky);
+    margin-bottom: 28px;
+  }
+
+  .modal-body {
+    font-size: 13px;
+    line-height: 1.85;
+    color: var(--text-muted);
+  }
+
+  .modal-body h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin: 24px 0 8px;
+  }
+
+  /* ── SUCCESS STATE ── */
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .form-success.active { display: block; }
+  .success-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(245,166,35,0.15);
+    border: 1px solid var(--sun);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    font-size: 24px;
+  }
+  .success-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  .success-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.55);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav, .sunrun-bar, .section, .why-section, .form-section,
+    .process-section, footer { padding-left: 24px; padding-right: 24px; }
+    .about-grid, .form-grid, .footer-top { grid-template-columns: 1fr; gap: 48px; }
+    .benefits-grid { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .steps::before { display: none; }
+    .hero-stats { flex-direction: column; padding: 0 24px; }
+    .hero-stat { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .hero-stat:last-child { border-bottom: none; }
+    .form-row { grid-template-columns: 1fr; }
+    .hero-content { padding: 40px 24px 60px; }
+    nav { padding: 20px 24px; }
+    .modal { padding: 36px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="sun-orb"></div>
+  <div class="sun-orb-2"></div>
+
+  <nav>
+    <div class="nav-logo">Howle <span>Enterprises</span></div>
+    <a href="#contact" class="nav-cta">Get Free Consultation</a>
+  </nav>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">Orange County, California</div>
+    <h1 class="hero-title">
+      Solar energy<br>made <em>simple</em><br>for your family.
+    </h1>
+    <p class="hero-sub">
+      Adam Howle and his team of Solar Specialists have helped thousands of Orange County families reduce their energy bills and go solar with Sunrun — America's #1 residential solar company.
+    </p>
+    <div class="hero-buttons">
+      <a href="#contact" class="btn-primary">See If You Qualify</a>
+      <a href="#about" class="btn-outline">Learn More</a>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-num">1.3M+</div>
+      <div class="hero-stat-label">Sunrun Customers Nationwide</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">1,000s</div>
+      <div class="hero-stat-label">Homes Installed in OC</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">#1</div>
+      <div class="hero-stat-label">Residential Solar in the US</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">$0</div>
+      <div class="hero-stat-label">Down Options Available</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SUNRUN PARTNER BAR ── -->
+<div class="sunrun-bar">
+  <div class="sunrun-badge">
+    <div class="sunrun-dot"></div>
+    <p class="sunrun-text">Authorized Sunrun Sales Partner — <strong>Sunrun is the largest residential solar provider in the United States</strong> with over 1.3 million customers.</p>
+  </div>
+</div>
+
+<!-- ── ABOUT ── -->
+<section class="section" id="about">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div>
+        <div class="section-label">About Us</div>
+        <h2 class="section-title">A team built on<br><em>trust and results.</em></h2>
+        <p class="section-body">
+          Howle Enterprises is a team of dedicated Solar Specialists led by Adam Howle, serving families throughout Orange County, CA. We partner with Sunrun to deliver a seamless solar experience — from your first conversation to the day your system goes live.
+        </p>
+        <p class="section-body">
+          We believe every family deserves clean, affordable energy. Our team walks with you through every step — no pressure, no confusion — just honest guidance and real results.
+        </p>
+        <p class="section-body">
+          With thousands of installations across Orange County, we know this market and we know solar. Let us show you what's possible for your home.
+        </p>
+      </div>
+      <div class="about-img-block">
+        <div class="about-card">
+          <p class="about-quote">"Our mission is simple: help every family in Orange County access clean energy with confidence."</p>
+          <div class="about-quote-attr">Adam Howle — Lead Sales Specialist</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── WHY SOLAR ── -->
+<section class="why-section" id="why">
+  <div class="section-inner">
+    <div class="section-label">Why Solar</div>
+    <h2 class="section-title">Why families in OC<br>are making the <em>switch.</em></h2>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-icon">☀</div>
+        <div class="benefit-title">Reduce Your Bills</div>
+        <p class="benefit-body">Dramatically lower or eliminate your monthly electricity bill. Many of our customers see immediate savings from day one.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🏠</div>
+        <div class="benefit-title">Increase Home Value</div>
+        <p class="benefit-body">Solar installations consistently increase property values. It's one of the few home improvements that pays you back.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">⚡</div>
+        <div class="benefit-title">Energy Independence</div>
+        <p class="benefit-body">Take control of your energy costs. No more surprises on your utility bill — your power, your terms.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">💰</div>
+        <div class="benefit-title">$0 Down Options</div>
+        <p class="benefit-body">Go solar with no upfront cost. Sunrun offers flexible financing, lease, and PPA options to fit every situation.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🌱</div>
+        <div class="benefit-title">Clean Energy</div>
+        <p class="benefit-body">Reduce your carbon footprint and contribute to a cleaner California for your family and future generations.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🛡</div>
+        <div class="benefit-title">Sunrun Guarantee</div>
+        <p class="benefit-body">Backed by America's largest residential solar company. Sunrun stands behind every system with long-term support and warranties.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROCESS ── -->
+<section class="process-section" id="process">
+  <div class="section-inner">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">From conversation<br>to <em>clean energy</em> in weeks.</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Free Consultation</div>
+        <p class="step-body">We review your energy usage and roof to see if solar is a fit — no cost, no obligation.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Custom Design</div>
+        <p class="step-body">Sunrun designs a system sized specifically for your home and energy needs.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Installation</div>
+        <p class="step-body">Professional installation by a certified Sunrun crew. Most installs complete in one day.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-title">Power On</div>
+        <p class="step-body">After city inspection and utility approval, your system goes live and the savings begin.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── OPT-IN FORM ── -->
+<section class="form-section" id="contact">
+  <div class="form-grid">
+    <div class="form-left">
+      <div class="section-label">Free Consultation</div>
+      <h2 class="section-title">See if your home<br>qualifies for <em>solar.</em></h2>
+      <p class="section-body">Fill out the form and one of our Solar Specialists will reach out to walk you through your options — completely free, with zero pressure.</p>
+      <p class="section-body" style="font-size:14px;">
+        Serving: Irvine, Anaheim, Santa Ana, Huntington Beach, Newport Beach, Costa Mesa, Fullerton, and all of Orange County.
+      </p>
+    </div>
+    <div>
+      <div class="form-box" id="form-wrap">
+        <form id="optin-form" onsubmit="handleSubmit(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" name="fname" placeholder="Jane" required>
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" name="lname" placeholder="Smith" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" name="email" placeholder="jane@email.com" required>
+          </div>
+          <div class="form-group">
+            <label>Mobile Phone</label>
+            <input type="tel" name="phone" placeholder="(949) 555-0100" required>
+          </div>
+          <div class="form-group">
+            <label>Home Address</label>
+            <input type="text" name="address" placeholder="123 Main St, Irvine, CA">
+          </div>
+          <div class="form-group">
+            <label>Monthly Electric Bill</label>
+            <select name="bill">
+              <option value="" disabled selected>Select a range</option>
+              <option>Under $100</option>
+              <option>$100 – $200</option>
+              <option>$200 – $300</option>
+              <option>$300 – $400</option>
+              <option>$400+</option>
+            </select>
+          </div>
+
+          <div class="consent-block">
+            <p class="consent-text">
+              By clicking below you consent to receive marketing communications from Adam Howle through automated text messages, calling, and prerecorded messages, and you also agree to Adam Howle's <a href="#" onclick="openModal('privacy'); return false;">Privacy Policy</a> and <a href="#" onclick="openModal('terms'); return false;">Terms &amp; Conditions</a>. I acknowledge that consent is not a requirement to purchase. For text campaigns, you can reply "STOP" to opt-out and reply "HELP" for help. Message frequency may vary. Message and data rates may apply.
+            </p>
+          </div>
+
+          <button type="submit" class="form-submit">Get My Free Consultation →</button>
+        </form>
+        <div class="form-success" id="form-success">
+          <div class="success-icon">✓</div>
+          <div class="success-title">You're on your way to solar.</div>
+          <p class="success-sub">A member of Adam's team will be in touch with you shortly.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer id="footer">
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand">Howle <span>Enterprises</span></div>
+      <p class="footer-desc">Authorized Sunrun Sales Specialists serving Orange County, CA. Helping families go solar with confidence since day one.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Navigate</div>
+      <ul class="footer-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#why">Why Solar</a></li>
+        <li><a href="#process">How It Works</a></li>
+        <li><a href="#contact">Get a Quote</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Legal</div>
+      <ul class="footer-links">
+        <li><a href="#" onclick="openModal('privacy'); return false;">Privacy Policy</a></li>
+        <li><a href="#" onclick="openModal('terms'); return false;">Terms &amp; Conditions</a></li>
+      </ul>
+      <div class="footer-col-title" style="margin-top:24px;">Contact</div>
+      <ul class="footer-links">
+        <li><a href="tel:5625371559">(562) 537-1559</a></li>
+        <li>Orange County, CA</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-legal">
+      Howle Enterprises is an authorized Sunrun sales partner. Sunrun is not responsible for the content of this website. Solar savings vary based on system size, energy usage, utility rates, and other factors. &nbsp;|&nbsp;
+      <a href="#" onclick="openModal('privacy'); return false;">Privacy Policy</a> &nbsp;|&nbsp;
+      <a href="#" onclick="openModal('terms'); return false;">Terms &amp; Conditions</a>
+    </p>
+    <p class="footer-copy">© 2026 Howle Enterprises</p>
+  </div>
+</footer>
+
+<!-- ── PRIVACY POLICY MODAL ── -->
+<div class="modal-overlay" id="modal-privacy" onclick="closeModalOutside(event,'privacy')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('privacy')">×</button>
+    <div class="modal-title">Privacy Policy</div>
+    <div class="modal-body">
+      <p><em>Effective Date: April 2026</em></p>
+
+      <h3>1. Information We Collect</h3>
+      <p>Howle Enterprises ("we," "us," or "our") collects information you provide when submitting a consultation request, including your name, email address, phone number, home address, and energy usage details.</p>
+
+      <h3>2. How We Use Your Information</h3>
+      <p>We use the information we collect to contact you about solar energy products and services offered through our partnership with Sunrun, to respond to your inquiries, and to improve our services. By submitting this form, you consent to receive marketing communications — including automated text messages, calls, and prerecorded messages — from Adam Howle and Howle Enterprises at the number provided.</p>
+
+      <h3>3. SMS / Text Message Communications</h3>
+      <p>No mobile information will be shared with third parties or affiliates for marketing or promotional purposes. Information sharing to subcontractors in support services, such as customer service, is permitted. All the above categories exclude text messaging originator opt-in data and consent; this information will not be shared with any third parties.</p>
+      <p>You may opt out at any time by replying STOP to any text message. Reply HELP for assistance. Message and data rates may apply. Message frequency may vary.</p>
+
+      <h3>4. Sharing Your Information</h3>
+      <p>We may share your information with Sunrun and affiliated service providers as necessary to fulfill your consultation request. We do not sell your personal information to third parties.</p>
+
+      <h3>5. Data Security</h3>
+      <p>We take reasonable measures to protect your personal information from unauthorized access, disclosure, or misuse.</p>
+
+      <h3>6. Your Rights</h3>
+      <p>You may request access to, correction of, or deletion of your personal information at any time by contacting us directly.</p>
+
+      <h3>7. Contact Us</h3>
+      <p>Howle Enterprises &nbsp;|&nbsp; Orange County, CA &nbsp;|&nbsp; (562) 537-1559</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── TERMS & CONDITIONS MODAL ── -->
+<div class="modal-overlay" id="modal-terms" onclick="closeModalOutside(event,'terms')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('terms')">×</button>
+    <div class="modal-title">Terms &amp; Conditions</div>
+    <div class="modal-body">
+      <p><em>Effective Date: April 2026</em></p>
+
+      <h3>1. Agreement</h3>
+      <p>By using this website and submitting a consultation request, you agree to these Terms &amp; Conditions. If you do not agree, please do not use this site.</p>
+
+      <h3>2. Services</h3>
+      <p>Howle Enterprises provides solar energy sales consultation and referral services in partnership with Sunrun. Submission of a form does not guarantee service, installation, or any specific pricing or savings outcome.</p>
+
+      <h3>3. Communications Consent</h3>
+      <p>By submitting our consultation form, you consent to receive marketing communications from Adam Howle through automated text messages, calling, and prerecorded messages. Consent is not a condition of purchase. You may opt out at any time by replying STOP to any SMS, or by contacting us directly.</p>
+
+      <h3>4. No Guarantee of Savings</h3>
+      <p>Solar savings estimates are based on general assumptions and vary by location, energy usage, system size, utility rates, and other factors. No specific savings amount is guaranteed.</p>
+
+      <h3>5. Intellectual Property</h3>
+      <p>All content on this website is the property of Howle Enterprises and may not be reproduced without written permission.</p>
+
+      <h3>6. Limitation of Liability</h3>
+      <p>Howle Enterprises is not liable for any indirect, incidental, or consequential damages arising from the use of this website or reliance on information presented herein.</p>
+
+      <h3>7. Governing Law</h3>
+      <p>These Terms are governed by the laws of the State of California.</p>
+
+      <h3>8. Contact</h3>
+      <p>Howle Enterprises &nbsp;|&nbsp; Orange County, CA &nbsp;|&nbsp; (562) 537-1559</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function openModal(id) {
+  document.getElementById('modal-' + id).classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById('modal-' + id).classList.remove('active');
+  document.body.style.overflow = '';
+}
+function closeModalOutside(e, id) {
+  if (e.target === document.getElementById('modal-' + id)) closeModal(id);
+}
+function handleSubmit(e) {
+  e.preventDefault();
+  document.getElementById('optin-form').style.display = 'none';
+  document.getElementById('form-success').classList.add('active');
+}
+</script>
+</body>
+</html>
