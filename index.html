@@ -12,15 +12,15 @@
 <script src="consul-config.js"></script>
 <style>
 :root {
-  --cyan-light: #FF6200;
-  --cyan-dark: #C44B00;
+  --cyan-light: #AADDDD; /* Default skin — XII/cyan. Overridden at runtime by consul-config.js via applyBranding(). */
+  --cyan-dark: #5A9EA0;
   --near-black: #000000;
   --sand: #F2CF9C;
   --wine: #685236;
   --off-white: #F8F9F9;
   --text-muted: rgba(248,249,249,0.55);
-  --border: rgba(255,98,0,0.22);
-  --row-hover: rgba(255,98,0,0.08);
+  --border: rgba(170,221,221,0.2);
+  --row-hover: rgba(170,221,221,0.08);
   --card-bg: rgba(255,255,255,0.05);
   /* Performance value states */
   --v-exceeds: #27d9d9;
@@ -39,19 +39,19 @@
 }
 /* ── LIGHT MODE ── */
 body.light-mode {
-  --cyan-light: #CC4F00;
-  --cyan-dark: #8B3600;
-  --near-black: #E7E5E4;
+  --cyan-light: #AADDDD;
+  --cyan-dark: #1D5557;
+  --near-black: #F0EDE8;
   --sand: #8B5E20;
   --wine: #5C3D1E;
   --off-white: #1A1718;
   --text-muted: rgba(26,23,24,0.52);
-  --border: rgba(180,70,0,0.22);
-  --row-hover: rgba(180,70,0,0.06);
-  --card-bg: #2A2828;
+  --border: rgba(45,102,104,0.22);
+  --row-hover: rgba(45,102,104,0.06);
+  --card-bg: rgba(0,0,0,0.04);
   --r-franchise: #EF9F27;
   --r-premier:   #7A5800;
-  --r-l3:        #27d9d9;
+  --r-l3:        #3A8082;
   --r-l2:        #1D5557;
   --r-l1:        #0F7A52;
   --r-combine:   #666666;
