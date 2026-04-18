@@ -8,6 +8,8 @@
 <meta property="og:title" content="Consul — Empire Performance Dashboard">
 <meta property="og:description" content="Consul Performance Dashboard">
 <meta name="robots" content="noindex, nofollow">
+<!-- Office-specific config — loaded from consul-config.js in each branch -->
+<script src="consul-config.js"></script>
 <style>
 :root {
   --cyan-light: #FF6200;
@@ -660,6 +662,9 @@ body.chrome-collapsed .rankings-stats{max-height:0;opacity:0;border-bottom-color
 
 /* Scope scrolling to the rankings panel so sticky thead works — overflow on ancestor breaks sticky */
 #panel-rankings.active{display:flex;flex-direction:column;height:calc(100vh - 111px);overflow:hidden;}
+#panel-calendar.active{display:flex;flex-direction:column;height:calc(100vh - 111px);overflow:hidden;}
+#panel-calendar .stats-bar{flex-shrink:0;}
+#panel-calendar .footer-bar{flex-shrink:0;}
 body.chrome-collapsed #panel-rankings.active{height:calc(100vh - 65px)}
 #panel-rankings .rankings-stats{flex-shrink:0}
 #panel-rankings .rankings-filter-bar{flex-shrink:0}
@@ -1942,6 +1947,7 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
 <div class="tab-bar">
   <div class="tab active" onclick="switchTab('overview',this)">Overview</div>
   <div class="tab" onclick="switchTab('wtd',this)">Squads</div>
+  <div class="tab" onclick="switchTab('calendar',this)">Calendar</div>
   <div class="tab" onclick="switchTab('rankings',this)">Rankings</div>
   <div class="tab" onclick="switchTab('status-incentive',this)">Chasers</div>
   <div class="tab" onclick="switchTab('roster',this)">Roster</div>
@@ -2105,6 +2111,28 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
 </div>
 
 <!-- ══ ROSTER ══ -->
+<div class="tab-panel" id="panel-calendar">
+  <div class="stats-bar" style="grid-template-columns:1fr;padding:0;">
+    <div class="stat-card" style="display:flex;align-items:center;gap:14px;padding:14px 36px;">
+      <span class="stat-label" style="margin-bottom:0;">Team Calendar</span>
+      <span style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--text-muted);text-transform:uppercase;">Synced via Google Calendar</span>
+    </div>
+  </div>
+  <div style="flex:1;overflow:hidden;padding:0 36px 0 36px;display:flex;flex-direction:column;box-sizing:border-box;">
+    <iframe
+      src=""
+      id="calendar-iframe"
+      style="border:1px solid var(--border);width:100%;flex:1;display:block;min-height:0;"
+      frameborder="0"
+      scrolling="no"
+    ></iframe>
+  </div>
+  <div class="footer-bar">
+    <span class="footer-count">GOOGLE CALENDAR — SYNCED</span>
+    <span class="footer-brand">■ XII — BUILDING CULTURE FORWARD ■</span>
+  </div>
+</div>
+
 <div class="tab-panel" id="panel-status-incentive">
   <div class="stats-bar" id="si-stats-bar"></div>
   <div class="filter-bar">
@@ -2283,31 +2311,10 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
 
 <script>
 // ══════════════════════════════════════════════════════════════════════════════
-// CONSUL_CONFIG — White-label skin. Change only this block when deploying to a
-// new office. Everything else in the file references these values automatically.
+// CONSUL_CONFIG is loaded externally from consul-config.js in each branch.
+// Do not define CONSUL_CONFIG here. Edit consul-config.js for office-specific
+// values (brand, sheets_id, oauth_client_id, offices, calendar, etc.)
 // ══════════════════════════════════════════════════════════════════════════════
-const CONSUL_CONFIG = {
-  brand:         'EMPIRE',
-  primary_label: 'Riverside',
-  tagline:       'THE BEST OFFICE IN THE COMPANY',
-  sheets_id:       '1Awy-KgfNtf8IBAZf-nY8pmv26n0juNk28IRTfN0usn4',
-  oauth_client_id: '824495442632-o4v639jl9rcsj7dq2fgvfcr6joj98s2c.apps.googleusercontent.com',
-  admin_email: 'adam.howle@sunrun.com',  admin_phone: '5625371559',
-  office_admin_email: 'adam.howle@sunrun.com',  office_admin_phone: '5625371559',
-  offices: ['Riverside'],
-  compare_offices: ['Orange County'],
-  office_colors: { 'Riverside': '#FF6200', 'Orange County': '#F2CF9C' },
-  office_meeting_info: {
-    'Riverside': { days: 'Tuesday & Thursdays', time: '11:00am', address: '1550 Magnolia Ave, Corona, CA' },
-  },
-  // Skin accent colors — pure black background, orange brand
-  accent: {
-    cyan_light: '#FF6200', cyan_dark: '#C44B00', near_black: '#000000',
-    border: 'rgba(255,98,0,0.22)', row_hover: 'rgba(255,98,0,0.08)',
-    light_cyan_light: '#CC4F00', light_cyan_dark: '#8B3600', light_near_black: '#F5F0EB',
-    light_border: 'rgba(180,70,0,0.22)', light_row_hover: 'rgba(180,70,0,0.06)',
-  },
-};
 
 // ── Convenience aliases (used throughout the file) ────────────────────────────
 // These replace the previous standalone constants so no other code changes.
@@ -2494,6 +2501,12 @@ function applyBranding() {
 
   // ── Page title ────────────────────────────────────────────────────────────
   document.title = 'Consul \u2014 ' + brand + ' Performance Dashboard';
+
+  // ── Calendar iframe — src injected from config ────────────────────────────
+  const calIframe = document.getElementById('calendar-iframe');
+  if (calIframe && CONSUL_CONFIG.calendar_src) {
+    calIframe.src = CONSUL_CONFIG.calendar_src;
+  }
 }
 
 const WTD_EMPLOYEES = []; // Populated from Google Sheets
@@ -2836,6 +2849,7 @@ function switchTab(id, el){
 
   else if(id==='onboarding') { try { ob_renderTable(); } catch(e) {} }
   else if(id==='overview') renderOverview();
+  else if(id==='calendar') { /* iframe self-renders — no JS needed */ }
   else if(id==='rankings') renderRankings();
   else if(id==='data') renderDataTab();
   else if(id==='combine') renderCombineTab();
