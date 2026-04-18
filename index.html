@@ -428,6 +428,10 @@ body.light-mode tr.group-header td{background:#2A2828;color:#27d9d9;border-top-c
 /* ── ROSTER LIST VIEW ── */
 #roster-list{display:none;padding:0 36px 24px}
 #roster-list.active{display:block}
+/* Column layout for list view */
+.rc-list-columns{display:flex;flex-wrap:wrap;gap:0;align-items:flex-start}
+.rc-list-col{min-width:170px;flex:1 1 170px;border-right:1px solid var(--border);min-height:40px}
+.rc-list-col:last-child{border-right:none}
 .roster-card-grid.hidden{display:none}
 .rc-list-row{display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;gap:12px}
 .rc-list-row:hover{background:var(--row-hover)}
@@ -2160,7 +2164,7 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
       </tr></thead>
       <tbody id="si-table-body"></tbody>
     </table>
-    <div class="empty-state" id="si-empty-state" style="display:block">Loading Status Chasers data from Sheets…</div>
+    <div class="empty-state" id="si-empty-state" style="display:block">Loading Status Chasers data…</div>
   </div>
   <!-- Game Changers sub-panel — shown when view toggle = Game Changers -->
   <div id="chasers-gc-panel" style="display:none">
@@ -3258,11 +3262,15 @@ function ovToggleTargetsPanel() {
 // ── LEADERSHIP PULSE CALCULATIONS ──────────────────────────────────────────────
 
 function calcSelfGen() {
-  // OC-only. sheetsRowsToObjects lowercases all headers, so keys are lowercase.
+  // Filtered to CONSUL_CONFIG.offices. sheetsRowsToObjects lowercases all headers.
   // An SRA is truly Self Gen if: metric == SRA, assist/own == Own,
   // AND its address does NOT appear in any Assist row at the same metric.
   if (!INSTALL_LIST.length) return { selfGen: null, total: null, pct: null };
-  var sraRows = INSTALL_LIST.filter(function(r) {
+  var officeSet = new Set(CONSUL_CONFIG.offices);
+  var officeRows = INSTALL_LIST.filter(function(r) {
+    return officeSet.has((r['office'] || '').trim());
+  });
+  var sraRows = officeRows.filter(function(r) {
     return (r['metric'] || '').trim().toUpperCase() === 'SRA';
   });
   var assistAddrs = new Set(
@@ -3279,12 +3287,13 @@ function calcSelfGen() {
 }
 
 function calcRepsHitStatus() {
-  // Source: QTD_EMPLOYEES (QTD Points tab), OC only.
-  // Total = reps with counts_towards_club == 'Y' in OC.
+  // Source: QTD_EMPLOYEES (QTD Points tab), filtered to CONSUL_CONFIG.offices.
+  // Total = reps with counts_towards_club == 'Y' in the primary office(s).
   // Hit status = above reps whose qtr_status is Level 1 / Level 2 / Level 3 / Premier / Franchise.
   var HIT_STATUS = new Set(['LEVEL 1','LEVEL 2','LEVEL 3','PREMIER','FRANCHISE',
                              'LEVEL I','LEVEL II','LEVEL III']);
-  var ocReps = QTD_EMPLOYEES.filter(function(e) { return e.office === 'Orange County'; });
+  var officeSet = new Set(CONSUL_CONFIG.offices);
+  var ocReps = QTD_EMPLOYEES.filter(function(e) { return officeSet.has(e.office); });
   var eligible = ocReps.filter(function(e) { return e.counts_towards_club === 'Y'; });
   var total = eligible.length;
   if (!total) return { hit: null, total: null, pct: null };
@@ -3295,10 +3304,11 @@ function calcRepsHitStatus() {
 }
 
 function calcActiveProductive() {
-  // Source: REP_DETAIL_MAP, OC only (matched via ROSTER_EMPLOYEES).
+  // Source: REP_DETAIL_MAP, filtered to CONSUL_CONFIG.offices (matched via ROSTER_EMPLOYEES).
+  var officeSet = new Set(CONSUL_CONFIG.offices);
   var ocIds = new Set(
     ROSTER_EMPLOYEES
-      .filter(function(e) { return e.office === 'Orange County'; })
+      .filter(function(e) { return officeSet.has(e.office); })
       .map(function(e) { return e.id; })
   );
   var count = 0;
@@ -3371,7 +3381,7 @@ function renderLeadershipPulse(qtdPace) {
     '<div class="pulse-card">' +
       '<div class="pulse-label">Active + Productive</div>' +
       '<div class="pulse-value" style="color:var(--off-white)">' + (ap !== null ? ap : '—') + '</div>' +
-      '<div class="pulse-sub">OC headcount</div>' +
+      '<div class="pulse-sub">Active Headcount</div>' +
     '</div>';
 }
 
@@ -4662,24 +4672,54 @@ function renderRoster(){
   if (rosterViewMode === 'list') {
     grid.classList.add('hidden');
     listEl.classList.add('active');
-    let _lastSquadList = null;
-    listEl.innerHTML = data.map(e => {
+
+    // Helper: build a single rep row
+    const multiOffice = rosterOfficeFilter === 'all' || !rosterOfficeFilter;
+    function repRow(e) {
       const isML  = (e.role||'').toLowerCase().includes('market leader');
       const isSL  = (e.role||'').toLowerCase().includes('squad leader');
       const isDir = (e.role||'').toLowerCase().includes('director');
       const isPP  = (e.role||'').toLowerCase().includes('performancepro') || (e.role||'').toLowerCase().includes('performance pro');
-      const oc = e.office ? e.office.replace('Orange County','OC').replace('Newport Beach','NB').replace('Riverside','RV') : '';
-      let hdr = '';
-      if (rosterSortMode === 'squad') {
-        const sq = e.squad || '— No Squad —';
-        if (sq !== _lastSquadList) { _lastSquadList = sq; hdr = `<div class="rc-list-squad-header">${sq}</div>`; }
-      }
-      return hdr + `<div class="rc-list-row${isML?' is-market-leader':''}${isSL?' is-squad-leader':''}${isDir?' is-director':''}${isPP?' is-performance-pro':''}" onclick="openRepModal('${e.id}')">
+      const oc = multiOffice && e.office
+        ? e.office.replace('Orange County','OC').replace('Newport Beach','NB').replace('Riverside','RV')
+        : '';
+      const dotColor = (CONSUL_CONFIG.office_colors || {})[e.office] || 'var(--cyan-dark)';
+      const officeEl = multiOffice && oc
+        ? `<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0"></span><span class="rc-list-meta">${oc}</span></span>`
+        : '';
+      return `<div class="rc-list-row${isML?' is-market-leader':''}${isSL?' is-squad-leader':''}${isDir?' is-director':''}${isPP?' is-performance-pro':''}" onclick="openRepModal('${e.id}')">
         <span class="rc-list-name">${e.name}${isML?'<span class="rc-ml-badge" style="margin-left:8px">ML</span>':''}${isSL?'<span class="rc-sl-badge" style="margin-left:8px">SL</span>':''}${isDir?'<span class="rc-dir-badge" style="margin-left:8px">Dir</span>':''}${isPP?'<span class="rc-pp-badge" style="margin-left:8px">PP</span>':''}</span>
-        ${e.pod ? `<span style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--sand);border:1px solid rgba(242,207,156,0.3);padding:1px 7px">${e.pod}</span>` : ''}
-        <span class="rc-list-meta">${oc}</span>
+        ${officeEl}
       </div>`;
-    }).join('');
+    }
+
+    if (rosterSortMode === 'squad') {
+      // Group reps by squad — one column per squad
+      const squadMap = new Map();
+      data.forEach(e => {
+        const sq = e.squad || '— No Squad —';
+        if (!squadMap.has(sq)) squadMap.set(sq, []);
+        squadMap.get(sq).push(e);
+      });
+      listEl.innerHTML = '<div class="rc-list-columns">' +
+        [...squadMap.entries()].map(([sq, members]) =>
+          `<div class="rc-list-col">` +
+          `<div class="rc-list-squad-header">${sq}</div>` +
+          members.map(repRow).join('') +
+          `</div>`
+        ).join('') +
+        '</div>';
+    } else {
+      // Name sort — balanced columns, no group headers
+      const colCount = Math.max(1, Math.floor((listEl.offsetWidth || 800) / 170));
+      const cols = Array.from({length: colCount}, () => []);
+      data.forEach((e, i) => cols[i % colCount].push(e));
+      listEl.innerHTML = '<div class="rc-list-columns">' +
+        cols.map(col =>
+          `<div class="rc-list-col">` + col.map(repRow).join('') + `</div>`
+        ).join('') +
+        '</div>';
+    }
   } else {
     grid.classList.remove('hidden');
     listEl.classList.remove('active');
@@ -6354,7 +6394,7 @@ const RAW_CSV = `ID,In Combine,Name,QSRA,QIC,SRA Remaining,IC Remaining,Office
 let allData = [];
 let filteredData = [];
 let activeFilter = 'all';
-let activeOffice = 'Orange County';
+let activeOffice = CONSUL_CONFIG.offices[0]; // defaults to primary office per config
 let sortCol = 'QSRA';
 let sortDir = -1; // descending by default
 let searchTerm = '';
@@ -6397,7 +6437,12 @@ function buildSIFromRepPerf() {
     })
     .map(([id]) => id);
 
-  if (!eligible.length) return; // Rankings not loaded yet
+  if (!eligible.length) {
+    // Rankings not yet loaded — show waiting message and bail
+    const emptyEl = document.getElementById('si-empty-state');
+    if (emptyEl) { emptyEl.textContent = 'Awaiting Rankings data from Sheets…'; emptyEl.style.display = 'block'; }
+    return;
+  }
 
   allData = eligible.map((id, i) => {
     const roster = rosterById[id] || {};
@@ -6494,6 +6539,10 @@ function renderTable() {
 
   if (filteredData.length === 0) {
     tbody.innerHTML = '';
+    const hasRankings = Object.keys(RANKINGS_MAP).length > 0;
+    empty.textContent = hasRankings
+      ? 'All reps currently qualify for Status Chasers — see Rankings for QTD progress.'
+      : 'Awaiting Rankings data from Sheets…';
     empty.style.display = 'block';
     const fc = document.getElementById('si-footer-count');
     if (fc) fc.textContent = '— 0 records';
