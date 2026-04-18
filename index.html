@@ -2388,10 +2388,10 @@ function applyBranding() {
   if (wtdBar) {
     const _wOff = _filterOffices();
     wtdBar.innerHTML =
-      '<button class="filter-btn active" id="wtd-f-all" onclick="wtdToggleOffice(\'all\')">All</button>' +
-      _wOff.map((o,i) => `<button class="filter-btn" id="wtd-f-off-${i}" data-office="${o}" onclick="wtdToggleOffice('${o}')">${o}</button>`).join('') +
+      '<button class="filter-btn" id="wtd-f-all" onclick="wtdToggleOffice(\'all\')">All</button>' +
+      _wOff.map((o,i) => `<button class="filter-btn${o === defaultOff ? ' active' : ''}" id="wtd-f-off-${i}" data-office="${o}" onclick="wtdToggleOffice('${o}')">${o}</button>`).join('') +
       '<button class="filter-btn" id="wtd-f-active" onclick="wtdToggleOffice(\'active\')">Has Activity</button>';
-    wtdOffices = new Set(_wOff);
+    wtdOffices = new Set([defaultOff]);
   }
 
   // ── Overview compare bar ──────────────────────────────────────────────────
