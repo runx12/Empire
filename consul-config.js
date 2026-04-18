@@ -14,13 +14,13 @@ const CONSUL_CONFIG = {
   primary_label:    'Riverside',                          // ← UPDATE
   tagline:          'EMPIRE — BUILDING CULTURE FORWARD',  // ← UPDATE
 
-  sheets_id:        'REPLACE_WITH_EMPIRE_SHEETS_ID',      // ← UPDATE
-  oauth_client_id:  'REPLACE_WITH_EMPIRE_OAUTH_CLIENT_ID', // ← UPDATE
+  sheets_id:        '1Awy-KgfNtf8IBAZf-nY8pmv26n0juNk28IRTfN0usn4',      // ← UPDATE
+  oauth_client_id:  '824495442632-o4v639jl9rcsj7dq2fgvfcr6joj98s2c.apps.googleusercontent.com', // ← UPDATE
 
-  admin_email:          'REPLACE_WITH_ADMIN_EMAIL',       // ← UPDATE
-  admin_phone:          'REPLACE_WITH_ADMIN_PHONE',       // ← UPDATE
-  office_admin_email:   'REPLACE_WITH_ADMIN_EMAIL',       // ← UPDATE
-  office_admin_phone:   'REPLACE_WITH_ADMIN_PHONE',       // ← UPDATE
+  admin_email:          'adam.howle@sunrun.com',       // ← UPDATE
+  admin_phone:          '5625371559',       // ← UPDATE
+  office_admin_email:   'adam.howle@sunrun.com',       // ← UPDATE
+  office_admin_phone:   '5625371559',       // ← UPDATE
 
   offices:          ['Riverside'],                        // ← UPDATE
   compare_offices:  ['Orange County'],                    // ← UPDATE
