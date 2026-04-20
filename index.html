@@ -6427,20 +6427,31 @@ function reapplyRepPerfAuthority() {
 function buildSIFromRepPerf() {
   const rosterById = Object.fromEntries(ROSTER_EMPLOYEES.map(e => [e.id, e]));
 
-  // Build the list from Rankings — anyone whose BOTH current AND highest rank is NO STATUS
-  // (highest rank != NO STATUS means they achieved a level before and are excluded)
-  const eligible = Object.entries(RANKINGS_MAP)
-    .filter(([id, r]) => {
-      const cur  = (r.currentRank  || '').toUpperCase();
-      const high = (r.highestRank  || '').toUpperCase();
-      return cur === 'NO STATUS' && (high === 'NO STATUS' || high === '');
-    })
-    .map(([id]) => id);
-
-  if (!eligible.length) {
-    // Rankings not yet loaded — show waiting message and bail
+  // Start from QTD_EMPLOYEES (active reps with data this quarter),
+  // then keep only those whose highestRank in the Export tab contains
+  // 'NO STATUS' or 'NO LEVEL' — meaning they have never previously achieved a rank.
+  if (!QTD_EMPLOYEES.length) {
+    const emptyEl = document.getElementById('si-empty-state');
+    if (emptyEl) { emptyEl.textContent = 'Awaiting QTD data from Sheets…'; emptyEl.style.display = 'block'; }
+    return;
+  }
+  if (!Object.keys(RANKINGS_MAP).length) {
     const emptyEl = document.getElementById('si-empty-state');
     if (emptyEl) { emptyEl.textContent = 'Awaiting Rankings data from Sheets…'; emptyEl.style.display = 'block'; }
+    return;
+  }
+
+  const eligible = QTD_EMPLOYEES
+    .filter(e => {
+      const rk   = RANKINGS_MAP[e.id] || {};
+      const high = (rk.highestRank || '').toUpperCase();
+      return high.includes('NO STATUS') || high.includes('NO LEVEL') || high === '';
+    })
+    .map(e => e.id);
+
+  if (!eligible.length) {
+    const emptyEl = document.getElementById('si-empty-state');
+    if (emptyEl) { emptyEl.textContent = 'No Status Chasers found.'; emptyEl.style.display = 'block'; }
     return;
   }
 
