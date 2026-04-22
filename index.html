@@ -2472,7 +2472,8 @@ function applyBranding() {
   if (modalOffice) {
     const cur = modalOffice.value;
     modalOffice.innerHTML = '<option value="">— Select —</option>' +
-      offices.map(o => `<option value="${o}"${o === cur ? ' selected' : ''}>${o}</option>`).join('');
+      [...new Set([...CONSUL_CONFIG.offices, ...(CONSUL_CONFIG.compare_offices||[])])]
+        .map(o => `<option value="${o}"${o === cur ? ' selected' : ''}>${o}</option>`).join('');
   }
 
   // ── Overview compare labels (default text) ────────────────────────────────
@@ -7764,7 +7765,7 @@ async function fetchSheetsData(opts) {
     var ilRes = await fetchWithTimeout(sheetsUrl('Install List'));
     if (!ilRes.ok) throw new Error('HTTP ' + ilRes.status);
     var ilRows = sheetsRowsToObjects((await ilRes.json()).values || []);
-    if (ilRows.length) { INSTALL_LIST.length = 0; ilRows.forEach(function(r){ INSTALL_LIST.push(r); }); }
+    if (ilRows.length) { INSTALL_LIST.length = 0; ilRows.forEach(function(r){ r['office'] = shortOffice(r['office'] || ''); INSTALL_LIST.push(r); }); }
     if (typeof renderLeadershipPulse === 'function') renderLeadershipPulse(null);
   } catch(e) { errors.push('Install List: ' + e.message); }
 
