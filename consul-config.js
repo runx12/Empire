@@ -18,9 +18,12 @@ const CONSUL_CONFIG = {
   oauth_client_id:  '824495442632-o4v639jl9rcsj7dq2fgvfcr6joj98s2c.apps.googleusercontent.com', // ← UPDATE
 
   admin_email:          'adam.howle@sunrun.com',       // ← UPDATE
-  admin_phone:          '5625371559',       // ← UPDATE
+  admin_phone:          '5625371559',                  // ← UPDATE
   office_admin_email:   'adam.howle@sunrun.com',       // ← UPDATE
-  office_admin_phone:   '5625371559',       // ← UPDATE
+  office_admin_phone:   '5625371559',                  // ← UPDATE
+
+  admin_display_name:   'Adam Howle',          // Used in onboarding SMS sign-off
+  hr_sms_number:        '(562) 561-2688',       // HR text number for I-9/BG help
 
   offices:          ['Riverside'],                        // ← UPDATE
   compare_offices:  ['Orange County'],                    // ← UPDATE
@@ -32,7 +35,7 @@ const CONSUL_CONFIG = {
   },
 
   office_meeting_info: {
-    'Riverside': { days: '', time: '', address: '' },     // ← UPDATE
+    'Riverside': { days: 'Tuesday and Thursday', time: '11:00', address: '1550 Magnolia Ave, Corona, CA 92879' },
   },
 
   // Google Calendar embed URL for the Calendar tab
