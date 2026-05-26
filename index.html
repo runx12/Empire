@@ -6820,20 +6820,24 @@ function gc_build() {
     const id     = String(r['employee id'] || r['id'] || '').trim();
     const roster = rosterById[id] || {};
     const qtd    = QTD_MAP[id] || {};
-    const qsra   = qtd.qtdpts_sra != null ? qtd.qtdpts_sra : (qtd.qtr_sra != null ? qtd.qtr_sra : '');
-    const qic    = qtd.qtdpts_ic  != null ? qtd.qtdpts_ic  : (qtd.qtr_ic  != null ? qtd.qtr_ic  : '');
-    const sraRem = qsra !== '' ? (parseFloat(qsra) - 7) : '';
-    const icRem  = qic  !== '' ? (parseFloat(qic)  - 3) : '';
-    const name   = roster.name   || String(r['name']   || '');
-    const office = roster.office || String(r['office'] || '');
+    const qsra    = qtd.qtdpts_sra != null ? qtd.qtdpts_sra : (qtd.qtr_sra != null ? qtd.qtr_sra : '');
+    const qic     = qtd.qtdpts_ic  != null ? qtd.qtdpts_ic  : (qtd.qtr_ic  != null ? qtd.qtr_ic  : '');
+    const sraGoal = r.sra_goal != null ? r.sra_goal : 10;
+    const icGoal  = r.ic_goal  != null ? r.ic_goal  : 5;
+    const sraRem  = qsra !== '' ? (parseFloat(qsra) - sraGoal) : '';
+    const icRem   = qic  !== '' ? (parseFloat(qic)  - icGoal)  : '';
+    const name    = roster.name   || String(r['name']   || '');
+    const office  = roster.office || String(r['office'] || '');
     if (!name) return null;
     return {
       _id: i,
-      'ID':     id,
-      'Name':   name,
-      'Office': office,
-      'QSRA':   qsra !== '' ? String(qsra) : '',
-      'QIC':    qic  !== '' ? String(qic)  : '',
+      'ID':       id,
+      'Name':     name,
+      'Office':   office,
+      'QSRA':     qsra !== '' ? String(qsra) : '',
+      'QIC':      qic  !== '' ? String(qic)  : '',
+      'SRA Goal': sraGoal,
+      'IC Goal':  icGoal,
       'SRA Remaining': sraRem !== '' ? String(sraRem) : '',
       'IC Remaining':  icRem  !== '' ? String(icRem)  : '',
     };
@@ -6876,10 +6880,12 @@ function gc_renderTable() {
 
   tbody.innerHTML = gc_filteredData.map((row, i) => {
     const officeColor = SI_OFFICE_COLORS[row['Office']] || '#AADDDD';
-    const sraVal = parseFloat(row['QSRA']) || 0;
-    const icVal  = parseFloat(row['QIC'])  || 0;
-    const sraPct = Math.min(sraVal / 10 * 100, 100);
-    const icPct  = Math.min(icVal  / 10 * 100, 100);
+    const sraVal  = parseFloat(row['QSRA']) || 0;
+    const icVal   = parseFloat(row['QIC'])  || 0;
+    const sraGoal = row['SRA Goal'] || 10;
+    const icGoal  = row['IC Goal']  || 5;
+    const sraPct  = Math.min(sraVal / sraGoal * 100, 100);
+    const icPct   = Math.min(icVal  / icGoal  * 100, 100);
     const sraComplete = sraPct >= 100;
     const icComplete  = icPct  >= 100;
 
@@ -7744,7 +7750,9 @@ async function fetchSheetsData(opts) {
     var gcRows = sheetsRowsToObjects((await gcRes.json()).values || []).map(function(r) {
       var id = String(r['employee id'] || r['rep id'] || r['id'] || '').trim();
       if (!id) return null;
-      return { 'employee id': id, name: String(r['name']||''), office: shortOffice(String(r['office']||'')), qsra: r['qsra']||r['sra']||'', qic: r['qic']||r['ic']||'' };
+      var sraGoal = parseFloat(r['sra goal']||'') || null;
+      var icGoal  = parseFloat(r['ic goal'] ||'') || null;
+      return { 'employee id': id, name: String(r['name']||''), office: shortOffice(String(r['office']||'')), qsra: r['qsra']||r['sra']||'', qic: r['qic']||r['ic']||'', sra_goal: sraGoal, ic_goal: icGoal };
     }).filter(Boolean);
     if (gcRows.length) { GC_EMPLOYEES.length = 0; gcRows.forEach(function(e){ GC_EMPLOYEES.push(e); }); }
   } catch(e) { errors.push('Game Changers: ' + e.message); }
