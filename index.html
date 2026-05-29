@@ -1959,6 +1959,7 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
   <div class="tab" onclick="switchTab('onboard-employee',this)">Onboard</div>
   <div class="tab" onclick="switchTab('combine',this)">Combine</div>
   <div class="tab" onclick="switchTab('productivity',this)">Productivity</div>
+  <div class="tab" onclick="switchTab('assists',this)">Assists</div>
 </div>
 
 <!-- ══ OVERVIEW ══ -->
@@ -2890,6 +2891,7 @@ function switchTab(id, el){
   else if(id==='rankings') renderRankings();
   else if(id==='data') renderDataTab();
   else if(id==='combine') renderCombineTab();
+  else if(id==='assists') renderAssistsTab();
 
   updateFooter();
 }
@@ -9050,6 +9052,390 @@ function renderProductivity() {
   </div>
 
 </div><!-- end panel-combine -->
+
+
+<!-- ── ASSISTS TAB ──────────────────────────────────────────────────────────── -->
+<div class="tab-panel" id="panel-assists">
+<style>
+  #panel-assists.active {
+    display: flex; flex-direction: column;
+    height: calc(100vh - 111px); overflow: hidden;
+  }
+  body.chrome-collapsed #panel-assists.active { height: calc(100vh - 65px); }
+  #panel-assists .assists-stats      { flex-shrink: 0; }
+  #panel-assists .assists-filter-bar { flex-shrink: 0; }
+  #panel-assists .table-wrap         { flex: 1; overflow-y: auto; overflow-x: auto; padding: 0 36px; }
+  #panel-assists .footer-bar         { flex-shrink: 0; }
+
+  #assists-table thead th {
+    position: sticky; top: 0; z-index: 46;
+    background: var(--near-black);
+  }
+  body.light-mode #assists-table thead th { background: var(--near-black); }
+
+  #panel-assists .assists-stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--border);
+  }
+  #panel-assists .stat-card { padding: 18px 28px; border-right: 1px solid var(--border); }
+  #panel-assists .stat-card:last-child { border-right: none; }
+  #panel-assists .stat-label {
+    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--cyan-dark); margin-bottom: 6px;
+  }
+  #panel-assists .stat-value {
+    font-size: 36px; font-weight: 700; letter-spacing: -1px;
+    color: var(--off-white); line-height: 1;
+  }
+  #panel-assists .stat-sub {
+    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 10px; color: var(--text-muted); margin-top: 4px;
+  }
+  #panel-assists .assists-filter-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 36px; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+  }
+  #panel-assists .filter-label {
+    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--cyan-dark);
+  }
+  #panel-assists .search-wrap { margin-left: auto; position: relative; }
+  #panel-assists .search-wrap input {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    color: var(--off-white); padding: 7px 14px 7px 32px;
+    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 10px; width: 210px; outline: none;
+  }
+  #panel-assists .search-wrap input:focus { border-color: var(--cyan-light); }
+  #panel-assists .search-wrap input::placeholder { color: rgba(248,249,249,0.25); }
+  #panel-assists .search-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--text-muted); font-size: 13px; pointer-events: none;
+  }
+  #assists-table { width: 100%; border-collapse: collapse; }
+  #assists-table thead tr { border-bottom: 1px solid var(--border); }
+  #assists-table th {
+    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--cyan-dark); padding: 14px 12px;
+    text-align: left; white-space: nowrap; cursor: pointer; user-select: none;
+  }
+  #assists-table th:hover { color: var(--cyan-light); }
+  #assists-table th.sorted .sa { opacity: 1; color: var(--cyan-light); }
+  #assists-table th .sa { margin-left: 4px; opacity: .4; }
+  #assists-table td { padding: 14px 12px; color: var(--off-white); font-size: 14px; white-space: nowrap; }
+  #assists-table tbody tr { border-bottom: 1px solid rgba(170,221,221,0.07); animation: rowIn .22s ease both; }
+  #assists-table tbody tr:hover { background: var(--row-hover); cursor: pointer; }
+  .assists-bar-wrap { display: flex; align-items: center; gap: 10px; }
+  .assists-bar-track {
+    width: 120px; height: 4px;
+    background: rgba(255,255,255,0.08); border-radius: 2px;
+    position: relative; flex-shrink: 0;
+  }
+  .assists-bar-fill {
+    position: absolute; left: 0; top: 0; height: 4px;
+    border-radius: 2px; background: var(--cyan-light);
+  }
+  .assists-count-val {
+    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 15px; font-weight: 700; color: var(--cyan-light); min-width: 28px; text-align: right;
+  }
+  #assists-modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65); z-index: 500;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  #assists-modal-overlay.open { display: flex; }
+  #assists-modal {
+    background: #1a1718; border: 1px solid rgba(170,221,221,0.2);
+    width: 420px; max-width: 100%; max-height: 80vh;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .am-header {
+    padding: 24px 28px 18px; border-bottom: 1px solid rgba(170,221,221,0.12); flex-shrink: 0;
+  }
+  .am-sup {
+    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--cyan-dark); margin-bottom: 8px;
+  }
+  .am-name { font-size: 22px; font-weight: 700; color: var(--off-white); letter-spacing: -0.3px; }
+  .am-count-line {
+    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text-muted); margin-top: 6px;
+  }
+  .am-count-line span { color: var(--cyan-light); font-weight: 700; }
+  .am-list { overflow-y: auto; padding: 16px 28px 20px; flex: 1; }
+  .am-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid rgba(170,221,221,0.07);
+    animation: rowIn .18s ease both;
+  }
+  .am-row:last-child { border-bottom: none; }
+  .am-row-num {
+    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 10px; letter-spacing: 1px; color: var(--text-muted); min-width: 26px;
+  }
+  .am-row-name { flex: 1; font-size: 14px; font-weight: 600; color: var(--off-white); }
+  .am-close-btn {
+    display: block; width: 100%; padding: 13px 28px;
+    background: transparent; border: none; border-top: 1px solid rgba(170,221,221,0.12);
+    color: var(--text-muted);
+    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
+    cursor: pointer; text-align: center; transition: color .15s, background .15s; flex-shrink: 0;
+  }
+  .am-close-btn:hover { color: var(--off-white); background: rgba(170,221,221,0.05); }
+</style>
+
+<!-- Stats bar -->
+<div class="assists-stats">
+  <div class="stat-card">
+    <div class="stat-label">Total Assists</div>
+    <div class="stat-value" id="assists-stat-total">—</div>
+    <div class="stat-sub">from install list</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Assisters</div>
+    <div class="stat-value" id="assists-stat-reps">—</div>
+    <div class="stat-sub">reps with assists</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Top Assister</div>
+    <div class="stat-value" id="assists-stat-top-name" style="font-size:20px;letter-spacing:-0.5px;line-height:1.2">—</div>
+    <div class="stat-sub" id="assists-stat-top-count"></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Avg per Assister</div>
+    <div class="stat-value" id="assists-stat-avg">—</div>
+    <div class="stat-sub">assists</div>
+  </div>
+</div>
+
+<!-- Filter bar -->
+<div class="assists-filter-bar">
+  <span class="filter-label">Assists</span>
+  <div class="search-wrap">
+    <span class="search-icon">&#9906;</span>
+    <input type="text" id="assists-search" placeholder="Search rep name…" oninput="renderAssistsTab()">
+  </div>
+</div>
+
+<!-- Table -->
+<div class="table-wrap">
+  <table id="assists-table">
+    <thead>
+      <tr>
+        <th style="width:48px" onclick="assistsSort('rank')"># <span class="sa">&#8597;</span></th>
+        <th onclick="assistsSort('name')">Rep Name <span class="sa">&#8597;</span></th>
+        <th onclick="assistsSort('count')">Assists <span class="sa">&#8597;</span></th>
+        <th onclick="assistsSort('unique')">Unique CS Reps <span class="sa">&#8597;</span></th>
+      </tr>
+    </thead>
+    <tbody id="assists-tbody"></tbody>
+  </table>
+</div>
+
+<!-- Footer -->
+<div class="footer-bar">
+  <span class="footer-count" id="assists-footer-count"></span>
+  <span class="footer-brand">&#9632; XII &#8212; BUILDING CULTURE FORWARD &#9632;</span>
+</div>
+
+</div><!-- end panel-assists -->
+
+<!-- ── ASSISTS MODAL ──────────────────────────────────────────────────────── -->
+<div id="assists-modal-overlay" onclick="if(event.target===this)closeAssistsModal()">
+  <div id="assists-modal">
+    <div class="am-header">
+      <div class="am-sup">Assist Detail</div>
+      <div class="am-name" id="am-name">—</div>
+      <div class="am-count-line">Total assists: <span id="am-count">—</span></div>
+    </div>
+    <div class="am-list" id="am-list"></div>
+    <button class="am-close-btn" onclick="closeAssistsModal()">Close</button>
+  </div>
+</div>
+
+
+<script>
+// ── ASSISTS TAB DATA ──────────────────────────────────────────────────────────
+const ASSIST_DATA = [
+  {name: 'Chase Hermansen', count: 46, cs_reps: ["Jovanni Cornejo", "Caden Martin", "Ellie Cole", "Adam Clark", "Adam Clark", "Evan Flynn", "Adam Clark", "Briana Garcia", "Ryan Baker", "Derrick Disbrow", "Devin Poe", "Adam Clark", "Adam Clark", "Mohamed Elbarbary", "Adam Clark", "Pablo Torres Garcia", "Richard Carriere", "Kerrie Carriere", "Tyler Criddle", "Seyenna Mello", "Tyler Criddle", "Evan Flynn", "Tyler Criddle", "Ellie Cole", "Jovanni Cornejo", "Pablo Torres Garcia", "Briana Garcia", "Devin Poe", "Derrick Disbrow", "Caden Martin", "Ryan Baker", "Seyenna Mello", "Adam Clark", "Adam Clark", "Adam Clark", "Adam Clark", "Adam Clark", "Adam Clark", "Mohamed Elbarbary", "Tyler Criddle", "Tyler Criddle", "Tyler Criddle", "Evan Flynn", "Evan Flynn", "Richard Carriere", "Kerrie Carriere"]},
+  {name: 'Spencer Haws', count: 42, cs_reps: ["Brooke Ashley", "Brooke Ashley", "Adam Clark", "Seyenna Mello", "Nevaeh Olson", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Nevaeh Olson", "Brooke Ashley", "Derrick Disbrow", "Rod Grajales", "Derrick Disbrow", "Derrick Disbrow", "Nevaeh Olson", "Derrick Disbrow", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Nevaeh Olson", "Nevaeh Olson", "Nevaeh Olson", "Rod Grajales", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Seyenna Mello", "Adam Clark"]},
+  {name: 'Tucker Criddle', count: 42, cs_reps: ["Chase Hermansen", "Chris Pham", "Briana Garcia", "Brock Parrish", "Brock Parrish", "Chase Stenzel", "Adam Clark", "Brock Parrish", "Austin Lindsay", "Evan Flynn", "Briana Garcia", "Caden Martin", "Chris Pham", "Justin Pinto", "Austin Lindsay", "Evan Flynn", "Tyler Criddle", "Brock Parrish", "Justin Pinto", "Austin Lindsay", "Austin Lindsay", "Tyler Criddle", "Austin Lindsay", "Katie Jones", "Chase Stenzel", "Chase Hermansen", "Chase Stenzel", "Chase Stenzel", "Austin Lindsay", "Austin Lindsay", "Austin Lindsay", "Austin Lindsay", "Austin Lindsay", "Caden Martin", "Adam Clark", "Tyler Criddle", "Tyler Criddle", "Justin Pinto", "Justin Pinto", "Evan Flynn", "Evan Flynn", "Katie Jones"]},
+  {name: 'Kendl Hansen', count: 32, cs_reps: ["Victor Martinez", "Malik Colossio Lopez", "Malik Colossio Lopez", "Victor Martinez", "Jameson Perreault", "Jameson Perreault", "Ivan Stone", "Malik Colossio Lopez", "Alexander Doig", "Katie Jones", "Alexander Doig", "Ivan Stone", "Albert Barba", "Jameson Perreault", "Evan Broudy", "Alexander Doig", "Malik Colossio Lopez", "Malik Colossio Lopez", "Malik Colossio Lopez", "Victor Martinez", "Victor Martinez", "Evan Broudy", "Alexander Doig", "Alexander Doig", "Alexander Doig", "Albert Barba", "Jameson Perreault", "Jameson Perreault", "Jameson Perreault", "Ivan Stone", "Ivan Stone", "Katie Jones"]},
+  {name: 'Ralph Holding', count: 28, cs_reps: ["Ryan Baker", "Sean Whalen Jr", "Devin Poe", "Bryce Davis", "Justin Pinto", "Bryce Davis", "Bryce Davis", "Justin Pinto", "Chase Stenzel", "Evan Flynn", "Justin Pinto", "Nathaniel Williams", "Austin Lindsay", "Austin Lindsay", "Sean Whalen Jr", "Chase Stenzel", "Devin Poe", "Austin Lindsay", "Austin Lindsay", "Ryan Baker", "Nathaniel Williams", "Justin Pinto", "Justin Pinto", "Justin Pinto", "Evan Flynn", "Bryce Davis", "Bryce Davis", "Bryce Davis"]},
+  {name: 'Hector Navarro', count: 24, cs_reps: ["Mohamed Elbarbary", "Mohamed Elbarbary", "Mohamed Elbarbary", "Jovanni Cornejo", "Caden Martin", "Mohamed Elbarbary", "Jovanni Cornejo", "Jovanni Cornejo", "Mohamed Elbarbary", "Mohamed Elbarbary", "Jovanni Cornejo", "Caden Martin", "Jovanni Cornejo", "Jovanni Cornejo", "Jovanni Cornejo", "Jovanni Cornejo", "Caden Martin", "Caden Martin", "Mohamed Elbarbary", "Mohamed Elbarbary", "Mohamed Elbarbary", "Mohamed Elbarbary", "Mohamed Elbarbary", "Mohamed Elbarbary"]},
+  {name: 'Preston Thompson', count: 24, cs_reps: ["Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Derrick Disbrow", "Ellie Cole", "Szymon Szymczyk", "Julia Brucato", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Jameson Perreault", "Julia Brucato", "Ellie Cole", "Julia Brucato", "Julia Brucato", "Derrick Disbrow", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Jameson Perreault"]},
+  {name: 'Walter Schumacher', count: 20, cs_reps: ["Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Colby Degele", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Colby Degele"]},
+  {name: 'Jaxon Junior', count: 18, cs_reps: ["Ralph Holding", "Justin Pinto", "Hunter Floyd", "Richard Carriere", "Heidi Bryant", "Hunter Floyd", "Christian Blaser", "Chase Blaser", "Christian Blaser", "Ralph Holding", "Justin Pinto", "Hunter Floyd", "Hunter Floyd", "Christian Blaser", "Christian Blaser", "Heidi Bryant", "Richard Carriere", "Chase Blaser"]},
+  {name: 'Lafe Frandsen', count: 16, cs_reps: ["Chase Hermansen", "Devin Poe", "Brant Anderson", "Pablo Torres Garcia", "Brant Anderson", "Brant Anderson", "Pablo Torres Garcia", "Brant Anderson", "Chase Hermansen", "Pablo Torres Garcia", "Pablo Torres Garcia", "Devin Poe", "Brant Anderson", "Brant Anderson", "Brant Anderson", "Brant Anderson"]},
+  {name: 'John Woodfield', count: 14, cs_reps: ["Peter Anthony", "Erin Dominguez", "Pablo Torres Garcia", "Pablo Torres Garcia", "Memphis Day", "Malik Colossio Lopez", "Colby Degele", "Erin Dominguez", "Pablo Torres Garcia", "Pablo Torres Garcia", "Malik Colossio Lopez", "Peter Anthony", "Memphis Day", "Colby Degele"]},
+  {name: 'Chad Towersey', count: 12, cs_reps: ["Maxx Hickey", "Maxx Hickey", "Robert Kobetsky", "Memphis Day", "Memphis Day", "Robert Kobetsky", "Maxx Hickey", "Maxx Hickey", "Robert Kobetsky", "Robert Kobetsky", "Memphis Day", "Memphis Day"]},
+  {name: 'Krystal Rodriguez', count: 12, cs_reps: ["Qun Wang", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Qun Wang"]},
+  {name: 'Erin Dominguez', count: 10, cs_reps: ["Maxx Hickey", "Maxx Hickey", "Maxx Hickey", "Alexander Doig", "Maxx Hickey", "Maxx Hickey", "Maxx Hickey", "Maxx Hickey", "Maxx Hickey", "Alexander Doig"]},
+  {name: 'Julia Brucato', count: 10, cs_reps: ["Chase Hermansen", "Chase Hermansen", "Chase Hermansen", "Preston Thompson", "Preston Thompson", "Preston Thompson", "Preston Thompson", "Preston Thompson", "Chase Hermansen", "Preston Thompson"]},
+  {name: 'Louie Gutierrez', count: 10, cs_reps: ["Jaime Reynoso", "Jden Burmaster", "Landon Crowhurst", "Landon Crowhurst", "Landon Crowhurst", "Jaime Reynoso", "Jden Burmaster", "Landon Crowhurst", "Landon Crowhurst", "Landon Crowhurst"]},
+  {name: 'Kenny Roberts', count: 8, cs_reps: ["Derrick Disbrow", "Derrick Disbrow", "Justin Pinto", "Tyler Criddle", "Derrick Disbrow", "Derrick Disbrow", "Tyler Criddle", "Justin Pinto"]},
+  {name: 'Malik Animashaun', count: 8, cs_reps: ["Briana Garcia", "Briana Garcia", "Chris Pham", "Jovanni Cornejo", "Chris Pham", "Jovanni Cornejo", "Briana Garcia", "Briana Garcia"]},
+  {name: 'Max Redfield', count: 8, cs_reps: ["Thomas Kellogg", "Laheim Wallace", "Laheim Wallace", "Laheim Wallace", "Laheim Wallace", "Laheim Wallace", "Laheim Wallace", "Thomas Kellogg"]},
+  {name: 'Pedro Cruz', count: 7, cs_reps: ["Oscar Zavala", "Oscar Zavala", "Oscar Zavala", "Gustavo Lozano Sanchez", "Gustavo Lozano Sanchez", "Gustavo Lozano Sanchez", "Jerry Ramos"]},
+  {name: 'Bradley Kicinski', count: 6, cs_reps: ["Tyson Wickline", "Tyson Wickline", "Tyson Wickline", "Tyson Wickline", "Tyson Wickline", "Tyson Wickline"]},
+  {name: 'Greg Abdouch', count: 6, cs_reps: ["Tyson Wickline", "Cairo Michael", "Cairo Michael", "Tyson Wickline", "Cairo Michael", "Cairo Michael"]},
+  {name: 'Hunter Thompson', count: 5, cs_reps: ["Preston Thompson", "Preston Thompson", "Preston Thompson", "Preston Thompson", "Preston Thompson"]},
+  {name: 'Qun Wang', count: 5, cs_reps: ["Wei Wang", "Wei Wang", "Wei Wang", "Wei Wang", "Yi Hsing Hsia"]},
+  {name: 'Rod Grajales', count: 5, cs_reps: ["Seyenna Mello", "Seyenna Mello", "Seyenna Mello", "Seyenna Mello", "Seyenna Mello"]},
+  {name: 'Argelia Leanos', count: 4, cs_reps: ["Michael Durr", "Michael Durr", "Michael Durr", "Michael Durr"]},
+  {name: 'Giovanni Rivas', count: 4, cs_reps: ["Saul Hernandez", "Saul Hernandez", "Saul Hernandez", "Saul Hernandez"]},
+  {name: 'Gustavo Lozano Sanchez', count: 4, cs_reps: ["Pedro Cruz", "Laura Cardenas", "Oscar Zavala", "Jerry Ramos"]},
+  {name: 'Caleb Heward', count: 3, cs_reps: ["Kenny Roberts", "Kenny Roberts", "Kenny Roberts"]},
+  {name: 'Oscar Zavala', count: 3, cs_reps: ["Jeremy Martinez", "Jeremy Martinez", "Laura Cardenas"]},
+  {name: 'Brian Barczak', count: 2, cs_reps: ["Maxx Hickey", "Maxx Hickey"]},
+  {name: 'Cameron West', count: 2, cs_reps: ["Kendl Hansen", "Kendl Hansen"]},
+  {name: 'Colby Rankin', count: 2, cs_reps: ["Alexander Doig", "Enoch Brookins-yisrael"]},
+  {name: 'Daniel Rios', count: 2, cs_reps: ["Chase Hermansen", "Chase Hermansen"]},
+  {name: 'Diego Zamora', count: 2, cs_reps: ["Spencer Haws", "Spencer Haws"]},
+  {name: 'Ellie Cole', count: 2, cs_reps: ["Chase Hermansen", "Chase Hermansen"]},
+  {name: 'Evan Flynn', count: 2, cs_reps: ["Chase Hermansen", "Tucker Criddle"]},
+  {name: 'Jaden Biggs', count: 2, cs_reps: ["Ralph Holding", "Ralph Holding"]},
+  {name: 'Jeremy Martinez', count: 2, cs_reps: ["Tyson Wickline", "Tyson Wickline"]},
+  {name: 'Philip Vierhus', count: 2, cs_reps: ["Ambyr Evans", "Mike Miclea"]},
+  {name: 'Richard Ellis', count: 2, cs_reps: ["Richard Bosley", "Richard Bosley"]},
+  {name: 'Thomas Norman', count: 2, cs_reps: ["Adrian Rodriguez", "Adrian Rodriguez"]},
+  {name: 'Tyler Criddle', count: 2, cs_reps: ["Lafe Frandsen", "Ralph Holding"]},
+  {name: 'Wei Wang', count: 2, cs_reps: ["Qun Wang", "Qun Wang"]},
+  {name: 'Zach Harbin', count: 2, cs_reps: ["Erik Oh", "Erik Oh"]},
+  {name: 'Adam Clark', count: 1, cs_reps: ["Tucker Criddle"]},
+  {name: 'Adan Vazquez', count: 1, cs_reps: ["Gustavo Lozano Sanchez"]},
+  {name: 'Alec Lowry', count: 1, cs_reps: ["Chase Hermansen"]},
+  {name: 'Brant Anderson', count: 1, cs_reps: ["Chase Hermansen"]},
+  {name: 'Brian Arriaga', count: 1, cs_reps: ["Joshua Ruiz"]},
+  {name: 'Brooke Ashley', count: 1, cs_reps: ["Spencer Haws"]},
+  {name: 'Bryce Davis', count: 1, cs_reps: ["Ralph Holding"]},
+  {name: 'Cam Smith', count: 1, cs_reps: ["David Price"]},
+  {name: 'Charles Josey', count: 1, cs_reps: ["Francisco Flores"]},
+  {name: 'David Maldonado', count: 1, cs_reps: ["Nevin Schwebs"]},
+  {name: 'Ikeem Clay', count: 1, cs_reps: ["Landon Crowhurst"]},
+  {name: 'Isaac Vance', count: 1, cs_reps: ["Tucker Criddle"]},
+  {name: 'Jameson Perreault', count: 1, cs_reps: ["Kendl Hansen"]},
+  {name: 'Jerry Ramos', count: 1, cs_reps: ["Russell Dean"]},
+  {name: 'Joseph Rodas', count: 1, cs_reps: ["Pedro Cruz"]},
+  {name: 'Josh Fairhurst', count: 1, cs_reps: ["Ikeem Clay"]},
+  {name: 'Jovanni Cornejo', count: 1, cs_reps: ["Kenny Roberts"]},
+  {name: 'Justin Pinto', count: 1, cs_reps: ["Kenny Roberts"]},
+  {name: 'Key Goins', count: 1, cs_reps: ["Malik Animashaun"]},
+  {name: 'Korron Walker', count: 1, cs_reps: ["Chase Hermansen"]},
+  {name: 'Lisbel Benito', count: 1, cs_reps: ["Ikeem Clay"]},
+  {name: 'Michael Durr', count: 1, cs_reps: ["Argelia Leanos"]},
+  {name: 'Naim Harris', count: 1, cs_reps: ["Spencer Haws"]},
+  {name: 'Saul Hernandez', count: 1, cs_reps: ["Giovanni Rivas"]},
+  {name: 'Seyenna Mello', count: 1, cs_reps: ["Chase Hermansen"]},
+  {name: 'Spring Saunders', count: 1, cs_reps: ["Ellie Cole"]},
+  {name: 'Trevor Bryant', count: 1, cs_reps: ["Gerardo Sanchez"]},
+  {name: 'Tyler Sheesley', count: 1, cs_reps: ["Russell Dean"]},
+];
+
+// ── ASSISTS TAB LOGIC ─────────────────────────────────────────────────────────
+let _assistsSortKey = 'count';
+let _assistsSortDir = -1;
+
+function assistsSort(key) {
+  if (_assistsSortKey === key) { _assistsSortDir *= -1; }
+  else { _assistsSortKey = key; _assistsSortDir = key === 'name' ? 1 : -1; }
+  renderAssistsTab();
+}
+
+function renderAssistsTab() {
+  const searchEl = document.getElementById('assists-search');
+  const search = searchEl ? searchEl.value.trim().toLowerCase() : '';
+
+  const data = ASSIST_DATA.map((d, i) => ({
+    ...d, rank: i + 1, unique: [...new Set(d.cs_reps)].length
+  }));
+
+  // Stats from full dataset
+  const totalAssists = data.reduce((s, d) => s + d.count, 0);
+  const totalReps    = data.length;
+  const topRep       = data[0];
+  const avg          = totalReps ? Math.round(totalAssists / totalReps) : 0;
+
+  const el = id => document.getElementById(id);
+  if (el('assists-stat-total'))     el('assists-stat-total').textContent     = totalAssists;
+  if (el('assists-stat-reps'))      el('assists-stat-reps').textContent      = totalReps;
+  if (el('assists-stat-top-name'))  el('assists-stat-top-name').textContent  = topRep ? topRep.name : '—';
+  if (el('assists-stat-top-count')) el('assists-stat-top-count').textContent = topRep ? topRep.count + ' assists' : '';
+  if (el('assists-stat-avg'))       el('assists-stat-avg').textContent       = avg;
+
+  let filtered = search ? data.filter(d => d.name.toLowerCase().includes(search)) : data;
+
+  filtered.sort((a, b) => {
+    let va = a[_assistsSortKey], vb = b[_assistsSortKey];
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    if (va < vb) return -1 * _assistsSortDir;
+    if (va > vb) return  1 * _assistsSortDir;
+    return 0;
+  });
+
+  // Sort indicator
+  document.querySelectorAll('#assists-table th').forEach(th => th.classList.remove('sorted'));
+  const keyIdx = {rank: 0, name: 1, count: 2, unique: 3};
+  const ths = document.querySelectorAll('#assists-table th');
+  if (ths[keyIdx[_assistsSortKey]]) ths[keyIdx[_assistsSortKey]].classList.add('sorted');
+
+  const maxCount = ASSIST_DATA[0] ? ASSIST_DATA[0].count : 1;
+  const tbody = document.getElementById('assists-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+  filtered.forEach((d, i) => {
+    const pct = Math.round((d.count / maxCount) * 100);
+    const tr = document.createElement('tr');
+    tr.style.animationDelay = Math.min(i * 0.01, 0.3) + 's';
+    tr.onclick = () => openAssistsModal(d);
+    tr.innerHTML =
+      '<td style="color:var(--text-muted);font-size:12px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif">' + d.rank + '</td>' +
+      '<td style="font-weight:600;font-size:15px">' + d.name + '</td>' +
+      '<td><div class="assists-bar-wrap">' +
+        '<div class="assists-bar-track"><div class="assists-bar-fill" style="width:' + pct + '%"></div></div>' +
+        '<span class="assists-count-val">' + d.count + '</span>' +
+      '</div></td>' +
+      '<td style="color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px">' + d.unique + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  const fc = document.getElementById('assists-footer-count');
+  if (fc) fc.textContent = filtered.length + ' rep' + (filtered.length !== 1 ? 's' : '');
+}
+
+function openAssistsModal(d) {
+  const overlay = document.getElementById('assists-modal-overlay');
+  if (!overlay) return;
+  document.getElementById('am-name').textContent  = d.name;
+  document.getElementById('am-count').textContent = d.count;
+
+  const listEl = document.getElementById('am-list');
+  listEl.innerHTML = '';
+  d.cs_reps.forEach(function(rep, i) {
+    const row = document.createElement('div');
+    row.className = 'am-row';
+    row.style.animationDelay = Math.min(i * 0.015, 0.4) + 's';
+    row.innerHTML = '<span class="am-row-num">' + (i + 1) + '</span><span class="am-row-name">' + rep + '</span>';
+    listEl.appendChild(row);
+  });
+  overlay.classList.add('open');
+}
+
+function closeAssistsModal() {
+  const overlay = document.getElementById('assists-modal-overlay');
+  if (overlay) overlay.classList.remove('open');
+}
+</script>
+
 
 
 <!-- ── WTD GOALS PANEL ─────────────────────────────────────────────────────── -->
