@@ -65,11 +65,11 @@ const CONSUL_CONFIG = {
 
     // ── Light mode overrides ─────────────────────────────────────────────────
     light_cyan_light:  '#1C1C1E',   // primary accent on light — near black
-    light_cyan_dark:   '#6E6E73',   // labels/headers on light
+    light_cyan_dark:   '#1C1C1E',   // labels/headers on light — black
     light_near_black:  '#FFFFFF',   // page background → white
     light_off_white:   '#1C1C1E',   // primary text → near black
-    light_sand:        '#6E6E73',   // view-toggle buttons on light
-    light_border:      'rgba(0,0,0,0.09)',
+    light_sand:        '#1C1C1E',   // view-toggle buttons on light — black
+    light_border:      'rgba(0,0,0,0.10)',
     light_row_hover:   'rgba(0,0,0,0.03)',
   },
 };
