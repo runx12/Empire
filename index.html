@@ -63,20 +63,23 @@ body.light-mode {
   color-scheme: light;
 }
 body.light-mode { background: #E7E5E4; color: #1A1718; }
-/* ── Cards keep dark bg in light mode — force light text inside them ── */
+/* ── Overview progress cards — light bg, dark text ── */
 body.light-mode .prog-card,
 body.light-mode .prog-card .prog-cat,
 body.light-mode .prog-card .prog-num-val,
 body.light-mode .prog-card .prog-num-lbl,
-body.light-mode .prog-card .prog-ou { color: #F8F9F9; }
-body.light-mode .prog-card .prog-num-val.dim { color: rgba(248,249,249,0.5); }
-body.light-mode .prog-card .prog-track { background: rgba(255,255,255,0.08); }
-body.light-mode .prog-card .prog-tick { background: rgba(248,249,249,0.4); }
-body.light-mode .prog-card .prog-ou span.neg { color: #F05252; }
-body.light-mode .prog-card .prog-ou span.pos { color: #2DC48E; }
-body.light-mode .overview-target-input { color: #F8F9F9; }
-body.light-mode .roster-card { color: #F8F9F9; }
-body.light-mode .roster-card .rc-name { color: #F8F9F9; }
+body.light-mode .prog-card .prog-ou { color: #1C1C1E; }
+body.light-mode .prog-card .prog-num-val.dim { color: rgba(28,28,30,0.35); }
+body.light-mode .prog-card .prog-track { background: rgba(0,0,0,0.10); }
+body.light-mode .prog-card .prog-tick { background: rgba(28,28,30,0.25); }
+body.light-mode .prog-card .prog-ou span.neg { color: #C0392B; }
+body.light-mode .prog-card .prog-ou span.pos { color: #0F7A52; }
+body.light-mode .prog-card .prog-num-val.dim { color: rgba(28,28,30,0.30); }
+body.light-mode .prog-ou-dim { color: rgba(28,28,30,0.40); }
+body.light-mode .overview-target-input { color: #1C1C1E; }
+/* ── Roster cards — light bg, dark text ── */
+body.light-mode .roster-card { color: #1C1C1E; }
+body.light-mode .roster-card .rc-name { color: #1C1C1E; }
 body.light-mode .roster-card .rc-role { color: #6E6E73; }
 body.light-mode .rc-edit-field { color: var(--off-white); background: rgba(0,0,0,0.08); }
 body.light-mode .search-wrap input { color: var(--off-white); background: rgba(0,0,0,0.08); }
@@ -672,6 +675,14 @@ body.chrome-collapsed .rankings-stats{max-height:0;opacity:0;border-bottom-color
   accent-color: var(--cyan-light); cursor: pointer; flex-shrink: 0;
 }
 .rk-chk-item.checked { color: var(--cyan-light); }
+/* ── Light mode: rankings dropdowns ── */
+body.light-mode .rk-chk-btn { background: rgba(0,0,0,0.04); border-color: rgba(28,28,30,0.25); color: #1C1C1E; }
+body.light-mode .rk-chk-btn::after { color: #1C1C1E; }
+body.light-mode .rk-chk-btn.active-filter { border-color: #1C1C1E; color: #1C1C1E; }
+body.light-mode .rk-chk-panel { background: #F5F5F7; border-color: rgba(28,28,30,0.15); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+body.light-mode .rk-chk-item { color: rgba(28,28,30,0.65); }
+body.light-mode .rk-chk-item:hover { background: rgba(0,0,0,0.05); color: #1C1C1E; }
+body.light-mode .rk-chk-item.checked { color: #1C1C1E; }
 
 /* Scope scrolling to the rankings panel so sticky thead works — overflow on ancestor breaks sticky */
 #panel-rankings.active{display:flex;flex-direction:column;height:calc(100vh - 111px);overflow:hidden;}
@@ -3238,7 +3249,7 @@ function buildProgressCard(cat, target, actual, pace, prefix){
     : `<span class="prog-pct" style="color:rgba(248,249,249,.3);background:transparent">—</span>`;
   const paceVal = hasPace
     ? `<span class="prog-num-val dim">${Math.round(pace)}</span>`
-    : `<span class="prog-num-val dim" style="color:rgba(248,249,249,.25)">—</span>`;
+    : `<span class="prog-num-val dim">—</span>`;
   // Pace indicator: +/- number only, colour carries the meaning
   const paceIndicator = hasPace ? (() => {
     const diff = actual - Math.round(pace);
@@ -3248,7 +3259,7 @@ function buildProgressCard(cat, target, actual, pace, prefix){
   })() : '';
   const ouLine = hasPace
     ? `<div class="prog-ou">Proj. Over/Under: <span class="${ou>=0?'pos':'neg'}">${ou>=0?'+':''}${ou}</span>${paceIndicator}</div>`
-    : `<div class="prog-ou" style="color:rgba(248,249,249,.25)">Set date to calculate pace</div>`;
+    : `<div class="prog-ou prog-ou-dim">Set date to calculate pace</div>`;
   return `<div class="prog-card">
     <div class="prog-card-header"><span class="prog-cat">${cat}</span>${pctBadge}</div>
     <div class="prog-nums">
@@ -9256,6 +9267,7 @@ function renderProductivity() {
       <tr>
         <th style="width:48px" onclick="assistsSort('rank')"># <span class="sa">&#8597;</span></th>
         <th onclick="assistsSort('name')">Rep Name <span class="sa">&#8597;</span></th>
+        <th onclick="assistsSort('metric')" style="width:70px">Type <span class="sa">&#8597;</span></th>
         <th onclick="assistsSort('count')">Assists <span class="sa">&#8597;</span></th>
         <th onclick="assistsSort('unique')">Unique CS Reps <span class="sa">&#8597;</span></th>
       </tr>
@@ -9289,88 +9301,118 @@ function renderProductivity() {
 <script>
 // ── ASSISTS TAB DATA ──────────────────────────────────────────────────────────
 const ASSIST_DATA = [
-  {name: 'Chase Hermansen', count: 46, cs_reps: ["Jovanni Cornejo", "Caden Martin", "Ellie Cole", "Adam Clark", "Adam Clark", "Evan Flynn", "Adam Clark", "Briana Garcia", "Ryan Baker", "Derrick Disbrow", "Devin Poe", "Adam Clark", "Adam Clark", "Mohamed Elbarbary", "Adam Clark", "Pablo Torres Garcia", "Richard Carriere", "Kerrie Carriere", "Tyler Criddle", "Seyenna Mello", "Tyler Criddle", "Evan Flynn", "Tyler Criddle", "Ellie Cole", "Jovanni Cornejo", "Pablo Torres Garcia", "Briana Garcia", "Devin Poe", "Derrick Disbrow", "Caden Martin", "Ryan Baker", "Seyenna Mello", "Adam Clark", "Adam Clark", "Adam Clark", "Adam Clark", "Adam Clark", "Adam Clark", "Mohamed Elbarbary", "Tyler Criddle", "Tyler Criddle", "Tyler Criddle", "Evan Flynn", "Evan Flynn", "Richard Carriere", "Kerrie Carriere"]},
-  {name: 'Spencer Haws', count: 42, cs_reps: ["Brooke Ashley", "Brooke Ashley", "Adam Clark", "Seyenna Mello", "Nevaeh Olson", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Nevaeh Olson", "Brooke Ashley", "Derrick Disbrow", "Rod Grajales", "Derrick Disbrow", "Derrick Disbrow", "Nevaeh Olson", "Derrick Disbrow", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Nevaeh Olson", "Nevaeh Olson", "Nevaeh Olson", "Rod Grajales", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Seyenna Mello", "Adam Clark"]},
-  {name: 'Tucker Criddle', count: 42, cs_reps: ["Chase Hermansen", "Chris Pham", "Briana Garcia", "Brock Parrish", "Brock Parrish", "Chase Stenzel", "Adam Clark", "Brock Parrish", "Austin Lindsay", "Evan Flynn", "Briana Garcia", "Caden Martin", "Chris Pham", "Justin Pinto", "Austin Lindsay", "Evan Flynn", "Tyler Criddle", "Brock Parrish", "Justin Pinto", "Austin Lindsay", "Austin Lindsay", "Tyler Criddle", "Austin Lindsay", "Katie Jones", "Chase Stenzel", "Chase Hermansen", "Chase Stenzel", "Chase Stenzel", "Austin Lindsay", "Austin Lindsay", "Austin Lindsay", "Austin Lindsay", "Austin Lindsay", "Caden Martin", "Adam Clark", "Tyler Criddle", "Tyler Criddle", "Justin Pinto", "Justin Pinto", "Evan Flynn", "Evan Flynn", "Katie Jones"]},
-  {name: 'Kendl Hansen', count: 32, cs_reps: ["Victor Martinez", "Malik Colossio Lopez", "Malik Colossio Lopez", "Victor Martinez", "Jameson Perreault", "Jameson Perreault", "Ivan Stone", "Malik Colossio Lopez", "Alexander Doig", "Katie Jones", "Alexander Doig", "Ivan Stone", "Albert Barba", "Jameson Perreault", "Evan Broudy", "Alexander Doig", "Malik Colossio Lopez", "Malik Colossio Lopez", "Malik Colossio Lopez", "Victor Martinez", "Victor Martinez", "Evan Broudy", "Alexander Doig", "Alexander Doig", "Alexander Doig", "Albert Barba", "Jameson Perreault", "Jameson Perreault", "Jameson Perreault", "Ivan Stone", "Ivan Stone", "Katie Jones"]},
-  {name: 'Ralph Holding', count: 28, cs_reps: ["Ryan Baker", "Sean Whalen Jr", "Devin Poe", "Bryce Davis", "Justin Pinto", "Bryce Davis", "Bryce Davis", "Justin Pinto", "Chase Stenzel", "Evan Flynn", "Justin Pinto", "Nathaniel Williams", "Austin Lindsay", "Austin Lindsay", "Sean Whalen Jr", "Chase Stenzel", "Devin Poe", "Austin Lindsay", "Austin Lindsay", "Ryan Baker", "Nathaniel Williams", "Justin Pinto", "Justin Pinto", "Justin Pinto", "Evan Flynn", "Bryce Davis", "Bryce Davis", "Bryce Davis"]},
-  {name: 'Hector Navarro', count: 24, cs_reps: ["Mohamed Elbarbary", "Mohamed Elbarbary", "Mohamed Elbarbary", "Jovanni Cornejo", "Caden Martin", "Mohamed Elbarbary", "Jovanni Cornejo", "Jovanni Cornejo", "Mohamed Elbarbary", "Mohamed Elbarbary", "Jovanni Cornejo", "Caden Martin", "Jovanni Cornejo", "Jovanni Cornejo", "Jovanni Cornejo", "Jovanni Cornejo", "Caden Martin", "Caden Martin", "Mohamed Elbarbary", "Mohamed Elbarbary", "Mohamed Elbarbary", "Mohamed Elbarbary", "Mohamed Elbarbary", "Mohamed Elbarbary"]},
-  {name: 'Preston Thompson', count: 24, cs_reps: ["Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Derrick Disbrow", "Ellie Cole", "Szymon Szymczyk", "Julia Brucato", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Jameson Perreault", "Julia Brucato", "Ellie Cole", "Julia Brucato", "Julia Brucato", "Derrick Disbrow", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Jameson Perreault"]},
-  {name: 'Walter Schumacher', count: 20, cs_reps: ["Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Colby Degele", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Colby Degele"]},
-  {name: 'Jaxon Junior', count: 18, cs_reps: ["Ralph Holding", "Justin Pinto", "Hunter Floyd", "Richard Carriere", "Heidi Bryant", "Hunter Floyd", "Christian Blaser", "Chase Blaser", "Christian Blaser", "Ralph Holding", "Justin Pinto", "Hunter Floyd", "Hunter Floyd", "Christian Blaser", "Christian Blaser", "Heidi Bryant", "Richard Carriere", "Chase Blaser"]},
-  {name: 'Lafe Frandsen', count: 16, cs_reps: ["Chase Hermansen", "Devin Poe", "Brant Anderson", "Pablo Torres Garcia", "Brant Anderson", "Brant Anderson", "Pablo Torres Garcia", "Brant Anderson", "Chase Hermansen", "Pablo Torres Garcia", "Pablo Torres Garcia", "Devin Poe", "Brant Anderson", "Brant Anderson", "Brant Anderson", "Brant Anderson"]},
-  {name: 'John Woodfield', count: 14, cs_reps: ["Peter Anthony", "Erin Dominguez", "Pablo Torres Garcia", "Pablo Torres Garcia", "Memphis Day", "Malik Colossio Lopez", "Colby Degele", "Erin Dominguez", "Pablo Torres Garcia", "Pablo Torres Garcia", "Malik Colossio Lopez", "Peter Anthony", "Memphis Day", "Colby Degele"]},
-  {name: 'Chad Towersey', count: 12, cs_reps: ["Maxx Hickey", "Maxx Hickey", "Robert Kobetsky", "Memphis Day", "Memphis Day", "Robert Kobetsky", "Maxx Hickey", "Maxx Hickey", "Robert Kobetsky", "Robert Kobetsky", "Memphis Day", "Memphis Day"]},
-  {name: 'Krystal Rodriguez', count: 12, cs_reps: ["Qun Wang", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Qun Wang"]},
-  {name: 'Erin Dominguez', count: 10, cs_reps: ["Maxx Hickey", "Maxx Hickey", "Maxx Hickey", "Alexander Doig", "Maxx Hickey", "Maxx Hickey", "Maxx Hickey", "Maxx Hickey", "Maxx Hickey", "Alexander Doig"]},
-  {name: 'Julia Brucato', count: 10, cs_reps: ["Chase Hermansen", "Chase Hermansen", "Chase Hermansen", "Preston Thompson", "Preston Thompson", "Preston Thompson", "Preston Thompson", "Preston Thompson", "Chase Hermansen", "Preston Thompson"]},
-  {name: 'Louie Gutierrez', count: 10, cs_reps: ["Jaime Reynoso", "Jden Burmaster", "Landon Crowhurst", "Landon Crowhurst", "Landon Crowhurst", "Jaime Reynoso", "Jden Burmaster", "Landon Crowhurst", "Landon Crowhurst", "Landon Crowhurst"]},
-  {name: 'Kenny Roberts', count: 8, cs_reps: ["Derrick Disbrow", "Derrick Disbrow", "Justin Pinto", "Tyler Criddle", "Derrick Disbrow", "Derrick Disbrow", "Tyler Criddle", "Justin Pinto"]},
-  {name: 'Malik Animashaun', count: 8, cs_reps: ["Briana Garcia", "Briana Garcia", "Chris Pham", "Jovanni Cornejo", "Chris Pham", "Jovanni Cornejo", "Briana Garcia", "Briana Garcia"]},
-  {name: 'Max Redfield', count: 8, cs_reps: ["Thomas Kellogg", "Laheim Wallace", "Laheim Wallace", "Laheim Wallace", "Laheim Wallace", "Laheim Wallace", "Laheim Wallace", "Thomas Kellogg"]},
-  {name: 'Pedro Cruz', count: 7, cs_reps: ["Oscar Zavala", "Oscar Zavala", "Oscar Zavala", "Gustavo Lozano Sanchez", "Gustavo Lozano Sanchez", "Gustavo Lozano Sanchez", "Jerry Ramos"]},
-  {name: 'Bradley Kicinski', count: 6, cs_reps: ["Tyson Wickline", "Tyson Wickline", "Tyson Wickline", "Tyson Wickline", "Tyson Wickline", "Tyson Wickline"]},
-  {name: 'Greg Abdouch', count: 6, cs_reps: ["Tyson Wickline", "Cairo Michael", "Cairo Michael", "Tyson Wickline", "Cairo Michael", "Cairo Michael"]},
-  {name: 'Hunter Thompson', count: 5, cs_reps: ["Preston Thompson", "Preston Thompson", "Preston Thompson", "Preston Thompson", "Preston Thompson"]},
-  {name: 'Qun Wang', count: 5, cs_reps: ["Wei Wang", "Wei Wang", "Wei Wang", "Wei Wang", "Yi Hsing Hsia"]},
-  {name: 'Rod Grajales', count: 5, cs_reps: ["Seyenna Mello", "Seyenna Mello", "Seyenna Mello", "Seyenna Mello", "Seyenna Mello"]},
-  {name: 'Argelia Leanos', count: 4, cs_reps: ["Michael Durr", "Michael Durr", "Michael Durr", "Michael Durr"]},
-  {name: 'Giovanni Rivas', count: 4, cs_reps: ["Saul Hernandez", "Saul Hernandez", "Saul Hernandez", "Saul Hernandez"]},
-  {name: 'Gustavo Lozano Sanchez', count: 4, cs_reps: ["Pedro Cruz", "Laura Cardenas", "Oscar Zavala", "Jerry Ramos"]},
-  {name: 'Caleb Heward', count: 3, cs_reps: ["Kenny Roberts", "Kenny Roberts", "Kenny Roberts"]},
-  {name: 'Oscar Zavala', count: 3, cs_reps: ["Jeremy Martinez", "Jeremy Martinez", "Laura Cardenas"]},
-  {name: 'Brian Barczak', count: 2, cs_reps: ["Maxx Hickey", "Maxx Hickey"]},
-  {name: 'Cameron West', count: 2, cs_reps: ["Kendl Hansen", "Kendl Hansen"]},
-  {name: 'Colby Rankin', count: 2, cs_reps: ["Alexander Doig", "Enoch Brookins-yisrael"]},
-  {name: 'Daniel Rios', count: 2, cs_reps: ["Chase Hermansen", "Chase Hermansen"]},
-  {name: 'Diego Zamora', count: 2, cs_reps: ["Spencer Haws", "Spencer Haws"]},
-  {name: 'Ellie Cole', count: 2, cs_reps: ["Chase Hermansen", "Chase Hermansen"]},
-  {name: 'Evan Flynn', count: 2, cs_reps: ["Chase Hermansen", "Tucker Criddle"]},
-  {name: 'Jaden Biggs', count: 2, cs_reps: ["Ralph Holding", "Ralph Holding"]},
-  {name: 'Jeremy Martinez', count: 2, cs_reps: ["Tyson Wickline", "Tyson Wickline"]},
-  {name: 'Philip Vierhus', count: 2, cs_reps: ["Ambyr Evans", "Mike Miclea"]},
-  {name: 'Richard Ellis', count: 2, cs_reps: ["Richard Bosley", "Richard Bosley"]},
-  {name: 'Thomas Norman', count: 2, cs_reps: ["Adrian Rodriguez", "Adrian Rodriguez"]},
-  {name: 'Tyler Criddle', count: 2, cs_reps: ["Lafe Frandsen", "Ralph Holding"]},
-  {name: 'Wei Wang', count: 2, cs_reps: ["Qun Wang", "Qun Wang"]},
-  {name: 'Zach Harbin', count: 2, cs_reps: ["Erik Oh", "Erik Oh"]},
-  {name: 'Adam Clark', count: 1, cs_reps: ["Tucker Criddle"]},
-  {name: 'Adan Vazquez', count: 1, cs_reps: ["Gustavo Lozano Sanchez"]},
-  {name: 'Alec Lowry', count: 1, cs_reps: ["Chase Hermansen"]},
-  {name: 'Brant Anderson', count: 1, cs_reps: ["Chase Hermansen"]},
-  {name: 'Brian Arriaga', count: 1, cs_reps: ["Joshua Ruiz"]},
-  {name: 'Brooke Ashley', count: 1, cs_reps: ["Spencer Haws"]},
-  {name: 'Bryce Davis', count: 1, cs_reps: ["Ralph Holding"]},
-  {name: 'Cam Smith', count: 1, cs_reps: ["David Price"]},
-  {name: 'Charles Josey', count: 1, cs_reps: ["Francisco Flores"]},
-  {name: 'David Maldonado', count: 1, cs_reps: ["Nevin Schwebs"]},
-  {name: 'Ikeem Clay', count: 1, cs_reps: ["Landon Crowhurst"]},
-  {name: 'Isaac Vance', count: 1, cs_reps: ["Tucker Criddle"]},
-  {name: 'Jameson Perreault', count: 1, cs_reps: ["Kendl Hansen"]},
-  {name: 'Jerry Ramos', count: 1, cs_reps: ["Russell Dean"]},
-  {name: 'Joseph Rodas', count: 1, cs_reps: ["Pedro Cruz"]},
-  {name: 'Josh Fairhurst', count: 1, cs_reps: ["Ikeem Clay"]},
-  {name: 'Jovanni Cornejo', count: 1, cs_reps: ["Kenny Roberts"]},
-  {name: 'Justin Pinto', count: 1, cs_reps: ["Kenny Roberts"]},
-  {name: 'Key Goins', count: 1, cs_reps: ["Malik Animashaun"]},
-  {name: 'Korron Walker', count: 1, cs_reps: ["Chase Hermansen"]},
-  {name: 'Lisbel Benito', count: 1, cs_reps: ["Ikeem Clay"]},
-  {name: 'Michael Durr', count: 1, cs_reps: ["Argelia Leanos"]},
-  {name: 'Naim Harris', count: 1, cs_reps: ["Spencer Haws"]},
-  {name: 'Saul Hernandez', count: 1, cs_reps: ["Giovanni Rivas"]},
-  {name: 'Seyenna Mello', count: 1, cs_reps: ["Chase Hermansen"]},
-  {name: 'Spring Saunders', count: 1, cs_reps: ["Ellie Cole"]},
-  {name: 'Trevor Bryant', count: 1, cs_reps: ["Gerardo Sanchez"]},
-  {name: 'Tyler Sheesley', count: 1, cs_reps: ["Russell Dean"]},
+  {name:'Chase Hermansen', metric:'SRA', count:34, unique:12, cs_reps:["Adam Clark", "Briana Garcia", "Ryan Baker", "Derrick Disbrow", "Devin Poe", "Adam Clark", "Adam Clark", "Mohamed Elbarbary", "Adam Clark", "Pablo Torres Garcia", "Richard Carriere", "Kerrie Carriere", "Tyler Criddle", "Seyenna Mello", "Tyler Criddle", "Evan Flynn", "Tyler Criddle", "Pablo Torres Garcia", "Briana Garcia", "Devin Poe", "Derrick Disbrow", "Ryan Baker", "Seyenna Mello", "Adam Clark", "Adam Clark", "Adam Clark", "Adam Clark", "Mohamed Elbarbary", "Tyler Criddle", "Tyler Criddle", "Tyler Criddle", "Evan Flynn", "Richard Carriere", "Kerrie Carriere"], rep_total:46, rank:1},
+  {name:'Chase Hermansen', metric:'IC', count:12, unique:5, cs_reps:["Jovanni Cornejo", "Caden Martin", "Ellie Cole", "Adam Clark", "Adam Clark", "Evan Flynn", "Ellie Cole", "Jovanni Cornejo", "Caden Martin", "Adam Clark", "Adam Clark", "Evan Flynn"], rep_total:46, rank:1},
+  {name:'Spencer Haws', metric:'SRA', count:28, unique:4, cs_reps:["Derrick Disbrow", "Derrick Disbrow", "Nevaeh Olson", "Brooke Ashley", "Derrick Disbrow", "Rod Grajales", "Derrick Disbrow", "Derrick Disbrow", "Nevaeh Olson", "Derrick Disbrow", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Nevaeh Olson", "Nevaeh Olson", "Rod Grajales", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Brooke Ashley", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow", "Derrick Disbrow"], rep_total:42, rank:2},
+  {name:'Spencer Haws', metric:'IC', count:14, unique:5, cs_reps:["Brooke Ashley", "Brooke Ashley", "Adam Clark", "Seyenna Mello", "Nevaeh Olson", "Derrick Disbrow", "Derrick Disbrow", "Nevaeh Olson", "Brooke Ashley", "Brooke Ashley", "Derrick Disbrow", "Derrick Disbrow", "Seyenna Mello", "Adam Clark"], rep_total:42, rank:2},
+  {name:'Tucker Criddle', metric:'SRA', count:34, unique:11, cs_reps:["Chase Hermansen", "Chris Pham", "Briana Garcia", "Brock Parrish", "Evan Flynn", "Briana Garcia", "Caden Martin", "Chris Pham", "Justin Pinto", "Austin Lindsay", "Evan Flynn", "Tyler Criddle", "Brock Parrish", "Justin Pinto", "Austin Lindsay", "Austin Lindsay", "Tyler Criddle", "Austin Lindsay", "Katie Jones", "Chase Stenzel", "Chase Hermansen", "Chase Stenzel", "Austin Lindsay", "Austin Lindsay", "Austin Lindsay", "Austin Lindsay", "Caden Martin", "Tyler Criddle", "Tyler Criddle", "Justin Pinto", "Justin Pinto", "Evan Flynn", "Evan Flynn", "Katie Jones"], rep_total:42, rank:3},
+  {name:'Tucker Criddle', metric:'IC', count:8, unique:4, cs_reps:["Brock Parrish", "Chase Stenzel", "Adam Clark", "Brock Parrish", "Austin Lindsay", "Chase Stenzel", "Austin Lindsay", "Adam Clark"], rep_total:42, rank:3},
+  {name:'Kendl Hansen', metric:'SRA', count:32, unique:8, cs_reps:["Victor Martinez", "Malik Colossio Lopez", "Malik Colossio Lopez", "Victor Martinez", "Jameson Perreault", "Jameson Perreault", "Ivan Stone", "Malik Colossio Lopez", "Alexander Doig", "Katie Jones", "Alexander Doig", "Ivan Stone", "Albert Barba", "Jameson Perreault", "Evan Broudy", "Alexander Doig", "Malik Colossio Lopez", "Malik Colossio Lopez", "Malik Colossio Lopez", "Victor Martinez", "Victor Martinez", "Evan Broudy", "Alexander Doig", "Alexander Doig", "Alexander Doig", "Albert Barba", "Jameson Perreault", "Jameson Perreault", "Jameson Perreault", "Ivan Stone", "Ivan Stone", "Katie Jones"], rep_total:32, rank:4},
+  {name:'Ralph Holding', metric:'SRA', count:24, unique:7, cs_reps:["Devin Poe", "Bryce Davis", "Justin Pinto", "Bryce Davis", "Bryce Davis", "Justin Pinto", "Chase Stenzel", "Evan Flynn", "Justin Pinto", "Nathaniel Williams", "Austin Lindsay", "Austin Lindsay", "Chase Stenzel", "Devin Poe", "Austin Lindsay", "Austin Lindsay", "Nathaniel Williams", "Justin Pinto", "Justin Pinto", "Justin Pinto", "Evan Flynn", "Bryce Davis", "Bryce Davis", "Bryce Davis"], rep_total:28, rank:5},
+  {name:'Ralph Holding', metric:'IC', count:4, unique:2, cs_reps:["Ryan Baker", "Sean Whalen Jr", "Sean Whalen Jr", "Ryan Baker"], rep_total:28, rank:5},
+  {name:'Hector Navarro', metric:'SRA', count:22, unique:3, cs_reps:["Mohamed Elbarbary", "Mohamed Elbarbary", "Jovanni Cornejo", "Caden Martin", "Mohamed Elbarbary", "Jovanni Cornejo", "Jovanni Cornejo", "Mohamed Elbarbary", "Mohamed Elbarbary", "Jovanni Cornejo", "Caden Martin", "Jovanni Cornejo", "Jovanni Cornejo", "Jovanni Cornejo", "Jovanni Cornejo", "Caden Martin", "Caden Martin", "Mohamed Elbarbary", "Mohamed Elbarbary", "Mohamed Elbarbary", "Mohamed Elbarbary", "Mohamed Elbarbary"], rep_total:24, rank:6},
+  {name:'Hector Navarro', metric:'IC', count:2, unique:1, cs_reps:["Mohamed Elbarbary", "Mohamed Elbarbary"], rep_total:24, rank:6},
+  {name:'Preston Thompson', metric:'SRA', count:24, unique:5, cs_reps:["Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Derrick Disbrow", "Ellie Cole", "Szymon Szymczyk", "Julia Brucato", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Jameson Perreault", "Julia Brucato", "Ellie Cole", "Julia Brucato", "Julia Brucato", "Derrick Disbrow", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Szymon Szymczyk", "Jameson Perreault"], rep_total:24, rank:7},
+  {name:'Walter Schumacher', metric:'SRA', count:20, unique:2, cs_reps:["Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Colby Degele", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Phillip Ho", "Colby Degele"], rep_total:20, rank:8},
+  {name:'Jaxon Junior', metric:'SRA', count:14, unique:5, cs_reps:["Hunter Floyd", "Richard Carriere", "Heidi Bryant", "Hunter Floyd", "Christian Blaser", "Chase Blaser", "Christian Blaser", "Hunter Floyd", "Hunter Floyd", "Christian Blaser", "Christian Blaser", "Heidi Bryant", "Richard Carriere", "Chase Blaser"], rep_total:18, rank:9},
+  {name:'Jaxon Junior', metric:'IC', count:4, unique:2, cs_reps:["Ralph Holding", "Justin Pinto", "Ralph Holding", "Justin Pinto"], rep_total:18, rank:9},
+  {name:'Lafe Frandsen', metric:'SRA', count:12, unique:3, cs_reps:["Chase Hermansen", "Pablo Torres Garcia", "Brant Anderson", "Brant Anderson", "Pablo Torres Garcia", "Brant Anderson", "Chase Hermansen", "Pablo Torres Garcia", "Pablo Torres Garcia", "Brant Anderson", "Brant Anderson", "Brant Anderson"], rep_total:16, rank:10},
+  {name:'Lafe Frandsen', metric:'IC', count:4, unique:2, cs_reps:["Devin Poe", "Brant Anderson", "Devin Poe", "Brant Anderson"], rep_total:16, rank:10},
+  {name:'John Woodfield', metric:'SRA', count:10, unique:4, cs_reps:["Pablo Torres Garcia", "Pablo Torres Garcia", "Memphis Day", "Malik Colossio Lopez", "Colby Degele", "Pablo Torres Garcia", "Pablo Torres Garcia", "Malik Colossio Lopez", "Memphis Day", "Colby Degele"], rep_total:14, rank:11},
+  {name:'John Woodfield', metric:'IC', count:4, unique:2, cs_reps:["Peter Anthony", "Erin Dominguez", "Erin Dominguez", "Peter Anthony"], rep_total:14, rank:11},
+  {name:'Chad Towersey', metric:'SRA', count:8, unique:2, cs_reps:["Robert Kobetsky", "Memphis Day", "Memphis Day", "Robert Kobetsky", "Robert Kobetsky", "Robert Kobetsky", "Memphis Day", "Memphis Day"], rep_total:12, rank:12},
+  {name:'Chad Towersey', metric:'IC', count:4, unique:1, cs_reps:["Maxx Hickey", "Maxx Hickey", "Maxx Hickey", "Maxx Hickey"], rep_total:12, rank:12},
+  {name:'Krystal Rodriguez', metric:'SRA', count:8, unique:1, cs_reps:["Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans", "Ambyr Evans"], rep_total:12, rank:13},
+  {name:'Krystal Rodriguez', metric:'IC', count:4, unique:2, cs_reps:["Qun Wang", "Ambyr Evans", "Ambyr Evans", "Qun Wang"], rep_total:12, rank:13},
+  {name:'Erin Dominguez', metric:'SRA', count:8, unique:2, cs_reps:["Maxx Hickey", "Maxx Hickey", "Alexander Doig", "Maxx Hickey", "Maxx Hickey", "Maxx Hickey", "Maxx Hickey", "Alexander Doig"], rep_total:10, rank:14},
+  {name:'Erin Dominguez', metric:'IC', count:2, unique:1, cs_reps:["Maxx Hickey", "Maxx Hickey"], rep_total:10, rank:14},
+  {name:'Julia Brucato', metric:'SRA', count:3, unique:2, cs_reps:["Chase Hermansen", "Preston Thompson", "Preston Thompson"], rep_total:10, rank:15},
+  {name:'Julia Brucato', metric:'IC', count:7, unique:2, cs_reps:["Chase Hermansen", "Chase Hermansen", "Preston Thompson", "Preston Thompson", "Preston Thompson", "Chase Hermansen", "Preston Thompson"], rep_total:10, rank:15},
+  {name:'Louie Gutierrez', metric:'SRA', count:10, unique:3, cs_reps:["Jaime Reynoso", "Jden Burmaster", "Landon Crowhurst", "Landon Crowhurst", "Landon Crowhurst", "Jaime Reynoso", "Jden Burmaster", "Landon Crowhurst", "Landon Crowhurst", "Landon Crowhurst"], rep_total:10, rank:16},
+  {name:'Kenny Roberts', metric:'SRA', count:8, unique:3, cs_reps:["Derrick Disbrow", "Derrick Disbrow", "Justin Pinto", "Tyler Criddle", "Derrick Disbrow", "Derrick Disbrow", "Tyler Criddle", "Justin Pinto"], rep_total:8, rank:17},
+  {name:'Malik Animashaun', metric:'SRA', count:6, unique:3, cs_reps:["Briana Garcia", "Chris Pham", "Jovanni Cornejo", "Chris Pham", "Jovanni Cornejo", "Briana Garcia"], rep_total:8, rank:18},
+  {name:'Malik Animashaun', metric:'IC', count:2, unique:1, cs_reps:["Briana Garcia", "Briana Garcia"], rep_total:8, rank:18},
+  {name:'Max Redfield', metric:'SRA', count:6, unique:1, cs_reps:["Laheim Wallace", "Laheim Wallace", "Laheim Wallace", "Laheim Wallace", "Laheim Wallace", "Laheim Wallace"], rep_total:8, rank:19},
+  {name:'Max Redfield', metric:'IC', count:2, unique:1, cs_reps:["Thomas Kellogg", "Thomas Kellogg"], rep_total:8, rank:19},
+  {name:'Pedro Cruz', metric:'SRA', count:6, unique:3, cs_reps:["Oscar Zavala", "Oscar Zavala", "Oscar Zavala", "Gustavo Lozano Sanchez", "Gustavo Lozano Sanchez", "Jerry Ramos"], rep_total:7, rank:20},
+  {name:'Pedro Cruz', metric:'IC', count:1, unique:1, cs_reps:["Gustavo Lozano Sanchez"], rep_total:7, rank:20},
+  {name:'Bradley Kicinski', metric:'SRA', count:4, unique:1, cs_reps:["Tyson Wickline", "Tyson Wickline", "Tyson Wickline", "Tyson Wickline"], rep_total:6, rank:21},
+  {name:'Bradley Kicinski', metric:'IC', count:2, unique:1, cs_reps:["Tyson Wickline", "Tyson Wickline"], rep_total:6, rank:21},
+  {name:'Greg Abdouch', metric:'SRA', count:6, unique:2, cs_reps:["Tyson Wickline", "Cairo Michael", "Cairo Michael", "Tyson Wickline", "Cairo Michael", "Cairo Michael"], rep_total:6, rank:22},
+  {name:'Hunter Thompson', metric:'SRA', count:3, unique:1, cs_reps:["Preston Thompson", "Preston Thompson", "Preston Thompson"], rep_total:5, rank:23},
+  {name:'Hunter Thompson', metric:'IC', count:2, unique:1, cs_reps:["Preston Thompson", "Preston Thompson"], rep_total:5, rank:23},
+  {name:'Qun Wang', metric:'SRA', count:2, unique:2, cs_reps:["Wei Wang", "Yi Hsing Hsia"], rep_total:5, rank:24},
+  {name:'Qun Wang', metric:'IC', count:3, unique:1, cs_reps:["Wei Wang", "Wei Wang", "Wei Wang"], rep_total:5, rank:24},
+  {name:'Rod Grajales', metric:'SRA', count:5, unique:1, cs_reps:["Seyenna Mello", "Seyenna Mello", "Seyenna Mello", "Seyenna Mello", "Seyenna Mello"], rep_total:5, rank:25},
+  {name:'Argelia Leanos', metric:'SRA', count:1, unique:1, cs_reps:["Michael Durr"], rep_total:4, rank:26},
+  {name:'Argelia Leanos', metric:'IC', count:3, unique:1, cs_reps:["Michael Durr", "Michael Durr", "Michael Durr"], rep_total:4, rank:26},
+  {name:'Giovanni Rivas', metric:'SRA', count:4, unique:1, cs_reps:["Saul Hernandez", "Saul Hernandez", "Saul Hernandez", "Saul Hernandez"], rep_total:4, rank:27},
+  {name:'Gustavo Lozano Sanchez', metric:'SRA', count:4, unique:4, cs_reps:["Pedro Cruz", "Laura Cardenas", "Oscar Zavala", "Jerry Ramos"], rep_total:4, rank:28},
+  {name:'Caleb Heward', metric:'SRA', count:2, unique:1, cs_reps:["Kenny Roberts", "Kenny Roberts"], rep_total:3, rank:29},
+  {name:'Caleb Heward', metric:'IC', count:1, unique:1, cs_reps:["Kenny Roberts"], rep_total:3, rank:29},
+  {name:'Oscar Zavala', metric:'SRA', count:1, unique:1, cs_reps:["Laura Cardenas"], rep_total:3, rank:30},
+  {name:'Oscar Zavala', metric:'IC', count:2, unique:1, cs_reps:["Jeremy Martinez", "Jeremy Martinez"], rep_total:3, rank:30},
+  {name:'Brian Barczak', metric:'SRA', count:2, unique:1, cs_reps:["Maxx Hickey", "Maxx Hickey"], rep_total:2, rank:31},
+  {name:'Cameron West', metric:'SRA', count:1, unique:1, cs_reps:["Kendl Hansen"], rep_total:2, rank:32},
+  {name:'Cameron West', metric:'IC', count:1, unique:1, cs_reps:["Kendl Hansen"], rep_total:2, rank:32},
+  {name:'Colby Rankin', metric:'SRA', count:2, unique:2, cs_reps:["Alexander Doig", "Enoch Brookins-yisrael"], rep_total:2, rank:33},
+  {name:'Daniel Rios', metric:'SRA', count:2, unique:1, cs_reps:["Chase Hermansen", "Chase Hermansen"], rep_total:2, rank:34},
+  {name:'Diego Zamora', metric:'SRA', count:1, unique:1, cs_reps:["Spencer Haws"], rep_total:2, rank:35},
+  {name:'Diego Zamora', metric:'IC', count:1, unique:1, cs_reps:["Spencer Haws"], rep_total:2, rank:35},
+  {name:'Ellie Cole', metric:'SRA', count:1, unique:1, cs_reps:["Chase Hermansen"], rep_total:2, rank:36},
+  {name:'Ellie Cole', metric:'IC', count:1, unique:1, cs_reps:["Chase Hermansen"], rep_total:2, rank:36},
+  {name:'Evan Flynn', metric:'IC', count:2, unique:2, cs_reps:["Chase Hermansen", "Tucker Criddle"], rep_total:2, rank:37},
+  {name:'Jaden Biggs', metric:'SRA', count:2, unique:1, cs_reps:["Ralph Holding", "Ralph Holding"], rep_total:2, rank:38},
+  {name:'Jeremy Martinez', metric:'SRA', count:2, unique:1, cs_reps:["Tyson Wickline", "Tyson Wickline"], rep_total:2, rank:39},
+  {name:'Philip Vierhus', metric:'SRA', count:2, unique:2, cs_reps:["Ambyr Evans", "Mike Miclea"], rep_total:2, rank:40},
+  {name:'Richard Ellis', metric:'SRA', count:2, unique:1, cs_reps:["Richard Bosley", "Richard Bosley"], rep_total:2, rank:41},
+  {name:'Thomas Norman', metric:'SRA', count:1, unique:1, cs_reps:["Adrian Rodriguez"], rep_total:2, rank:42},
+  {name:'Thomas Norman', metric:'IC', count:1, unique:1, cs_reps:["Adrian Rodriguez"], rep_total:2, rank:42},
+  {name:'Tyler Criddle', metric:'SRA', count:2, unique:2, cs_reps:["Lafe Frandsen", "Ralph Holding"], rep_total:2, rank:43},
+  {name:'Wei Wang', metric:'SRA', count:1, unique:1, cs_reps:["Qun Wang"], rep_total:2, rank:44},
+  {name:'Wei Wang', metric:'IC', count:1, unique:1, cs_reps:["Qun Wang"], rep_total:2, rank:44},
+  {name:'Zach Harbin', metric:'SRA', count:1, unique:1, cs_reps:["Erik Oh"], rep_total:2, rank:45},
+  {name:'Zach Harbin', metric:'IC', count:1, unique:1, cs_reps:["Erik Oh"], rep_total:2, rank:45},
+  {name:'Adam Clark', metric:'IC', count:1, unique:1, cs_reps:["Tucker Criddle"], rep_total:1, rank:46},
+  {name:'Adan Vazquez', metric:'IC', count:1, unique:1, cs_reps:["Gustavo Lozano Sanchez"], rep_total:1, rank:47},
+  {name:'Alec Lowry', metric:'SRA', count:1, unique:1, cs_reps:["Chase Hermansen"], rep_total:1, rank:48},
+  {name:'Brant Anderson', metric:'SRA', count:1, unique:1, cs_reps:["Chase Hermansen"], rep_total:1, rank:49},
+  {name:'Brian Arriaga', metric:'SRA', count:1, unique:1, cs_reps:["Joshua Ruiz"], rep_total:1, rank:50},
+  {name:'Brooke Ashley', metric:'SRA', count:1, unique:1, cs_reps:["Spencer Haws"], rep_total:1, rank:51},
+  {name:'Bryce Davis', metric:'SRA', count:1, unique:1, cs_reps:["Ralph Holding"], rep_total:1, rank:52},
+  {name:'Cam Smith', metric:'SRA', count:1, unique:1, cs_reps:["David Price"], rep_total:1, rank:53},
+  {name:'Charles Josey', metric:'SRA', count:1, unique:1, cs_reps:["Francisco Flores"], rep_total:1, rank:54},
+  {name:'David Maldonado', metric:'SRA', count:1, unique:1, cs_reps:["Nevin Schwebs"], rep_total:1, rank:55},
+  {name:'Ikeem Clay', metric:'SRA', count:1, unique:1, cs_reps:["Landon Crowhurst"], rep_total:1, rank:56},
+  {name:'Isaac Vance', metric:'IC', count:1, unique:1, cs_reps:["Tucker Criddle"], rep_total:1, rank:57},
+  {name:'Jameson Perreault', metric:'SRA', count:1, unique:1, cs_reps:["Kendl Hansen"], rep_total:1, rank:58},
+  {name:'Jerry Ramos', metric:'SRA', count:1, unique:1, cs_reps:["Russell Dean"], rep_total:1, rank:59},
+  {name:'Joseph Rodas', metric:'IC', count:1, unique:1, cs_reps:["Pedro Cruz"], rep_total:1, rank:60},
+  {name:'Josh Fairhurst', metric:'SRA', count:1, unique:1, cs_reps:["Ikeem Clay"], rep_total:1, rank:61},
+  {name:'Jovanni Cornejo', metric:'SRA', count:1, unique:1, cs_reps:["Kenny Roberts"], rep_total:1, rank:62},
+  {name:'Justin Pinto', metric:'SRA', count:1, unique:1, cs_reps:["Kenny Roberts"], rep_total:1, rank:63},
+  {name:'Key Goins', metric:'SRA', count:1, unique:1, cs_reps:["Malik Animashaun"], rep_total:1, rank:64},
+  {name:'Korron Walker', metric:'SRA', count:1, unique:1, cs_reps:["Chase Hermansen"], rep_total:1, rank:65},
+  {name:'Lisbel Benito', metric:'IC', count:1, unique:1, cs_reps:["Ikeem Clay"], rep_total:1, rank:66},
+  {name:'Michael Durr', metric:'IC', count:1, unique:1, cs_reps:["Argelia Leanos"], rep_total:1, rank:67},
+  {name:'Naim Harris', metric:'SRA', count:1, unique:1, cs_reps:["Spencer Haws"], rep_total:1, rank:68},
+  {name:'Saul Hernandez', metric:'SRA', count:1, unique:1, cs_reps:["Giovanni Rivas"], rep_total:1, rank:69},
+  {name:'Seyenna Mello', metric:'SRA', count:1, unique:1, cs_reps:["Chase Hermansen"], rep_total:1, rank:70},
+  {name:'Spring Saunders', metric:'SRA', count:1, unique:1, cs_reps:["Ellie Cole"], rep_total:1, rank:71},
+  {name:'Trevor Bryant', metric:'SRA', count:1, unique:1, cs_reps:["Gerardo Sanchez"], rep_total:1, rank:72},
+  {name:'Tyler Sheesley', metric:'IC', count:1, unique:1, cs_reps:["Russell Dean"], rep_total:1, rank:73},
 ];
 
 // ── ASSISTS TAB LOGIC ─────────────────────────────────────────────────────────
-let _assistsSortKey = 'count';
-let _assistsSortDir = -1;
+// ASSIST_DATA rows: {name, metric, count, unique, cs_reps, rep_total, rank}
+// Pre-sorted: by rep_total desc, SRA before IC within each rep.
+
+let _assistsSortKey = 'rank';
+let _assistsSortDir = 1;
 
 function assistsSort(key) {
   if (_assistsSortKey === key) { _assistsSortDir *= -1; }
-  else { _assistsSortKey = key; _assistsSortDir = key === 'name' ? 1 : -1; }
+  else { _assistsSortKey = key; _assistsSortDir = (key === 'name' || key === 'metric') ? 1 : -1; }
   renderAssistsTab();
 }
 
@@ -9378,27 +9420,36 @@ function renderAssistsTab() {
   const searchEl = document.getElementById('assists-search');
   const search = searchEl ? searchEl.value.trim().toLowerCase() : '';
 
-  const data = ASSIST_DATA.map((d, i) => ({
-    ...d, rank: i + 1, unique: [...new Set(d.cs_reps)].length
-  }));
-
-  // Stats from full dataset
-  const totalAssists = data.reduce((s, d) => s + d.count, 0);
-  const totalReps    = data.length;
-  const topRep       = data[0];
-  const avg          = totalReps ? Math.round(totalAssists / totalReps) : 0;
+  // Stats — unique reps only
+  const seen = new Set();
+  let totalAssists = 0, totalReps = 0, topName = '', topTotal = 0;
+  ASSIST_DATA.forEach(d => {
+    totalAssists += d.count;
+    if (!seen.has(d.name)) {
+      seen.add(d.name);
+      totalReps++;
+      if (d.rep_total > topTotal) { topTotal = d.rep_total; topName = d.name; }
+    }
+  });
+  const avg = totalReps ? Math.round(totalAssists / totalReps) : 0;
 
   const el = id => document.getElementById(id);
   if (el('assists-stat-total'))     el('assists-stat-total').textContent     = totalAssists;
   if (el('assists-stat-reps'))      el('assists-stat-reps').textContent      = totalReps;
-  if (el('assists-stat-top-name'))  el('assists-stat-top-name').textContent  = topRep ? topRep.name : '—';
-  if (el('assists-stat-top-count')) el('assists-stat-top-count').textContent = topRep ? topRep.count + ' assists' : '';
+  if (el('assists-stat-top-name'))  el('assists-stat-top-name').textContent  = topName || '—';
+  if (el('assists-stat-top-count')) el('assists-stat-top-count').textContent = topName ? topTotal + ' assists' : '';
   if (el('assists-stat-avg'))       el('assists-stat-avg').textContent       = avg;
 
-  let filtered = search ? data.filter(d => d.name.toLowerCase().includes(search)) : data;
+  let data = ASSIST_DATA.slice();
+  if (search) data = data.filter(d => d.name.toLowerCase().includes(search));
 
-  filtered.sort((a, b) => {
-    let va = a[_assistsSortKey], vb = b[_assistsSortKey];
+  data.sort((a, b) => {
+    const key = _assistsSortKey;
+    if (key === 'rank') {
+      if (a.rep_total !== b.rep_total) return (b.rep_total - a.rep_total) * _assistsSortDir;
+      return a.metric === 'SRA' ? -1 : 1;
+    }
+    let va = a[key], vb = b[key];
     if (typeof va === 'string') va = va.toLowerCase();
     if (typeof vb === 'string') vb = vb.toLowerCase();
     if (va < vb) return -1 * _assistsSortDir;
@@ -9406,25 +9457,29 @@ function renderAssistsTab() {
     return 0;
   });
 
-  // Sort indicator
   document.querySelectorAll('#assists-table th').forEach(th => th.classList.remove('sorted'));
-  const keyIdx = {rank: 0, name: 1, count: 2, unique: 3};
+  const keyIdx = {rank: 0, name: 1, metric: 2, count: 3, unique: 4};
   const ths = document.querySelectorAll('#assists-table th');
   if (ths[keyIdx[_assistsSortKey]]) ths[keyIdx[_assistsSortKey]].classList.add('sorted');
 
-  const maxCount = ASSIST_DATA[0] ? ASSIST_DATA[0].count : 1;
+  const maxCount = Math.max(...ASSIST_DATA.map(d => d.count), 1);
   const tbody = document.getElementById('assists-tbody');
   if (!tbody) return;
 
   tbody.innerHTML = '';
-  filtered.forEach((d, i) => {
+  data.forEach((d, i) => {
     const pct = Math.round((d.count / maxCount) * 100);
+    const isSRA = d.metric === 'SRA';
+    const badgeColor = isSRA ? 'var(--r-l3)'              : 'var(--r-l1)';
+    const badgeBg    = isSRA ? 'rgba(90,158,160,0.10)'    : 'rgba(45,196,142,0.10)';
+    const badgeBdr   = isSRA ? 'rgba(90,158,160,0.35)'    : 'rgba(45,196,142,0.35)';
     const tr = document.createElement('tr');
-    tr.style.animationDelay = Math.min(i * 0.01, 0.3) + 's';
+    tr.style.animationDelay = Math.min(i * 0.008, 0.3) + 's';
     tr.onclick = () => openAssistsModal(d);
     tr.innerHTML =
       '<td style="color:var(--text-muted);font-size:12px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif">' + d.rank + '</td>' +
       '<td style="font-weight:600;font-size:15px">' + d.name + '</td>' +
+      '<td><span style="display:inline-block;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;border:1px solid ' + badgeBdr + ';color:' + badgeColor + ';background:' + badgeBg + '">' + d.metric + '</span></td>' +
       '<td><div class="assists-bar-wrap">' +
         '<div class="assists-bar-track"><div class="assists-bar-fill" style="width:' + pct + '%"></div></div>' +
         '<span class="assists-count-val">' + d.count + '</span>' +
@@ -9433,15 +9488,16 @@ function renderAssistsTab() {
     tbody.appendChild(tr);
   });
 
+  const uniqueReps = new Set(data.map(d => d.name)).size;
   const fc = document.getElementById('assists-footer-count');
-  if (fc) fc.textContent = filtered.length + ' rep' + (filtered.length !== 1 ? 's' : '');
+  if (fc) fc.textContent = uniqueReps + ' rep' + (uniqueReps !== 1 ? 's' : '') + ' · ' + data.length + ' rows';
 }
 
 function openAssistsModal(d) {
   const overlay = document.getElementById('assists-modal-overlay');
   if (!overlay) return;
   document.getElementById('am-name').textContent  = d.name;
-  document.getElementById('am-count').textContent = d.count;
+  document.getElementById('am-count').textContent = d.count + ' ' + d.metric + ' assists';
 
   const listEl = document.getElementById('am-list');
   listEl.innerHTML = '';
