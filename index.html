@@ -7852,7 +7852,7 @@ async function fetchSheetsData(opts) {
         QTD_EMPLOYEES.push(newTotEntry);
         QTD_MAP[id] = newTotEntry;
       }
-      if (wtdEntry && !wtdEntry.wtd_ac && ac) wtdEntry.wtd_ac = ac;
+      // wtd_ac is sourced exclusively from the Report sheet — never overwrite from Totals
       totCount++;
     });
     if (typeof buildSIFromRepPerf === 'function') { buildSIFromRepPerf(); applyFilters(); }
