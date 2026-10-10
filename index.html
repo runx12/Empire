@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consul — Empire Performance Dashboard</title>
-<meta name="description" content="Empire Performance Dashboard — Powered by Consul">
-<meta property="og:title" content="Consul — Empire Performance Dashboard">
-<meta property="og:description" content="Consul Performance Dashboard">
+<title>Performance Dashboard</title>
+<meta name="description" content="Performance Dashboard">
+<meta property="og:title" content="Performance Dashboard">
+<meta property="og:description" content="Performance Dashboard">
 <meta name="robots" content="noindex, nofollow">
 <!-- Office-specific config — loaded from consul-config.js in each branch -->
 <script src="consul-config.js"></script>
@@ -2104,6 +2104,10 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
         <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4v6M3 7l3 3 3-3M2 10h8"/></svg>
         Export CSV
       </button>
+      <button class="export-btn" onclick="downloadAllSquadScorecards('wtd')" title="Download every squad's WTD scorecard as a ZIP of PNGs">
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4v6M3 7l3 3 3-3M2 10h8"/></svg>
+        Scorecards
+      </button>
       <button class="export-btn" id="wtd-goals-btn" onclick="openWTDGoals()" title="Edit WTD Goals">
         <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg>
         Goals
@@ -2262,21 +2266,21 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
   </div>
 </div>
 
-<!-- ── SQUAD SNAPSHOT MODAL ── -->
+<!-- ── SQUAD SNAPSHOT MODAL (scorecard style) ── -->
 <div id="squad-snapshot-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:2000;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closeSquadSnapshot()">
-  <div id="squad-snapshot-inner" style="background:#0e0c0d;border:1px solid rgba(170,221,221,0.22);width:100%;max-width:1400px;max-height:92vh;overflow:auto;position:relative;padding:28px 32px 24px;">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:16px;">
-      <div>
-        <div id="squad-snapshot-title" style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.3px;color:var(--off-white)"></div>
-        <div id="squad-snapshot-subtitle" style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark);margin-top:4px;"></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-top:2px;">
-        <button id="squad-snap-wtd-btn" onclick="squadSnapSetMode('wtd')" style="padding:5px 11px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:1px solid var(--cyan-light);color:var(--cyan-light);background:rgba(170,221,221,0.1);">WTD</button>
-        <button id="squad-snap-qtd-btn" onclick="squadSnapSetMode('qtd')" style="padding:5px 11px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:1px solid rgba(248,249,249,0.2);color:var(--text-muted);background:transparent;">QTD</button>
-        <button onclick="closeSquadSnapshot()" style="background:transparent;border:1px solid rgba(248,249,249,0.2);color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:5px 11px;cursor:pointer;">✕</button>
+  <div id="squad-snapshot-inner" style="background:#ffffff;width:100%;max-width:1000px;max-height:92vh;overflow:auto;position:relative;border-radius:4px;">
+    <div style="background:#1f4e79;padding:22px 24px 18px;text-align:center;">
+      <div id="squad-snapshot-title" style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:28px;font-weight:700;color:#ffffff;line-height:1.2"></div>
+      <div id="squad-snapshot-subtitle" style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:15px;color:#d6e4f0;margin-top:6px;"></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:16px;">
+        <button id="squad-snap-wtd-btn" onclick="squadSnapSetMode('wtd')" style="padding:6px 12px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">WTD</button>
+        <button id="squad-snap-qtd-btn" onclick="squadSnapSetMode('qtd')" style="padding:6px 12px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">QTD</button>
+        <button onclick="downloadSquadScorecard()" title="Download this squad's scorecard as a PNG" style="padding:6px 12px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;;border:1px solid rgba(255,255,255,0.45);color:#ffffff;background:transparent;">&#8681; PNG</button>
+        <button onclick="downloadAllSquadScorecards()" title="Download every squad's scorecard as a ZIP of PNGs" style="padding:6px 12px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;;border:1px solid rgba(255,255,255,0.45);color:#ffffff;background:transparent;">&#8681; All Squads</button>
+        <button onclick="closeSquadSnapshot()" style="padding:6px 12px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;;border:1px solid rgba(255,255,255,0.45);color:#ffffff;background:transparent;">&#10005;</button>
       </div>
     </div>
-    <div id="squad-snapshot-body"></div>
+    <div id="squad-snapshot-body" style="padding:24px 40px 30px;"></div>
   </div>
 </div>
 
@@ -2573,6 +2577,7 @@ let ROSTER_EMPLOYEES   = []; // Populated from Google Sheets on load
 let COMBINE2_EMPLOYEES = []; // Populated from Google Sheets
 let NEW_HIRE_EMPLOYEES = []; // Populated from Google Sheets
 let INSTALL_LIST       = []; // Populated from Google Sheets — Install List tab (self gen calc)
+let QTD_ASSISTS_LIST   = []; // Populated from Google Sheets — QTD_Assists tab (one row per rep, pre-totaled)
 let CLOSED_DEALS_MAP   = {}; // Keyed by rep ID — closed deal tally counter (New Hires)
 let REP_DETAIL_MAP     = {}; // Keyed by employee ID — populated by Rep Detail tab
 let GC_EMPLOYEES       = []; // Populated from Google Sheets — Game Changers tab
@@ -4906,104 +4911,260 @@ function closeSquadSnapshot() {
 
 function squadSnapSetMode(mode) {
   _squadSnapMode = mode;
-  const wb=document.getElementById('squad-snap-wtd-btn'), qb=document.getElementById('squad-snap-qtd-btn');
-  if(wb){wb.style.borderColor=mode==='wtd'?'var(--cyan-light)':'rgba(248,249,249,0.2)';wb.style.color=mode==='wtd'?'var(--cyan-light)':'var(--text-muted)';wb.style.background=mode==='wtd'?'rgba(170,221,221,0.1)':'transparent';}
-  if(qb){qb.style.borderColor=mode==='qtd'?'var(--cyan-light)':'rgba(248,249,249,0.2)';qb.style.color=mode==='qtd'?'var(--cyan-light)':'var(--text-muted)';qb.style.background=mode==='qtd'?'rgba(170,221,221,0.1)':'transparent';}
+  [['squad-snap-wtd-btn','wtd'],['squad-snap-qtd-btn','qtd']].forEach(function(p){
+    const el=document.getElementById(p[0]); if(!el) return;
+    const on = mode===p[1];
+    el.style.border   = '1px solid ' + (on ? '#ffffff' : 'rgba(255,255,255,0.45)');
+    el.style.color    = on ? '#1f4e79' : '#ffffff';
+    el.style.background = on ? '#ffffff' : 'transparent';
+  });
   renderSquadSnapshot(_squadSnapCurrent);
 }
 
-function renderSquadSnapshot(squadKey) {
-  const body=document.getElementById('squad-snapshot-body');
-  const subtitleEl=document.getElementById('squad-snapshot-subtitle');
-  const rosterMembers=ROSTER_EMPLOYEES.filter(e=>e.squad===squadKey);
-  if(!rosterMembers.length||!body) return;
-  const sqCfg=SQUAD_DB[squadKey]||{}, leader=sqCfg.leader||'', tab=_squadSnapMode;
-  let sorted=[...rosterMembers].sort((a,b)=>{
-    if(a.name===leader) return -1; if(b.name===leader) return 1;
-    if(tab==='wtd') return ((WTD_MAP[b.id]||{}).wtd_sra||0)-((WTD_MAP[a.id]||{}).wtd_sra||0);
-    return ((QTD_MAP[b.id]||{}).qtr_sra||0)-((QTD_MAP[a.id]||{}).qtr_sra||0);
-  });
-  // Always filter to reps with activity — WTD: any WTD number; QTD: any QTD number
-  if(tab==='wtd'){
-    sorted=sorted.filter(e=>{const w=WTD_MAP[e.id]||{};return w.wtd_ac||w.wtd_cs||w.wtd_sra||w.wtd_cap||w.wtd_ic;});
+// ── SQUAD SCORECARD (modal view + PNG / ZIP export) ──────────────────────────
+// One data builder feeds both the on-screen modal and the canvas-drawn PNG, so
+// the two always show identical numbers.
+const SC_FONT = "'Helvetica Neue',Helvetica,Arial,sans-serif"; // single quotes: also embedded in inline style="" attributes
+const SC_COLOR = {
+  band:'#1f4e79', bandSub:'#d6e4f0', head:'#163450', group:'#dae0f2',
+  stripe:'#f5f6fa', row:'#ffffff', text:'#2b2b2b', totalBg:'#fff0cc', border:'#d0d4dc'
+};
+
+function _scDate(mode) {
+  const el = document.getElementById(mode === 'qtd' ? 'qtd-date-input' : 'wtd-date-input');
+  const v = el && el.value;
+  return v ? new Date(v + 'T12:00:00') : new Date();
+}
+function _scSubtitle(mode) {
+  const d = _scDate(mode), f = x => (x.getMonth() + 1) + '/' + x.getDate();
+  return mode === 'qtd' ? 'Quarter to Date  ·  as of ' + f(d)
+                        : 'Week of ' + f(weekMonday(d)) + ' – ' + f(d);
+}
+function _scFileDate(mode) {
+  const d = _scDate(mode), p = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
+
+function squadScorecardData(squadKey, mode) {
+  const isW = mode !== 'qtd';
+  const members = ROSTER_EMPLOYEES.filter(e => e.squad === squadKey);
+  const sqCfg = SQUAD_DB[squadKey] || {}, leader = sqCfg.leader || '';
+  const cols = isW ? ['Pitches', 'AC', 'CS', 'SRA', 'CAP', 'IC'] : ['SRA', 'CAP', 'IC', 'Days/SRA'];
+  const counted = isW ? 6 : 3;          // columns that decide whether a rep "has activity"
+  const sraIdx  = isW ? 3 : 0;
+  const vals = e => {
+    const w = WTD_MAP[e.id] || {}, q = QTD_MAP[e.id] || {};
+    return isW ? [w.pitches || 0, w.wtd_ac || 0, w.wtd_cs || 0, w.wtd_sra || 0, w.wtd_cap || 0, w.wtd_ic || 0]
+               : [q.qtr_sra || 0, q.qtr_cap || 0, q.qtr_ic || 0, q.days_since_sra || 0];
+  };
+  const active = members.map(e => ({ e: e, v: vals(e) }))
+    .filter(r => r.v.slice(0, counted).some(n => n > 0))
+    .sort((a, b) => {
+      if (a.e.name === leader) return -1;
+      if (b.e.name === leader) return 1;
+      return (b.v[sraIdx] - a.v[sraIdx]) || (b.v[1 % counted] - a.v[1 % counted]) || a.e.name.localeCompare(b.e.name);
+    });
+
+  // Group by pod (reps with no pod go last under "Not Assigned"); skip headers if nobody has a pod
+  const hasPods = active.some(r => (r.e.pod || '').trim());
+  let groups;
+  if (!hasPods) {
+    groups = [{ label: null, rows: active }];
   } else {
-    sorted=sorted.filter(e=>{const q=QTD_MAP[e.id]||{};return q.qtr_sra||q.qtr_cap||q.qtr_ic;});
+    const byPod = {};
+    active.forEach(r => { const p = (r.e.pod || '').trim(); (byPod[p] = byPod[p] || []).push(r); });
+    const names = Object.keys(byPod).filter(Boolean).sort((a, b) => a.localeCompare(b));
+    groups = names.map(n => ({ label: n, rows: byPod[n] }));
+    if (byPod['']) groups.push({ label: 'Not Assigned', rows: byPod[''] });
   }
-  if(!sorted.length){
-    body.innerHTML='<div style="padding:20px;color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;">No activity yet this '+(tab==='wtd'?'week':'quarter')+' in this squad.</div>';
-    document.getElementById('squad-snapshot-modal').style.display='flex';
+  groups.forEach(g => { g.rows = g.rows.map(r => ({ name: r.e.name, vals: r.v })); });
+
+  const totals = cols.map((c, i) => {
+    if (!isW && i === 3) return '';                        // Days/SRA doesn't sum
+    const sum = active.reduce((s, r) => s + r.v[i], 0);
+    const goal = !isW ? (i === 0 ? sqCfg.qtr_sra : i === 2 ? sqCfg.qtr_ic : 0) : 0;
+    return goal ? sum + ' / ' + goal : String(sum);
+  });
+
+  return {
+    squadKey: squadKey, mode: isW ? 'wtd' : 'qtd', cols: cols, groups: groups, totals: totals,
+    count: active.length,
+    title: squadKey + (/squad\s*$/i.test(squadKey) ? '' : ' Squad') + ' Scorecard',
+    subtitle: _scSubtitle(isW ? 'wtd' : 'qtd'),
+    totalLabel: squadKey + ' Total'
+  };
+}
+
+// ── On-screen modal ──────────────────────────────────────────────────────────
+function renderSquadSnapshot(squadKey) {
+  const body = document.getElementById('squad-snapshot-body');
+  if (!body || !ROSTER_EMPLOYEES.some(e => e.squad === squadKey)) return;
+  const d = squadScorecardData(squadKey, _squadSnapMode);
+  document.getElementById('squad-snapshot-title').textContent = d.title;
+  document.getElementById('squad-snapshot-subtitle').textContent = d.subtitle;
+  const modal = document.getElementById('squad-snapshot-modal');
+  if (!d.count) {
+    body.innerHTML = '<div style="padding:28px 0;text-align:center;color:#5b6472;font-family:' + SC_FONT + ';font-size:14px;">No activity yet this ' + (d.mode === 'wtd' ? 'week' : 'quarter') + ' in this squad.</div>';
+    modal.style.display = 'flex';
     return;
   }
-  const n=sorted.length;
-  const fs=n<=10?14:n<=15?12:n<=20?11:n<=28?10:9;
-  const pad=fs<=10?'6px 10px':'8px 14px';
-  const hS='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+(fs-2)+'px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark);padding:'+pad+';text-align:center;border-bottom:1px solid rgba(170,221,221,0.18);white-space:nowrap;';
-  const hNS='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+(fs-2)+'px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark);padding:'+pad+';text-align:left;border-bottom:1px solid rgba(170,221,221,0.18);';
-  const tS='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+fs+'px;padding:'+pad+';border-bottom:1px solid rgba(170,221,221,0.06);text-align:center;color:var(--off-white);';
-  const tNS='font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:'+fs+'px;font-weight:600;padding:'+pad+';border-bottom:1px solid rgba(170,221,221,0.06);text-align:left;color:var(--off-white);white-space:nowrap;';
-  function clsWTD(v,g){if(!v||v===0)return 'color:rgba(248,249,249,0.15)';if(v>g)return 'color:var(--v-exceeds);text-shadow:0 0 8px rgba(39,217,217,0.4)';return 'color:var(--off-white)';}
-  function sraIndicator(d){if(!d)return '';const col=d>14?'#F05252':d>7?'#EF9F27':'#2DC48E';return '<span title="Days since last SRA: '+d+'" style="margin-left:6px;display:inline-block;width:7px;height:7px;border-radius:50%;background:'+col+';vertical-align:middle;flex-shrink:0"></span>';}
-  function rkBadge(id,q){const r=(q&&q.exp_rank)?q.exp_rank:((RANKINGS_MAP[id]||{}).currentRank||'');return r?rkRankBadge(r):'<span style="color:rgba(248,249,249,.25)">—</span>';}
-  // QTD squad summary bar (always shown at top)
-  const qG_sra=sqCfg.qtr_sra||0,qG_ic=sqCfg.qtr_ic||0;
-  const qT_sra=rosterMembers.reduce((s,e)=>s+((QTD_MAP[e.id]||{}).qtr_sra||0),0);
-  const qT_cap=rosterMembers.reduce((s,e)=>s+((QTD_MAP[e.id]||{}).qtr_cap||0),0);
-  const qT_ic=rosterMembers.reduce((s,e)=>s+((QTD_MAP[e.id]||{}).qtr_ic||0),0);
-  const sCol=qG_sra&&qT_sra>=qG_sra?'#2DC48E':qG_sra&&qT_sra>=qG_sra*.75?'#EF9F27':'var(--cyan-light)';
-  const iCol=qG_ic&&qT_ic>=qG_ic?'#2DC48E':qG_ic&&qT_ic>=qG_ic*.75?'#EF9F27':'var(--cyan-light)';
-  const qtdBar='<div style="display:flex;align-items:center;gap:24px;padding:12px 0 16px;border-bottom:1px solid rgba(170,221,221,0.2);margin-bottom:16px;flex-wrap:wrap">'
-    +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan-dark)">QTD Squad</div>'
-    +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:'+sCol+'">SRA '+qT_sra+(qG_sra?' <span style="font-weight:400;color:rgba(248,249,249,0.4);font-size:11px">/ '+qG_sra+'</span>':'')+'</div>'
-    +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:var(--off-white)">CAP '+qT_cap+'</div>'
-    +'<div style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:'+iCol+'">IC '+qT_ic+(qG_ic?' <span style="font-weight:400;color:rgba(248,249,249,0.4);font-size:11px">/ '+qG_ic+'</span>':'')+'</div>'
-    +'</div>';
-  let hdr,rows;
-  if(tab==='wtd'){
-    const wk=document.getElementById('wtd-date-input')?.value||'';
-    subtitleEl.textContent='This Week'+(wk?'  ·  Week of '+wk:'');
-    const tot=sorted.reduce((t,e)=>{const w=WTD_MAP[e.id]||{};t.ac+=w.wtd_ac||0;t.cs+=w.wtd_cs||0;t.sra+=w.wtd_sra||0;t.cap+=w.wtd_cap||0;t.ic+=w.wtd_ic||0;t.pit+=w.pitches||0;return t;},{ac:0,cs:0,sra:0,cap:0,ic:0,pit:0});
-    hdr='<tr><th style="'+hNS+'">Name</th><th style="'+hS+'">AC</th><th style="'+hS+'">CS</th><th style="'+hS+'">SRA</th><th style="'+hS+'">CAP</th><th style="'+hS+'">IC</th><th style="'+hS+'">Pitches</th><th style="'+hS+'">Days/SRA</th></tr>';
-    const totRow='<tr style="background:rgba(39,217,217,0.05)"><td style="'+tNS+'font-weight:700;color:var(--cyan-dark)">TOTALS</td>'
-      +'<td style="'+tS+'font-weight:700">'+(tot.ac||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cs||'—')+'</td>'
-      +'<td style="'+tS+'font-weight:700">'+(tot.sra||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cap||'—')+'</td>'
-      +'<td style="'+tS+'font-weight:700">'+(tot.ic||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.pit||'—')+'</td><td style="'+tS+'"></td></tr>';
-    rows=sorted.map(e=>{
-      const w=WTD_MAP[e.id]||{},q=QTD_MAP[e.id]||{},il=e.name===leader;
-      const days=q.days_since_sra||0;
-      const ds=days>14?'font-weight:700;color:#F05252':days>7?'color:#EF9F27':days>0?'color:#2DC48E':'color:rgba(248,249,249,0.25)';
-      const chg=q.status_change?changeIcon(q.status_change):'';
-      return '<tr><td style="'+tNS+(il?'color:var(--cyan-light);':'')+'"><span style="display:inline-flex;align-items:center">'+e.name
-        +(il?' <span style="font-size:9px;letter-spacing:1px;color:var(--cyan-dark);margin-left:5px">LEADER</span>':'')
-        +(chg?'<span style="margin-left:4px">'+chg+'</span>':'')+(days?sraIndicator(days):'')+'</span></td>'
-        +'<td style="'+tS+clsWTD(w.wtd_ac,WTD_GOALS.ac)+'">'+(w.wtd_ac||'—')+'</td>'
-        +'<td style="'+tS+clsWTD(w.wtd_cs,WTD_GOALS.cs)+'">'+(w.wtd_cs||'—')+'</td>'
-        +'<td style="'+tS+clsWTD(w.wtd_sra,WTD_GOALS.sra)+'">'+(w.wtd_sra||'—')+'</td>'
-        +'<td style="'+tS+clsWTD(w.wtd_cap,WTD_GOALS.cap)+'">'+(w.wtd_cap||'—')+'</td>'
-        +'<td style="'+tS+clsWTD(w.wtd_ic,WTD_GOALS.ic)+'">'+(w.wtd_ic||'—')+'</td>'
-        +'<td style="'+tS+clsWTD(w.pitches,WTD_GOALS.pitches)+'">'+(w.pitches||'—')+'</td>'
-        +'<td style="'+tS+ds+'">'+(days||'—')+'</td></tr>';
-    }).join('')+totRow;
-  } else {
-    subtitleEl.textContent='QTD Detail';
-    const tot=sorted.reduce((t,e)=>{const q=QTD_MAP[e.id]||{};t.sra+=q.qtr_sra||0;t.cap+=q.qtr_cap||0;t.ic+=q.qtr_ic||0;return t;},{sra:0,cap:0,ic:0});
-    hdr='<tr><th style="'+hNS+'">Name</th><th style="'+hS+'">QTR SRA</th><th style="'+hS+'">QTR CAP</th><th style="'+hS+'">QTR IC</th><th style="'+hS+'">Days/SRA</th><th style="'+hS+'">Rank</th></tr>';
-    const totRow='<tr style="background:rgba(39,217,217,0.05)"><td style="'+tNS+'font-weight:700;color:var(--cyan-dark)">TOTALS</td>'
-      +'<td style="'+tS+'font-weight:700">'+(tot.sra||'—')+'</td><td style="'+tS+'font-weight:700">'+(tot.cap||'—')+'</td>'
-      +'<td style="'+tS+'font-weight:700">'+(tot.ic||'—')+'</td><td style="'+tS+'"></td><td style="'+tS+'"></td></tr>';
-    rows=sorted.map(e=>{
-      const q=QTD_MAP[e.id]||{},il=e.name===leader;
-      const days=q.days_since_sra||0;
-      const ds=days>14?'font-weight:700;color:#F05252':days>7?'color:#EF9F27':days>0?'color:#2DC48E':'color:rgba(248,249,249,0.25)';
-      const chg=q.status_change?changeIcon(q.status_change):'';
-      return '<tr><td style="'+tNS+(il?'color:var(--cyan-light);':'')+'"><span style="display:inline-flex;align-items:center">'+e.name
-        +(il?' <span style="font-size:9px;letter-spacing:1px;color:var(--cyan-dark);margin-left:5px">LEADER</span>':'')
-        +(chg?'<span style="margin-left:4px">'+chg+'</span>':'')+(days?sraIndicator(days):'')+'</span></td>'
-        +'<td style="'+tS+'">'+(q.qtr_sra||'—')+'</td><td style="'+tS+'">'+(q.qtr_cap||'—')+'</td><td style="'+tS+'">'+(q.qtr_ic||'—')+'</td>'
-        +'<td style="'+tS+ds+'">'+(days||'—')+'</td><td style="'+tS+'">'+rkBadge(e.id,q)+'</td></tr>';
-    }).join('')+totRow;
+  const F = 'font-family:' + SC_FONT + ';';
+  const th = (t, left) => '<th style="' + F + 'background:' + SC_COLOR.head + ';color:#fff;font-size:13px;font-weight:700;padding:14px ' + (left ? '20px' : '10px') + ';text-align:' + (left ? 'left' : 'center') + ';white-space:nowrap;">' + t + '</th>';
+  let html = '<div style="overflow-x:auto;border:1px solid ' + SC_COLOR.border + ';"><table style="width:100%;min-width:480px;border-collapse:collapse;">'
+    + '<thead><tr>' + th('Name', true) + d.cols.map(c => th(c, false)).join('') + '</tr></thead><tbody>';
+  d.groups.forEach(g => {
+    if (g.label) html += '<tr><td colspan="' + (d.cols.length + 1) + '" style="' + F + 'background:' + SC_COLOR.group + ';color:' + SC_COLOR.head + ';font-weight:700;font-size:15px;padding:9px 20px;">' + g.label + '</td></tr>';
+    g.rows.forEach((r, i) => {
+      const bg = i % 2 === 0 ? SC_COLOR.stripe : SC_COLOR.row;
+      html += '<tr style="background:' + bg + '"><td style="' + F + 'color:' + SC_COLOR.text + ';font-size:14px;padding:12px 20px;white-space:nowrap;">' + r.name + '</td>'
+        + r.vals.map((v, ci) => '<td style="' + F + 'color:' + SC_COLOR.text + ';font-size:14px;padding:12px 10px;text-align:center;">' + ((d.mode === 'qtd' && ci === 3 && !v) ? '—' : v) + '</td>').join('') + '</tr>';
+    });
+  });
+  html += '<tr style="background:' + SC_COLOR.totalBg + ';border-top:2px solid ' + SC_COLOR.head + '"><td style="' + F + 'color:' + SC_COLOR.head + ';font-weight:700;font-size:15px;padding:14px 20px;white-space:nowrap;">' + d.totalLabel + '</td>'
+    + d.totals.map(t => '<td style="' + F + 'color:' + SC_COLOR.head + ';font-weight:700;font-size:15px;padding:14px 10px;text-align:center;">' + t + '</td>').join('') + '</tr>';
+  html += '</tbody></table></div>';
+  body.innerHTML = html;
+  modal.style.display = 'flex';
+}
+
+// ── PNG drawing (canvas) ─────────────────────────────────────────────────────
+function drawSquadScorecard(d, scale) {
+  scale = scale || 2;
+  const W = 975, bandH = 100, padX = 40, gapTop = 24, headH = 46, rowH = 42, groupH = 34, totH = 48, gapBot = 30;
+  let nRows = 0, nGroups = 0;
+  d.groups.forEach(g => { nRows += g.rows.length; if (g.label) nGroups++; });
+  const H = bandH + gapTop + headH + nGroups * groupH + nRows * rowH + totH + gapBot;
+  const cv = document.createElement('canvas');
+  cv.width = W * scale; cv.height = H * scale;
+  const c = cv.getContext('2d');
+  c.scale(scale, scale);
+  c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, H);
+
+  c.fillStyle = SC_COLOR.band; c.fillRect(0, 0, W, bandH);
+  c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillStyle = '#ffffff'; c.font = '700 32px ' + SC_FONT; c.fillText(d.title, W / 2, 36);
+  c.fillStyle = SC_COLOR.bandSub; c.font = '400 18px ' + SC_FONT; c.fillText(d.subtitle, W / 2, 72);
+
+  const tx = padX, tw = W - 2 * padX, n = d.cols.length;
+  const nameW = Math.min(340, tw - n * 80), numW = (tw - nameW) / n;
+  const colX = i => tx + nameW + numW * i + numW / 2;
+  const fit = (t, max) => {
+    t = String(t);
+    if (c.measureText(t).width <= max) return t;
+    while (t.length > 1 && c.measureText(t + '…').width > max) t = t.slice(0, -1);
+    return t + '…';
+  };
+  let y = bandH + gapTop;
+  const tableTop = y;
+
+  c.fillStyle = SC_COLOR.head; c.fillRect(tx, y, tw, headH);
+  c.fillStyle = '#ffffff'; c.font = '700 15px ' + SC_FONT;
+  c.textAlign = 'left'; c.fillText('Name', tx + 20, y + headH / 2);
+  c.textAlign = 'center'; d.cols.forEach((col, i) => c.fillText(col, colX(i), y + headH / 2));
+  y += headH;
+
+  d.groups.forEach(g => {
+    if (g.label) {
+      c.fillStyle = SC_COLOR.group; c.fillRect(tx, y, tw, groupH);
+      c.fillStyle = SC_COLOR.head; c.font = '700 16px ' + SC_FONT; c.textAlign = 'left';
+      c.fillText(g.label, tx + 20, y + groupH / 2 + 1);
+      y += groupH;
+    }
+    g.rows.forEach((r, i) => {
+      c.fillStyle = i % 2 === 0 ? SC_COLOR.stripe : SC_COLOR.row; c.fillRect(tx, y, tw, rowH);
+      c.fillStyle = SC_COLOR.text; c.font = '400 15px ' + SC_FONT; c.textAlign = 'left';
+      c.fillText(fit(r.name, nameW - 30), tx + 20, y + rowH / 2 + 1);
+      c.textAlign = 'center';
+      r.vals.forEach((v, ci) => c.fillText((d.mode === 'qtd' && ci === 3 && !v) ? '—' : String(v), colX(ci), y + rowH / 2 + 1));
+      y += rowH;
+    });
+  });
+
+  c.fillStyle = SC_COLOR.totalBg; c.fillRect(tx, y, tw, totH);
+  c.fillStyle = SC_COLOR.head; c.fillRect(tx, y, tw, 2);
+  c.font = '700 17px ' + SC_FONT; c.textAlign = 'left';
+  c.fillText(fit(d.totalLabel, nameW - 30), tx + 20, y + totH / 2 + 1);
+  c.textAlign = 'center'; d.totals.forEach((t, i) => c.fillText(t, colX(i), y + totH / 2 + 1));
+  y += totH;
+
+  c.strokeStyle = SC_COLOR.border; c.lineWidth = 1;
+  c.strokeRect(tx + 0.5, tableTop + 0.5, tw - 1, y - tableTop - 1);
+  return cv;
+}
+
+// ── Downloads ────────────────────────────────────────────────────────────────
+function _scBlob(cv) { return new Promise(res => cv.toBlob(res, 'image/png')); }
+function _scSlug(s) { return String(s).replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'Squad'; }
+function _scSave(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+}
+
+async function downloadSquadScorecard() {
+  const d = squadScorecardData(_squadSnapCurrent, _squadSnapMode);
+  if (!d.count) { showSyncBanner('No activity to export for this squad', true); return; }
+  const blob = await _scBlob(drawSquadScorecard(d, 2));
+  _scSave(blob, _scSlug(d.squadKey) + '_Scorecard_' + d.mode.toUpperCase() + '_' + _scFileDate(d.mode) + '.png');
+}
+
+async function downloadAllSquadScorecards(mode) {
+  mode = mode === 'qtd' ? 'qtd' : (mode === 'wtd' ? 'wtd' : _squadSnapMode);
+  const squads = [...new Set(ROSTER_EMPLOYEES.map(e => e.squad).filter(s => s && s !== 'No Squad'))]
+    .sort((a, b) => a.localeCompare(b));
+  const files = [];
+  showSyncBanner('Building scorecards…');
+  for (const sq of squads) {
+    const d = squadScorecardData(sq, mode);
+    if (!d.count) continue;
+    const blob = await _scBlob(drawSquadScorecard(d, 2));
+    files.push({ name: _scSlug(sq) + '_Scorecard_' + mode.toUpperCase() + '_' + _scFileDate(mode) + '.png',
+                 data: new Uint8Array(await blob.arrayBuffer()) });
   }
-  body.innerHTML=qtdBar+'<table style="width:100%;border-collapse:collapse;">'+hdr+'<tbody>'+rows+'</tbody></table>';
-  document.getElementById('squad-snapshot-modal').style.display='flex';
+  if (!files.length) { showSyncBanner('No squads with activity to export', true); return; }
+  _scSave(_scZip(files), 'Squad_Scorecards_' + mode.toUpperCase() + '_' + _scFileDate(mode) + '.zip');
+  showSyncBanner('✓ ' + files.length + ' squad scorecards downloaded');
+}
+
+// Minimal store-only ZIP writer (PNGs are already compressed, so no deflate needed)
+let _scCrcTable = null;
+function _scCrc(buf) {
+  if (!_scCrcTable) {
+    _scCrcTable = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); _scCrcTable[n] = c >>> 0; }
+  }
+  let crc = 0xFFFFFFFF;
+  for (let i = 0; i < buf.length; i++) crc = _scCrcTable[(crc ^ buf[i]) & 0xFF] ^ (crc >>> 8);
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+function _scZip(files) {
+  const enc = new TextEncoder(), parts = [], central = [];
+  const now = new Date();
+  const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+  const dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+  let offset = 0;
+  files.forEach(f => {
+    const nm = enc.encode(f.name), crc = _scCrc(f.data), size = f.data.length;
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true);
+    lh.setUint16(8, 0, true); lh.setUint16(10, dosTime, true); lh.setUint16(12, dosDate, true);
+    lh.setUint32(14, crc, true); lh.setUint32(18, size, true); lh.setUint32(22, size, true);
+    lh.setUint16(26, nm.length, true); lh.setUint16(28, 0, true);
+    parts.push(new Uint8Array(lh.buffer), nm, f.data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true);
+    ch.setUint16(10, 0, true); ch.setUint16(12, dosTime, true); ch.setUint16(14, dosDate, true);
+    ch.setUint32(16, crc, true); ch.setUint32(20, size, true); ch.setUint32(24, size, true);
+    ch.setUint16(28, nm.length, true); ch.setUint32(42, offset, true);
+    central.push(new Uint8Array(ch.buffer), nm);
+    offset += 30 + nm.length + size;
+  });
+  const cdSize = central.reduce((s, p) => s + p.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+  end.setUint32(12, cdSize, true); end.setUint32(16, offset, true);
+  return new Blob(parts.concat(central, [new Uint8Array(end.buffer)]), { type: 'application/zip' });
 }
 
 // ── POD SNAPSHOT ─────────────────────────────────────────────────────────────
@@ -7472,6 +7633,36 @@ function squadRowToEntry(r) {
   };
 }
 
+// Sheet headers: Employee ID, Rep Name, Office, Region, AC, CS, WC, SRA, CAP, IC, PTO
+// Every metric column on this tab is an assist count, already finalized by the
+// sheet owner — no halving, grouping, or per-interaction math needed here.
+// The sheet's trailing "Grand Total" row is dropped by the numeric-ID check.
+function qtdAssistsRowToEntry(r) {
+  var id = String(r['employee id'] || '').trim();
+  if (!id || !/^\d+$/.test(id)) return null;
+  var name = String(r['rep name'] || r['name'] || '').trim();
+  if (!name) return null;
+  var metrics = {
+    ac:  parseInt(r['ac']  || 0) || 0,
+    cs:  parseInt(r['cs']  || 0) || 0,
+    wc:  parseInt(r['wc']  || 0) || 0,
+    sra: parseInt(r['sra'] || 0) || 0,
+    cap: parseInt(r['cap'] || 0) || 0,
+    ic:  parseInt(r['ic']  || 0) || 0,
+    pto: parseInt(r['pto'] || 0) || 0
+  };
+  var total = metrics.ac + metrics.cs + metrics.wc + metrics.sra + metrics.cap + metrics.ic + metrics.pto;
+  return {
+    id:     id,
+    name:   name,
+    office: shortOffice(String(r['office'] || '')),
+    region: String(r['region'] || ''),
+    ac:     metrics.ac, cs: metrics.cs, wc: metrics.wc, sra: metrics.sra,
+    cap:    metrics.cap, ic: metrics.ic, pto: metrics.pto,
+    total:  total
+  };
+}
+
 function onboardRowToEmployee(r, idx) {
   // Field names match ob_rowToEmployee exactly so rendering works unchanged
   // Sheet columns: status,name,mobile,referral,leader,squad,office,
@@ -7660,7 +7851,10 @@ async function fetchSheetsData(opts) {
     if (exRows.length) { rankingsData = exRows; RANKINGS_MAP = Object.fromEntries(exRows.map(function(r){ return [r.id, {title:r.title, currentRank:r.currentRank, highestRank:r.highestRank}]; })); }
   } catch(e) { errors.push('Export: ' + e.message); }
 
-  // ── Report (WTD AC/Knocks/Pitches) ──────────────────────────────────────────
+  // ── Report (WTD AC/SRA/CAP/IC/Knocks/Pitches) ────────────────────────────────
+  // SRA/CAP/IC week values now come from this tab (sras/caps/installs columns)
+  // instead of QTD Points, per QTD Points reliability issues. If this fetch
+  // fails, wtd_sra/wtd_cap/wtd_ic simply retain whatever QTD Points set above.
   try {
     var rpRes = await fetchWithTimeout(sheetsUrl('Report'));
     if (!rpRes.ok) throw new Error('HTTP ' + rpRes.status);
@@ -7670,6 +7864,9 @@ async function fetchSheetsData(opts) {
       var wtd = WTD_MAP[id];
       if (wtd) {
         wtd.wtd_ac        = csvNum(r['acs']);
+        wtd.wtd_sra       = csvNum(r['sras']);
+        wtd.wtd_cap       = csvNum(r['caps']);
+        wtd.wtd_ic        = csvNum(r['installs']);
         wtd.pitches       = csvNum(r['pitches']);
         wtd.knocks        = csvNum(r['knocks']);
         wtd.hours_knocked = csvNum(r['hours knocked']);
@@ -7677,7 +7874,9 @@ async function fetchSheetsData(opts) {
         var ro = (rosterById && rosterById[id]) || {};
         var newEntry = { id, name: ro.name||id, squad: ro.squad||'', office: ro.office||'', status: ro.status||'',
           wtd_ac: csvNum(r['acs']), pitches: csvNum(r['pitches']), knocks: csvNum(r['knocks']),
-          hours_knocked: csvNum(r['hours knocked']), wtd_cs:0, wtd_wc:0, wtd_sra:0, wtd_cap:0, wtd_ic:0, qtr_status:'' };
+          hours_knocked: csvNum(r['hours knocked']), wtd_cs:0, wtd_wc:0,
+          wtd_sra: csvNum(r['sras']), wtd_cap: csvNum(r['caps']), wtd_ic: csvNum(r['installs']),
+          qtr_status:'' };
         WTD_EMPLOYEES.push(newEntry);
         WTD_MAP[id] = newEntry;
       }
@@ -7793,6 +7992,17 @@ async function fetchSheetsData(opts) {
     if (ilRows.length) { INSTALL_LIST.length = 0; ilRows.forEach(function(r){ r['office'] = shortOffice(r['office'] || ''); INSTALL_LIST.push(r); }); }
     if (typeof renderLeadershipPulse === 'function') renderLeadershipPulse(null);
   } catch(e) { errors.push('Install List: ' + e.message); }
+
+  // ── QTD_Assists (pre-totaled per rep — replaces old Install List assist calc) ─
+  try {
+    var qaRes  = await fetchWithTimeout(sheetsUrl('QTD_Assists'));
+    if (!qaRes.ok) throw new Error('HTTP ' + qaRes.status);
+    var qaRows = sheetsRowsToObjects((await qaRes.json()).values || [])
+                   .map(qtdAssistsRowToEntry)
+                   .filter(Boolean);
+    if (qaRows.length) { QTD_ASSISTS_LIST.length = 0; qaRows.forEach(function(e){ QTD_ASSISTS_LIST.push(e); }); }
+    if (typeof renderAssistsTab === 'function') renderAssistsTab();
+  } catch(e) { errors.push('QTD_Assists: ' + e.message); }
 
   // ── Closed Deals (New Hire tally counter) ────────────────────────────────────
   try {
@@ -9140,31 +9350,15 @@ function renderProductivity() {
   body.light-mode #assists-table thead th { background: var(--near-black); color: #1C1C1E; }
 
 /* ── Light mode: all modals keep dark bg — force light text inside ── */
-body.light-mode #assists-modal,
 body.light-mode #rep-modal,
-body.light-mode #squad-snapshot-inner,
 body.light-mode #pod-snapshot-inner,
 body.light-mode #wtd-goals-panel { background: #1a1718 !important; }
 body.light-mode #pod-snapshot-inner,
 body.light-mode #pod-snapshot-inner * { color: #F5F5F7; }
 body.light-mode #pod-snapshot-inner #pod-snapshot-title { color: var(--r-franchise); }
 
-body.light-mode #assists-modal *,
 body.light-mode #rep-modal *,
-body.light-mode #squad-snapshot-inner *,
 body.light-mode #wtd-goals-panel * { color: inherit; }
-
-/* Specific text elements inside dark modals */
-body.light-mode .am-header,
-body.light-mode .am-sup,
-body.light-mode .am-name,
-body.light-mode .am-count-line,
-body.light-mode .am-row-num,
-body.light-mode .am-row-name { color: #F5F5F7; }
-body.light-mode .am-count-line span { color: #27d9d9; }
-body.light-mode .am-close-btn { color: rgba(248,249,249,0.5); border-color: rgba(170,221,221,0.12); }
-body.light-mode .am-close-btn:hover { color: #F5F5F7; }
-body.light-mode .am-row { border-bottom-color: rgba(170,221,221,0.07); }
 
 body.light-mode #rep-modal .rm-name,
 body.light-mode #rep-modal .rm-stat-label,
@@ -9172,13 +9366,6 @@ body.light-mode #rep-modal .rm-stat-val,
 body.light-mode #rep-modal .rm-section-label,
 body.light-mode #rep-modal .rm-field-label,
 body.light-mode #rep-modal .rm-field-val { color: #F5F5F7; }
-
-body.light-mode #squad-snapshot-inner #squad-snapshot-title,
-body.light-mode #squad-snapshot-inner #squad-snapshot-subtitle,
-body.light-mode #squad-snapshot-inner td,
-body.light-mode #squad-snapshot-inner th { color: #F5F5F7; }
-body.light-mode #squad-snapshot-inner thead tr { border-bottom-color: rgba(170,221,221,0.2); }
-body.light-mode #squad-snapshot-inner tbody tr { border-bottom-color: rgba(170,221,221,0.07); }
 
 body.light-mode #wtd-goals-panel .goals-field-label,
 body.light-mode #wtd-goals-panel .goals-field-sub,
@@ -9253,53 +9440,6 @@ body.light-mode #wtd-goals-panel .goals-field-input { color: #F5F5F7; }
     font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
     font-size: 15px; font-weight: 700; color: var(--cyan-light); min-width: 28px; text-align: right;
   }
-  #assists-modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.65); z-index: 500;
-    align-items: center; justify-content: center; padding: 20px;
-  }
-  #assists-modal-overlay.open { display: flex; }
-  #assists-modal {
-    background: #1a1718; border: 1px solid rgba(170,221,221,0.2);
-    width: 420px; max-width: 100%; max-height: 80vh;
-    display: flex; flex-direction: column; overflow: hidden;
-  }
-  .am-header {
-    padding: 24px 28px 18px; border-bottom: 1px solid rgba(170,221,221,0.12); flex-shrink: 0;
-  }
-  .am-sup {
-    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
-    font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
-    color: var(--cyan-dark); margin-bottom: 8px;
-  }
-  .am-name { font-size: 22px; font-weight: 700; color: var(--off-white); letter-spacing: -0.3px; }
-  .am-count-line {
-    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
-    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-    color: var(--text-muted); margin-top: 6px;
-  }
-  .am-count-line span { color: var(--cyan-light); font-weight: 700; }
-  .am-list { overflow-y: auto; padding: 16px 28px 20px; flex: 1; }
-  .am-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 0; border-bottom: 1px solid rgba(170,221,221,0.07);
-    animation: rowIn .18s ease both;
-  }
-  .am-row:last-child { border-bottom: none; }
-  .am-row-num {
-    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
-    font-size: 10px; letter-spacing: 1px; color: var(--text-muted); min-width: 26px;
-  }
-  .am-row-name { flex: 1; font-size: 14px; font-weight: 600; color: var(--off-white); }
-  .am-close-btn {
-    display: block; width: 100%; padding: 13px 28px;
-    background: transparent; border: none; border-top: 1px solid rgba(170,221,221,0.12);
-    color: var(--text-muted);
-    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
-    font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
-    cursor: pointer; text-align: center; transition: color .15s, background .15s; flex-shrink: 0;
-  }
-  .am-close-btn:hover { color: var(--off-white); background: rgba(170,221,221,0.05); }
 </style>
 
 <!-- Stats bar -->
@@ -9307,7 +9447,7 @@ body.light-mode #wtd-goals-panel .goals-field-input { color: #F5F5F7; }
   <div class="stat-card">
     <div class="stat-label">Total Assists</div>
     <div class="stat-value" id="assists-stat-total">—</div>
-    <div class="stat-sub">from install list</div>
+    <div class="stat-sub">from QTD_Assists</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Assisters</div>
@@ -9342,9 +9482,15 @@ body.light-mode #wtd-goals-panel .goals-field-input { color: #F5F5F7; }
       <tr>
         <th style="width:48px" onclick="assistsSort('rank')"># <span class="sa">&#8597;</span></th>
         <th onclick="assistsSort('name')">Rep Name <span class="sa">&#8597;</span></th>
-        <th onclick="assistsSort('metric')" style="width:70px">Type <span class="sa">&#8597;</span></th>
-        <th onclick="assistsSort('count')">Assists <span class="sa">&#8597;</span></th>
-        <th onclick="assistsSort('unique')">Unique CS Reps <span class="sa">&#8597;</span></th>
+        <th onclick="assistsSort('office')">Office <span class="sa">&#8597;</span></th>
+        <th onclick="assistsSort('ac')" style="text-align:right">AC <span class="sa">&#8597;</span></th>
+        <th onclick="assistsSort('cs')" style="text-align:right">CS <span class="sa">&#8597;</span></th>
+        <th onclick="assistsSort('wc')" style="text-align:right">WC <span class="sa">&#8597;</span></th>
+        <th onclick="assistsSort('sra')" style="text-align:right">SRA <span class="sa">&#8597;</span></th>
+        <th onclick="assistsSort('cap')" style="text-align:right">CAP <span class="sa">&#8597;</span></th>
+        <th onclick="assistsSort('ic')" style="text-align:right">IC <span class="sa">&#8597;</span></th>
+        <th onclick="assistsSort('pto')" style="text-align:right">PTO <span class="sa">&#8597;</span></th>
+        <th onclick="assistsSort('total')" style="text-align:right">Total <span class="sa">&#8597;</span></th>
       </tr>
     </thead>
     <tbody id="assists-tbody"></tbody>
@@ -9359,71 +9505,19 @@ body.light-mode #wtd-goals-panel .goals-field-input { color: #F5F5F7; }
 
 </div><!-- end panel-assists -->
 
-<!-- ── ASSISTS MODAL ──────────────────────────────────────────────────────── -->
-<div id="assists-modal-overlay" onclick="if(event.target===this)closeAssistsModal()">
-  <div id="assists-modal">
-    <div class="am-header">
-      <div class="am-sup">Assist Detail</div>
-      <div class="am-name" id="am-name">—</div>
-      <div class="am-count-line">Total assists: <span id="am-count">—</span></div>
-    </div>
-    <div class="am-list" id="am-list"></div>
-    <button class="am-close-btn" onclick="closeAssistsModal()">Close</button>
-  </div>
-</div>
-
-
 <script>
 
-
 // ── ASSISTS TAB LOGIC ─────────────────────────────────────────────────────────
-// buildAssistData() computes ASSIST_DATA live from INSTALL_LIST (Google Sheets).
-// Called at the top of renderAssistsTab() so data is always current.
+// Reads straight from QTD_ASSISTS_LIST (QTD_Assists tab) — one row per rep,
+// every metric column already finalized by the sheet owner. No math, no
+// grouping, no per-interaction detail — just sort and display.
+
+const ASSISTS_METRIC_COLS = ['ac', 'cs', 'wc', 'sra', 'cap', 'ic', 'pto'];
 
 function buildAssistData() {
-  var byMetric = {};
-  INSTALL_LIST.forEach(function(r) {
-    var name   = (r['assist name']   || '').trim();
-    var metric = (r['metric']        || '').trim().toUpperCase();
-    var csRep  = (r['cs rep name']   || '').trim();
-    if (!name || !metric || (metric !== 'SRA' && metric !== 'IC')) return;
-    if (!byMetric[name]) byMetric[name] = {};
-    if (!byMetric[name][metric]) byMetric[name][metric] = [];
-    if (csRep) byMetric[name][metric].push(csRep);
-  });
-
-  // Compute halved counts and combined totals per rep
-  var repTotals = {};
-  Object.keys(byMetric).forEach(function(name) {
-    var total = 0;
-    Object.keys(byMetric[name]).forEach(function(metric) {
-      total += Math.ceil(byMetric[name][metric].length / 2);
-    });
-    repTotals[name] = total;
-  });
-
-  // Sort reps by combined total desc
-  var sortedNames = Object.keys(repTotals).sort(function(a, b) {
-    return repTotals[b] - repTotals[a];
-  });
-
-  // Build flat rows: SRA then IC per rep
-  var rows = [];
-  var rank = 1;
-  sortedNames.forEach(function(name) {
-    ['SRA', 'IC'].forEach(function(metric) {
-      var csReps = byMetric[name][metric];
-      if (!csReps || !csReps.length) return;
-      var count  = Math.ceil(csReps.length / 2);
-      var unique = (new Set(csReps)).size;
-      rows.push({
-        name: name, metric: metric, count: count,
-        unique: unique, cs_reps: csReps,
-        rep_total: repTotals[name], rank: rank
-      });
-    });
-    rank++;
-  });
+  var rows = QTD_ASSISTS_LIST.filter(function(e) { return e.total > 0; });
+  rows.sort(function(a, b) { return b.total - a.total; });
+  rows.forEach(function(e, i) { e.rank = i + 1; });
   return rows;
 }
 
@@ -9432,7 +9526,7 @@ let _assistsSortDir = 1;
 
 function assistsSort(key) {
   if (_assistsSortKey === key) { _assistsSortDir *= -1; }
-  else { _assistsSortKey = key; _assistsSortDir = (key === 'name' || key === 'metric') ? 1 : -1; }
+  else { _assistsSortKey = key; _assistsSortDir = (key === 'name' || key === 'office') ? 1 : -1; }
   renderAssistsTab();
 }
 
@@ -9441,17 +9535,13 @@ function renderAssistsTab() {
   const searchEl = document.getElementById('assists-search');
   const search = searchEl ? searchEl.value.trim().toLowerCase() : '';
 
-  // Stats — unique reps only
-  const seen = new Set();
-  let totalAssists = 0, totalReps = 0, topName = '', topTotal = 0;
+  // Stats
+  let totalAssists = 0, topName = '', topTotal = 0;
   ASSIST_DATA.forEach(d => {
-    totalAssists += d.count;
-    if (!seen.has(d.name)) {
-      seen.add(d.name);
-      totalReps++;
-      if (d.rep_total > topTotal) { topTotal = d.rep_total; topName = d.name; }
-    }
+    totalAssists += d.total;
+    if (d.total > topTotal) { topTotal = d.total; topName = d.name; }
   });
+  const totalReps = ASSIST_DATA.length;
   const avg = totalReps ? Math.round(totalAssists / totalReps) : 0;
 
   const el = id => document.getElementById(id);
@@ -9466,79 +9556,39 @@ function renderAssistsTab() {
 
   data.sort((a, b) => {
     const key = _assistsSortKey;
-    if (key === 'rank') {
-      // Primary: rank asc (already encodes combined total), secondary: SRA before IC
-      if (a.rank !== b.rank) return (a.rank - b.rank) * _assistsSortDir;
-      if (a.name !== b.name) return a.name < b.name ? -_assistsSortDir : _assistsSortDir;
-      return a.metric === 'SRA' ? -1 : 1;
-    }
     let va = a[key], vb = b[key];
     if (typeof va === 'string') va = va.toLowerCase();
     if (typeof vb === 'string') vb = vb.toLowerCase();
     if (va < vb) return -1 * _assistsSortDir;
     if (va > vb) return  1 * _assistsSortDir;
-    // Tiebreak: preserve original grouped order
-    if (a.rank !== b.rank) return a.rank - b.rank;
-    return a.metric === 'SRA' ? -1 : 1;
+    return a.rank - b.rank;
   });
 
   document.querySelectorAll('#assists-table th').forEach(th => th.classList.remove('sorted'));
-  const keyIdx = {rank: 0, name: 1, metric: 2, count: 3, unique: 4};
+  const keyIdx = {rank: 0, name: 1, office: 2, ac: 3, cs: 4, wc: 5, sra: 6, cap: 7, ic: 8, pto: 9, total: 10};
   const ths = document.querySelectorAll('#assists-table th');
   if (ths[keyIdx[_assistsSortKey]]) ths[keyIdx[_assistsSortKey]].classList.add('sorted');
 
-  const maxCount = ASSIST_DATA.length ? Math.max(...ASSIST_DATA.map(d => d.count)) : 1;
   const tbody = document.getElementById('assists-tbody');
   if (!tbody) return;
 
   tbody.innerHTML = '';
   data.forEach((d, i) => {
-    const pct = Math.round((d.count / maxCount) * 100);
-    const isSRA = d.metric === 'SRA';
-    const badgeColor = isSRA ? 'var(--r-l3)'              : 'var(--r-l1)';
-    const badgeBg    = isSRA ? 'rgba(90,158,160,0.10)'    : 'rgba(45,196,142,0.10)';
-    const badgeBdr   = isSRA ? 'rgba(90,158,160,0.35)'    : 'rgba(45,196,142,0.35)';
     const tr = document.createElement('tr');
     tr.style.animationDelay = Math.min(i * 0.008, 0.3) + 's';
-    tr.onclick = () => openAssistsModal(d);
     tr.innerHTML =
       '<td style="color:var(--text-muted);font-size:12px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif">' + d.rank + '</td>' +
       '<td style="font-weight:600;font-size:15px">' + d.name + '</td>' +
-      '<td><span style="display:inline-block;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;border:1px solid ' + badgeBdr + ';color:' + badgeColor + ';background:' + badgeBg + '">' + d.metric + '</span></td>' +
-      '<td><div class="assists-bar-wrap">' +
-        '<div class="assists-bar-track"><div class="assists-bar-fill" style="width:' + pct + '%"></div></div>' +
-        '<span class="assists-count-val">' + d.count + '</span>' +
-      '</div></td>' +
-      '<td style="color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px">' + d.unique + '</td>';
+      '<td style="color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:12px">' + (d.office || '—') + '</td>' +
+      ASSISTS_METRIC_COLS.map(function(k) {
+        return '<td style="color:var(--text-muted);text-align:right">' + (d[k] || 0) + '</td>';
+      }).join('') +
+      '<td style="text-align:right"><span class="assists-count-val">' + d.total + '</span></td>';
     tbody.appendChild(tr);
   });
 
-  const uniqueReps = new Set(data.map(d => d.name)).size;
   const fc = document.getElementById('assists-footer-count');
-  if (fc) fc.textContent = uniqueReps + ' rep' + (uniqueReps !== 1 ? 's' : '') + ' · ' + data.length + ' rows';
-}
-
-function openAssistsModal(d) {
-  const overlay = document.getElementById('assists-modal-overlay');
-  if (!overlay) return;
-  document.getElementById('am-name').textContent  = d.name;
-  document.getElementById('am-count').textContent = d.count + ' ' + d.metric + ' assists';
-
-  const listEl = document.getElementById('am-list');
-  listEl.innerHTML = '';
-  d.cs_reps.forEach(function(rep, i) {
-    const row = document.createElement('div');
-    row.className = 'am-row';
-    row.style.animationDelay = Math.min(i * 0.015, 0.4) + 's';
-    row.innerHTML = '<span class="am-row-num">' + (i + 1) + '</span><span class="am-row-name">' + rep + '</span>';
-    listEl.appendChild(row);
-  });
-  overlay.classList.add('open');
-}
-
-function closeAssistsModal() {
-  const overlay = document.getElementById('assists-modal-overlay');
-  if (overlay) overlay.classList.remove('open');
+  if (fc) fc.textContent = data.length + ' rep' + (data.length !== 1 ? 's' : '');
 }
 </script>
 
@@ -9879,19 +9929,43 @@ function initGIS() {
     callback:  async function(resp) {
       if (resp.error) {
         showSyncBanner('Sign-in failed: ' + resp.error, true);
+        updateAuthUI(false);
         return;
       }
-      sheetsAuthToken = resp.access_token;
-      // Fetch signed-in user's email BEFORE enabling UI or flushing writes
+      // Fetch signed-in user's email BEFORE granting any write access
+      var email = '';
       try {
         var tRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
           headers: { 'Authorization': 'Bearer ' + resp.access_token }
         });
         var tInfo = await tRes.json();
-        if (tInfo.email) currentUserEmail = tInfo.email;
+        email = (tInfo.email || '').toLowerCase().trim();
       } catch(e) { console.warn('userinfo failed', e); }
+
+      // Gate write access behind the existing editor allowlist. The dashboard
+      // itself is already public/read-only without signing in at all — this
+      // check only decides whether this Google account gets Sheets write
+      // access via the "Enable Edits" button. Anyone who signs in but isn't
+      // an approved editor is left exactly as before: read-only, no error.
+      var level = await xiiCheckAccess(email, resp.access_token);
+      if (level !== 'edit') {
+        updateAuthUI(false);
+        return;
+      }
+
+      sheetsAuthToken  = resp.access_token;
+      currentUserEmail = email;
+      try {
+        localStorage.setItem('xii_auth', JSON.stringify({
+          email:   email,
+          token:   resp.access_token,
+          level:   'edit',
+          expires: Date.now() + 55 * 60 * 1000 // 55 min
+        }));
+      } catch(e) {}
+
       updateAuthUI(true);
-      showSyncBanner('Signed in as ' + (currentUserEmail || 'unknown') + ' — syncing live data...');
+      showSyncBanner('Signed in as ' + email + ' — syncing live data...');
       flushWriteQueue();
       // Re-fetch all live Sheets tabs now that we have an auth token.
       // skipOnboarding:true preserves ob_employees._sheetRow values so
@@ -9907,7 +9981,7 @@ function initGIS() {
       });
     }
   });
-  // Only reset to signed-out if gate hasn't already authenticated the user
+  // Only reset to signed-out if a restored session hasn't already authenticated the user
   if (!sheetsAuthToken) updateAuthUI(false);
 }
 window.addEventListener('load', function() { setTimeout(initGIS, 500); });
@@ -10084,20 +10158,17 @@ var xiiAccessLevel  = null; // null | 'view' | 'edit'
 // On page load — check localStorage for a saved session
 window.addEventListener('DOMContentLoaded', function() {
   applyBranding(); // Stamp brand text and build all office UI from CONSUL_CONFIG
+  // The dashboard is public and read-only by default — no sign-in required
+  // just to view it. Data is already loaded independently by initDashboard().
+  // The only thing a Google session restores here is previously-approved
+  // *write* access (clicking "Enable Edits" / "Sheets Live"), for an editor
+  // who signed in within the last 55 minutes.
   var saved = null;
   try { saved = JSON.parse(localStorage.getItem('xii_auth') || 'null'); } catch(e) {}
-  if (saved && saved.email && saved.token && saved.expires > Date.now()) {
-    // Restore session
+  if (saved && saved.email && saved.token && saved.level === 'edit' && saved.expires > Date.now()) {
     currentUserEmail = saved.email;
     sheetsAuthToken  = saved.token;
-    xiiAccessLevel   = saved.level;
-    xiiUnlockPage(saved.level);
-    // Re-init GIS silently in background so writes still work
-    updateAuthUI(saved.level === 'edit');
-  } else {
-    // No valid session — show gate
-    document.body.classList.add('xii-locked');
-    document.getElementById('xii-auth-gate').classList.add('open');
+    updateAuthUI(true);
   }
 });
 
