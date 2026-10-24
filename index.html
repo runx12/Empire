@@ -2706,6 +2706,18 @@ function renderTrainingCalendar() {
 const WTD_EMPLOYEES = []; // Populated from Google Sheets
 const QTD_EMPLOYEES = []; // Populated from Google Sheets
 let ROSTER_EMPLOYEES   = []; // Populated from Google Sheets on load
+// Reps whose roster PAI column says Combine — their names are underlined on the Squads tab and scorecards
+let _combinePaiCache = null, _combinePaiLen = -1;
+function isCombineRep(id) {
+  if (!_combinePaiCache || _combinePaiLen !== ROSTER_EMPLOYEES.length) {
+    _combinePaiCache = new Set(ROSTER_EMPLOYEES.filter(e => /^combine$/i.test(e.pai || '')).map(e => String(e.id)));
+    _combinePaiLen = ROSTER_EMPLOYEES.length;
+  }
+  return _combinePaiCache.has(String(id));
+}
+function combineNameHtml(id, name) {
+  return isCombineRep(id) ? '<span style="text-decoration:underline;text-underline-offset:3px;">' + name + '</span>' : name;
+}
 let EXCLUDED_REP_IDS   = new Set(); // IDs of Termed / Transferred reps (Roster 'Employment Status') — hidden everywhere
 // Drops excluded reps from every performance list/map loaded from the other tabs
 function purgeExcludedReps() {
@@ -2799,10 +2811,11 @@ async function loadOfficeGoals() {
       // Per-rep weekly goals (same on every row; first office row wins)
       if (!repGoalsSet) {
         repGoalsSet = true;
-        var ra = goalNum(r['wtd_ac']), rp = goalNum(r['wtd_pitches']), rh = goalNum(r['wtd_hours']);
-        if (ra) WTD_GOALS.ac = ra;
-        if (rp) WTD_GOALS.pitches = rp;
-        if (rh) WTD_GOALS.hours = rh;
+        // Columns: wtd_AC, wtd_CS, wtd_SRA, wtd_CAP, wtd_IC, wtd_pitches, wtd_hours (a blank keeps the built-in default)
+        [['ac','wtd_ac'],['cs','wtd_cs'],['sra','wtd_sra'],['cap','wtd_cap'],['ic','wtd_ic'],['pitches','wtd_pitches'],['hours','wtd_hours']].forEach(function(p) {
+          var g = goalNum(r[p[1]]);
+          if (g) WTD_GOALS[p[0]] = g;
+        });
       }
     });
     // Flat fallbacks follow the primary office
@@ -3899,7 +3912,7 @@ function renderWTDMobile(data) {
   const WTD_SQUAD_LEADERS = Object.fromEntries(
     Object.entries(SQUAD_DB).map(([sq,d]) => [sq, d.leader]).filter(([,v]) => v)
   );
-  function cls(val, goal){ if(!val||val===0) return 'nil'; if(val>goal) return 'exceeds'; return 'pos'; }
+  function cls(val, goal){ if(!val||val===0) return 'nil'; if(val>=goal) return 'exceeds'; return 'pos'; }
 
   // Group by squad for squad view
   let html = '';
@@ -3941,19 +3954,19 @@ function renderWTDMobile(data) {
           <div style="display:grid;grid-template-columns:repeat(4,44px);gap:4px;flex-shrink:0;text-align:center">
             <div>
               <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">AC</div>
-              <div style="font-size:16px;font-weight:700;color:${!e.wtd_ac?'rgba(248,249,249,.2)':e.wtd_ac>WTD_GOALS.ac?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_ac||'—'}</div>
+              <div style="font-size:16px;font-weight:700;color:${!e.wtd_ac?'rgba(248,249,249,.2)':e.wtd_ac>=WTD_GOALS.ac?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_ac||'—'}</div>
             </div>
             <div>
               <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">SRA</div>
-              <div style="font-size:16px;font-weight:700;color:${!e.wtd_sra?'rgba(248,249,249,.2)':e.wtd_sra>WTD_GOALS.sra?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_sra||'—'}</div>
+              <div style="font-size:16px;font-weight:700;color:${!e.wtd_sra?'rgba(248,249,249,.2)':e.wtd_sra>=WTD_GOALS.sra?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_sra||'—'}</div>
             </div>
             <div>
               <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">CAP</div>
-              <div style="font-size:16px;font-weight:700;color:${!e.wtd_cap?'rgba(248,249,249,.2)':e.wtd_cap>WTD_GOALS.cap?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_cap||'—'}</div>
+              <div style="font-size:16px;font-weight:700;color:${!e.wtd_cap?'rgba(248,249,249,.2)':e.wtd_cap>=WTD_GOALS.cap?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_cap||'—'}</div>
             </div>
             <div>
               <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">IC</div>
-              <div style="font-size:16px;font-weight:700;color:${!e.wtd_ic?'rgba(248,249,249,.2)':e.wtd_ic>WTD_GOALS.ic?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_ic||'—'}</div>
+              <div style="font-size:16px;font-weight:700;color:${!e.wtd_ic?'rgba(248,249,249,.2)':e.wtd_ic>=WTD_GOALS.ic?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_ic||'—'}</div>
             </div>
           </div>
         </div>`;
@@ -3988,10 +4001,10 @@ function renderWTDMobile(data) {
             </div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(4,44px);gap:4px;flex-shrink:0;text-align:center">
-            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">AC</div><div style="font-size:16px;font-weight:700;color:${!leaderWTD.wtd_ac?'rgba(248,249,249,.2)':leaderWTD.wtd_ac>WTD_GOALS.ac?'var(--v-exceeds)':'var(--off-white)'}">${leaderWTD.wtd_ac||'—'}</div></div>
-            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">SRA</div><div style="font-size:16px;font-weight:700;color:${!leaderWTD.wtd_sra?'rgba(248,249,249,.2)':leaderWTD.wtd_sra>WTD_GOALS.sra?'var(--v-exceeds)':'var(--off-white)'}">${leaderWTD.wtd_sra||'—'}</div></div>
-            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">CAP</div><div style="font-size:16px;font-weight:700;color:${!leaderWTD.wtd_cap?'rgba(248,249,249,.2)':leaderWTD.wtd_cap>WTD_GOALS.cap?'var(--v-exceeds)':'var(--off-white)'}">${leaderWTD.wtd_cap||'—'}</div></div>
-            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">IC</div><div style="font-size:16px;font-weight:700;color:${!leaderWTD.wtd_ic?'rgba(248,249,249,.2)':leaderWTD.wtd_ic>WTD_GOALS.ic?'var(--v-exceeds)':'var(--off-white)'}">${leaderWTD.wtd_ic||'—'}</div></div>
+            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">AC</div><div style="font-size:16px;font-weight:700;color:${!leaderWTD.wtd_ac?'rgba(248,249,249,.2)':leaderWTD.wtd_ac>=WTD_GOALS.ac?'var(--v-exceeds)':'var(--off-white)'}">${leaderWTD.wtd_ac||'—'}</div></div>
+            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">SRA</div><div style="font-size:16px;font-weight:700;color:${!leaderWTD.wtd_sra?'rgba(248,249,249,.2)':leaderWTD.wtd_sra>=WTD_GOALS.sra?'var(--v-exceeds)':'var(--off-white)'}">${leaderWTD.wtd_sra||'—'}</div></div>
+            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">CAP</div><div style="font-size:16px;font-weight:700;color:${!leaderWTD.wtd_cap?'rgba(248,249,249,.2)':leaderWTD.wtd_cap>=WTD_GOALS.cap?'var(--v-exceeds)':'var(--off-white)'}">${leaderWTD.wtd_cap||'—'}</div></div>
+            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">IC</div><div style="font-size:16px;font-weight:700;color:${!leaderWTD.wtd_ic?'rgba(248,249,249,.2)':leaderWTD.wtd_ic>=WTD_GOALS.ic?'var(--v-exceeds)':'var(--off-white)'}">${leaderWTD.wtd_ic||'—'}</div></div>
           </div>
         </div>`;
       }
@@ -4023,10 +4036,10 @@ function renderWTDMobile(data) {
             <div style="display:flex;gap:6px;margin-top:4px;align-items:center"><span style="font-size:11px;color:var(--text-muted)">${e.squad||''}</span>${badge}</div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(4,44px);gap:4px;flex-shrink:0;text-align:center">
-            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">AC</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_ac?'rgba(248,249,249,.2)':e.wtd_ac>WTD_GOALS.ac?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_ac||'—'}</div></div>
-            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">SRA</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_sra?'rgba(248,249,249,.2)':e.wtd_sra>WTD_GOALS.sra?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_sra||'—'}</div></div>
-            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">CAP</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_cap?'rgba(248,249,249,.2)':e.wtd_cap>WTD_GOALS.cap?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_cap||'—'}</div></div>
-            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">IC</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_ic?'rgba(248,249,249,.2)':e.wtd_ic>WTD_GOALS.ic?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_ic||'—'}</div></div>
+            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">AC</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_ac?'rgba(248,249,249,.2)':e.wtd_ac>=WTD_GOALS.ac?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_ac||'—'}</div></div>
+            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">SRA</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_sra?'rgba(248,249,249,.2)':e.wtd_sra>=WTD_GOALS.sra?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_sra||'—'}</div></div>
+            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">CAP</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_cap?'rgba(248,249,249,.2)':e.wtd_cap>=WTD_GOALS.cap?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_cap||'—'}</div></div>
+            <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">IC</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_ic?'rgba(248,249,249,.2)':e.wtd_ic>=WTD_GOALS.ic?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_ic||'—'}</div></div>
           </div>
         </div>`;
       });
@@ -4046,10 +4059,10 @@ function renderWTDMobile(data) {
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,44px);gap:4px;flex-shrink:0;text-align:center">
-          <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">AC</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_ac?'rgba(248,249,249,.2)':e.wtd_ac>WTD_GOALS.ac?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_ac||'—'}</div></div>
-          <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">SRA</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_sra?'rgba(248,249,249,.2)':e.wtd_sra>WTD_GOALS.sra?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_sra||'—'}</div></div>
-          <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">CAP</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_cap?'rgba(248,249,249,.2)':e.wtd_cap>WTD_GOALS.cap?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_cap||'—'}</div></div>
-          <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">IC</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_ic?'rgba(248,249,249,.2)':e.wtd_ic>WTD_GOALS.ic?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_ic||'—'}</div></div>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">AC</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_ac?'rgba(248,249,249,.2)':e.wtd_ac>=WTD_GOALS.ac?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_ac||'—'}</div></div>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">SRA</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_sra?'rgba(248,249,249,.2)':e.wtd_sra>=WTD_GOALS.sra?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_sra||'—'}</div></div>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">CAP</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_cap?'rgba(248,249,249,.2)':e.wtd_cap>=WTD_GOALS.cap?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_cap||'—'}</div></div>
+          <div><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cyan-dark)">IC</div><div style="font-size:16px;font-weight:700;color:${!e.wtd_ic?'rgba(248,249,249,.2)':e.wtd_ic>=WTD_GOALS.ic?'var(--v-exceeds)':'var(--off-white)'}">${e.wtd_ic||'—'}</div></div>
         </div>
       </div>`;
     });
@@ -4363,7 +4376,7 @@ function renderWTD(){
     }
     const e=r.emp;
     const oc=OFFICE_COLORS[e.office]||'#888';
-    function wtdCls(val,goal){if(!val||val===0)return 'nil';if(val>goal)return 'exceeds';return 'pos';}
+    function wtdCls(val,goal){if(!val||val===0)return 'nil';if(val>=goal)return 'exceeds';return 'pos';}
     const trendHtml = e.status_change ? changeIcon(e.status_change) : '';
     var sraLightColor = '';
     if (e.days_since_sra > 14)     sraLightColor = '#F05252';
@@ -4373,7 +4386,7 @@ function renderWTD(){
       ? `<span title="Days since last SRA: ${e.days_since_sra}" style="margin-left:6px;display:inline-block;width:7px;height:7px;border-radius:50%;background:${sraLightColor};vertical-align:middle;flex-shrink:0"></span>`
       : '';
     return `<tr style="animation-delay:${Math.min(i*.01,.35)}s">
-      <td class="td-name" style="cursor:pointer" data-repid="${e.id}" onclick="openRepModal(this.dataset.repid)"><span style="display:inline-flex;align-items:center">${e.name}${trendHtml}${sraLightHtml}</span></td>
+      <td class="td-name" style="cursor:pointer" data-repid="${e.id}" onclick="openRepModal(this.dataset.repid)"><span style="display:inline-flex;align-items:center">${combineNameHtml(e.id,e.name)}${trendHtml}${sraLightHtml}</span></td>
       <td class="col-wtd-ac td-num ${wtdCls(e.wtd_ac,WTD_GOALS.ac)}">${fmtN(e.wtd_ac)}</td>
       <td class="col-wtd-cs td-num ${wtdCls(e.wtd_cs,WTD_GOALS.cs)}">${fmtN(e.wtd_cs)}</td>
       <td class="col-wtd-sra td-num ${wtdCls(e.wtd_sra,WTD_GOALS.sra)}">${fmtN(e.wtd_sra)}</td>
@@ -4605,7 +4618,7 @@ function renderQTD(){
     const oc=OFFICE_COLORS[e.office]||'#888';
     const dsraDanger = e.days_since_sra>14;
     return `<tr style="animation-delay:${Math.min(i*.01,.35)}s">
-      <td class="td-name" style="cursor:pointer" data-repid="${e.id}" onclick="openRepModal(this.dataset.repid)">${e.name}</td>
+      <td class="td-name" style="cursor:pointer" data-repid="${e.id}" onclick="openRepModal(this.dataset.repid)">${combineNameHtml(e.id,e.name)}</td>
       <td class="col-qtd-sra">${miniBar(e.qtr_sra,40,'#5A9EA0')}</td>
       <td class="col-qtd-cap">${miniBar(e.qtr_cap,20,'#9ABFBF')}</td>
       <td class="col-qtd-ic">${miniBar(e.qtr_ic,20,'#F2CF9C')}</td>
@@ -5079,7 +5092,7 @@ function squadSnapSetMode(mode) {
 const SC_FONT = "'Helvetica Neue',Helvetica,Arial,sans-serif"; // single quotes: also embedded in inline style="" attributes
 const SC_COLOR = {
   band:'#1f4e79', bandSub:'#d6e4f0', head:'#163450', group:'#dae0f2',
-  stripe:'#f5f6fa', row:'#ffffff', text:'#2b2b2b', totalBg:'#fff0cc', idle:'#d64545', border:'#d0d4dc'
+  stripe:'#f5f6fa', row:'#ffffff', text:'#2b2b2b', totalBg:'#fff0cc', idle:'#d64545', hitBg:'rgba(45,196,142,0.28)', hitText:'#0b5d3e', border:'#d0d4dc'
 };
 
 function _scDate(mode) {
@@ -5130,7 +5143,12 @@ function squadScorecardData(squadKey, mode) {
     groups = names.map(n => ({ label: n, rows: byPod[n] }));
     if (byPod['']) groups.push({ label: 'Not Assigned', rows: byPod[''] });
   }
-  groups.forEach(g => { g.rows = g.rows.map(r => ({ name: r.e.name, vals: r.v, idle: r.idle })); });
+  // Weekly goal check per column (at or above the rep-level weekly goal). Quarterly has no per-rep goals.
+  const GOAL_KEYS = ['pitches', 'ac', 'cs', 'sra', 'cap', 'ic'];
+  groups.forEach(g => { g.rows = g.rows.map(r => ({
+    name: r.e.name, vals: r.v, idle: r.idle, combine: isCombineRep(r.e.id),
+    hits: isW ? r.v.map((n, i) => { const goal = WTD_GOALS[GOAL_KEYS[i]]; return n > 0 && goal > 0 && n >= goal; }) : []
+  })); });
 
   const totals = cols.map((c, i) => {
     if (!isW && i === 3) return '';                        // Days/SRA doesn't sum
@@ -5169,8 +5187,8 @@ function renderSquadSnapshot(squadKey) {
     if (g.label) html += '<tr><td colspan="' + (d.cols.length + 1) + '" style="' + F + 'background:' + SC_COLOR.group + ';color:' + SC_COLOR.head + ';font-weight:700;font-size:15px;padding:9px 20px;">' + g.label + '</td></tr>';
     g.rows.forEach((r, i) => {
       const bg = i % 2 === 0 ? SC_COLOR.stripe : SC_COLOR.row;
-      html += '<tr style="background:' + bg + '"><td style="' + F + 'color:' + SC_COLOR.text + ';font-size:14px;padding:12px 20px;white-space:nowrap;">' + r.name + (r.idle ? ' <span title="No activity" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + SC_COLOR.idle + ';margin-left:7px;vertical-align:middle;"></span>' : '') + '</td>'
-        + r.vals.map((v, ci) => '<td style="' + F + 'color:' + SC_COLOR.text + ';font-size:14px;padding:12px 10px;text-align:center;">' + ((d.mode === 'qtd' && ci === 3 && !v) ? '—' : v) + '</td>').join('') + '</tr>';
+      html += '<tr style="background:' + bg + '"><td style="' + F + 'color:' + SC_COLOR.text + ';font-size:14px;padding:12px 20px;white-space:nowrap;">' + (r.combine ? '<span style="text-decoration:underline;text-underline-offset:3px;">' + r.name + '</span>' : r.name) + (r.idle ? ' <span title="No activity" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + SC_COLOR.idle + ';margin-left:7px;vertical-align:middle;"></span>' : '') + '</td>'
+        + r.vals.map((v, ci) => '<td style="' + F + 'color:' + (r.hits[ci] ? SC_COLOR.hitText : SC_COLOR.text) + ';font-size:14px;padding:12px 10px;text-align:center;' + (r.hits[ci] ? 'background:' + SC_COLOR.hitBg + ';font-weight:700;box-shadow:inset 0 0 10px rgba(45,196,142,0.55);' : '') + '">' + ((d.mode === 'qtd' && ci === 3 && !v) ? '—' : v) + '</td>').join('') + '</tr>';
     });
   });
   html += '<tr style="background:' + SC_COLOR.totalBg + ';border-top:2px solid ' + SC_COLOR.head + '"><td style="' + F + 'color:' + SC_COLOR.head + ';font-weight:700;font-size:15px;padding:14px 20px;white-space:nowrap;">' + d.totalLabel + '</td>'
@@ -5228,9 +5246,19 @@ function drawSquadScorecard(d, scale) {
       c.fillStyle = SC_COLOR.text; c.font = '400 15px ' + SC_FONT; c.textAlign = 'left';
       const nm = fit(r.name, nameW - 30);
       c.fillText(nm, tx + 20, y + rowH / 2 + 1);
+      if (r.combine) { const w = c.measureText(nm).width; c.fillRect(tx + 20, y + rowH / 2 + 11, w, 1.5); }
       if (r.idle) { c.fillStyle = SC_COLOR.idle; c.beginPath(); c.arc(tx + 20 + c.measureText(nm).width + 13, y + rowH / 2 + 1, 5, 0, Math.PI * 2); c.fill(); c.fillStyle = SC_COLOR.text; }
       c.textAlign = 'center';
-      r.vals.forEach((v, ci) => c.fillText((d.mode === 'qtd' && ci === 3 && !v) ? '—' : String(v), colX(ci), y + rowH / 2 + 1));
+      r.vals.forEach((v, ci) => {
+        const hit = r.hits[ci];
+        if (hit) {
+          c.save(); c.shadowColor = 'rgba(45,196,142,0.8)'; c.shadowBlur = 14; c.fillStyle = SC_COLOR.hitBg;
+          c.fillRect(colX(ci) - numW / 2 + 4, y + 4, numW - 8, rowH - 8); c.restore();
+          c.fillStyle = SC_COLOR.hitText; c.font = '700 15px ' + SC_FONT;
+        }
+        c.fillText((d.mode === 'qtd' && ci === 3 && !v) ? '—' : String(v), colX(ci), y + rowH / 2 + 1);
+        if (hit) { c.fillStyle = SC_COLOR.text; c.font = '400 15px ' + SC_FONT; }
+      });
       y += rowH;
     });
   });
@@ -7968,6 +7996,7 @@ function rosterRowToEmployee(r) {
     email:     String(r['email'] || ''),
     pod:       String(r['pod'] || ''),
     recruiter: String(r['recruiter'] || ''),
+    pai:       String(r['pai'] || '').trim(),   // 'Combine' here = rep is in Combine (names are underlined)
     employmentStatus: String(r['employment status'] || '').trim(),   // blank = current; 'Termed' / 'Transferred' = off the scorecards
   };
 }
@@ -8103,6 +8132,7 @@ async function fetchSheetsData(opts) {
     if (rows.length > 0) {
       ROSTER_EMPLOYEES.length = 0;
       rows.forEach(function(e) { ROSTER_EMPLOYEES.push(e); });
+      _combinePaiCache = null;
     }
   } catch(e) { errors.push('Roster: ' + e.message); }
 
