@@ -563,6 +563,8 @@ body.light-mode tr.pod-sub-header span{color:rgba(28,28,30,0.45)!important}
 .overview-date-meta{font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:10px;color:var(--cyan-dark);padding:4px 10px;background:rgba(170,221,221,0.07);border:1px solid var(--border);white-space:nowrap}
 .overview-target-input{background:transparent;border:none;border-bottom:1px solid rgba(170,221,221,0.3);color:var(--off-white);font-size:24px;font-weight:700;line-height:1;width:72px;text-align:center;font-family:inherit;outline:none;padding:0 2px}
 .ov-targets-btn{margin-left:auto;display:flex;align-items:center;gap:5px;background:transparent;border:0.5px solid var(--btn-border-idle);color:var(--btn-idle);padding:5px 11px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ov-targets-btn,#ov-targets-panel,#wtd-goals-btn,#wtd-goals-panel{display:none !important}
+.overview-target-input{pointer-events:none;border-bottom-color:transparent !important}
 .ov-targets-btn:hover,.ov-targets-btn.open{border-color:var(--sand);color:var(--sand)}
 .ov-targets-panel{display:none;background:var(--card-bg);border:0.5px solid var(--border);padding:18px 24px;margin-top:12px}
 .ov-targets-panel.visible{display:block}
@@ -698,14 +700,24 @@ body.light-mode .rk-chk-item.checked { color: #1C1C1E; }
 #panel-calendar .footer-bar{flex-shrink:0;}
 #training-calendar{--tc-accent:#35C4AE;flex:1;min-height:0;overflow:auto;padding:22px 36px 28px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:34px;align-items:start;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;}
 body.light-mode #training-calendar{--tc-accent:#0F7A6B;}
+#tc-toggle{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.tc-tab{background:transparent;border:0;color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:7px 16px;cursor:pointer;}
+.tc-tab.active{background:#35C4AE;color:#0b1f1c;}
+body.light-mode .tc-tab.active{background:#0F7A6B;color:#fff;}
 #training-calendar h3{font-size:20px;font-weight:700;color:var(--tc-accent);margin:0 0 10px;letter-spacing:.5px;}
 #training-calendar h3 small{font-size:12px;font-weight:500;color:var(--text-muted);margin-left:10px;letter-spacing:1.5px;text-transform:uppercase;}
-#training-calendar table{width:100%;border-collapse:collapse;border:1px solid var(--border);}
+#training-calendar section{min-width:0;}
+#training-calendar td{white-space:normal;overflow-wrap:anywhere;}
+#training-calendar td.tc-d{white-space:nowrap;overflow-wrap:normal;}
+#training-calendar table{width:100%;table-layout:fixed;border-collapse:collapse;border:1px solid var(--border);}
 #training-calendar th{background:var(--tc-accent);color:#0b1f1c;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:9px 12px;text-align:left;}
 body.light-mode #training-calendar th{color:#fff;}
 #training-calendar td{padding:10px 12px;font-size:14px;color:var(--off-white);border-top:1px solid var(--border);vertical-align:middle;}
 #training-calendar td.tc-n{width:44px;color:var(--tc-accent);font-weight:700;text-align:center;}
 #training-calendar td.tc-d{width:118px;white-space:nowrap;color:var(--text-muted);}
+#training-calendar th:nth-child(1){width:44px;}
+#training-calendar th:nth-child(2){width:118px;}
+#training-calendar th:nth-child(4){width:96px;}
 #training-calendar td.tc-w{width:96px;font-weight:700;}
 #training-calendar tr.tc-off td{font-style:italic;color:var(--text-muted);}
 #training-calendar tr.tc-past td{opacity:.45;}
@@ -2172,6 +2184,7 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
     <div class="stat-card" style="display:flex;align-items:center;gap:14px;padding:14px 36px;">
       <span class="stat-label" style="margin-bottom:0;">Training Calendar</span>
       <span id="tc-range" style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:1.5px;color:var(--text-muted);text-transform:uppercase;"></span>
+      <div id="tc-toggle" style="margin-left:auto;"></div>
     </div>
   </div>
   <div id="training-calendar"></div>
@@ -2642,7 +2655,8 @@ function applyBranding() {
 //   { d, t, who }            a training (numbered automatically)
 //   { d, off: 'reason' }     no meeting that day
 // Past dates dim automatically and the next upcoming training is highlighted.
-const TRAINING_CALENDAR = [
+const TRAINING_CALENDARS = {
+'Orange County': [
   { title: 'Correlation', sub: 'Mondays', rows: [
     { d: '2026-10-19', t: 'Panel discussion', done: true },
     { d: '2026-10-26', t: 'The Power of Bandwagoning', who: 'Adam' },
@@ -2673,7 +2687,42 @@ const TRAINING_CALENDAR = [
     { d: '2027-01-14', t: 'Solar Education', who: 'Tyler' },
     { d: '2027-01-21', t: 'Sunrun vs. Dealers or Installers', who: 'Tucker' },
   ]},
-];
+],
+'Riverside': [
+  { title: 'Correlation', sub: 'Tuesdays', rows: [
+    { d: '2026-10-20', t: 'The Power of Bandwagoning', who: 'Branson' },
+    { d: '2026-10-27', t: 'Handling Cancellations: The Toughest Objections', who: 'Louie' },
+    { d: '2026-11-03', t: 'Clear Customer Communication That Builds Trust', who: 'Cody' },
+    { d: '2026-11-10', t: 'Maintaining Leverage Without Losing the Customer', who: 'Krystal' },
+    { d: '2026-11-17', t: 'Saving Cancellations: How to Structure the Right Deal', who: 'Russell' },
+    { d: '2026-11-24', t: 'Account Management', who: 'Nevin' },
+    { d: '2026-12-01', t: 'Become a Referral Pro', who: 'Krystal' },
+    { d: '2026-12-08', t: 'Scope of Work', who: 'Nevin' },
+    { d: '2026-12-15', t: 'Using Incentives to Re-Engage Stuck Customers', who: 'Russell' },
+    { d: '2026-12-22', t: 'The Cancellation Conversation: How to Win It In Person or Over the Phone', who: 'Cody' },
+    { d: '2026-12-29', off: 'Holiday break' },
+    { d: '2027-01-05', t: 'Getting Shopped: How to Prevent Permit Poaching and Price Undercutting', who: 'Louie' },
+  ]},
+  { title: 'Combine', sub: 'Thursdays', rows: [
+    { d: '2026-10-22', t: 'Prospecting', who: 'Bradley' },
+    { d: '2026-10-29', t: 'Fresh vs. Add On Systems', who: 'Krystal' },
+    { d: '2026-11-05', t: 'Door Approach: Intro', who: 'Adam' },
+    { d: '2026-11-12', t: 'Door Approach: Problem', who: 'Bradley' },
+    { d: '2026-11-19', t: 'Door Approach: Solution', who: 'Krystal' },
+    { d: '2026-11-26', off: 'Thanksgiving' },
+    { d: '2026-12-03', t: 'Door Approach: Pull the Bill', who: 'Adam' },
+    { d: '2026-12-10', t: 'Door Approach: Kill the Bill', who: 'Bradley' },
+    { d: '2026-12-17', t: 'Door Approach: Setting an Appt.', who: 'Krystal' },
+    { d: '2026-12-24', off: 'Holiday break' },
+    { d: '2026-12-31', off: 'Holiday break' },
+    { d: '2027-01-07', t: 'Solar Products', who: 'Adam' },
+    { d: '2027-01-14', t: 'Solar Education', who: 'Bradley' },
+    { d: '2027-01-21', t: 'Sunrun vs. Dealers or Installers', who: 'Krystal' },
+  ]},
+],
+};
+var TC_OFFICE = 'Orange County';
+function setTrainingOffice(o) { TC_OFFICE = o; renderTrainingCalendar(); }
 
 function renderTrainingCalendar() {
   const host = document.getElementById('training-calendar');
@@ -2683,7 +2732,9 @@ function renderTrainingCalendar() {
   const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const fmt = ds => { const d = new Date(ds + 'T12:00:00'); return DOW[d.getDay()] + ', ' + MON[d.getMonth()] + ' ' + d.getDate(); };
   let first = '', last = '';
-  host.innerHTML = TRAINING_CALENDAR.map(sec => {
+  const tog = document.getElementById('tc-toggle');
+  if (tog) tog.innerHTML = Object.keys(TRAINING_CALENDARS).map(o => '<button type="button" class="tc-tab' + (o === TC_OFFICE ? ' active' : '') + '" onclick="setTrainingOffice(\'' + o + '\')">' + o + '</button>').join('');
+  host.innerHTML = (TRAINING_CALENDARS[TC_OFFICE] || []).map(sec => {
     let n = 0, nextMarked = false;
     const body = sec.rows.map(r => {
       if (!first || r.d < first) first = r.d;
@@ -2709,9 +2760,10 @@ let ROSTER_EMPLOYEES   = []; // Populated from Google Sheets on load
 // Reps whose roster PAI column says Combine — their names are underlined on the Squads tab and scorecards
 let _combinePaiCache = null, _combinePaiLen = -1;
 function isCombineRep(id) {
-  if (!_combinePaiCache || _combinePaiLen !== ROSTER_EMPLOYEES.length) {
+  if (!_combinePaiCache || _combinePaiLen !== ROSTER_EMPLOYEES.length + NEW_HIRE_EMPLOYEES.length * 100000) {
     _combinePaiCache = new Set(ROSTER_EMPLOYEES.filter(e => /^combine$/i.test(e.pai || '')).map(e => String(e.id)));
-    _combinePaiLen = ROSTER_EMPLOYEES.length;
+    NEW_HIRE_EMPLOYEES.forEach(e => { if (e && e.id) _combinePaiCache.add(String(e.id)); }); // New Hires tab = newest reps
+    _combinePaiLen = ROSTER_EMPLOYEES.length + NEW_HIRE_EMPLOYEES.length * 100000;
   }
   return _combinePaiCache.has(String(id));
 }
@@ -2871,12 +2923,10 @@ function qtdPacePct(dateStr) {
 function getTarget(prefix, cat, office) {
   if (office) {
     const el = document.getElementById(`${prefix}-cmp-target-${cat}`);
-    if (el) { const v = parseInt(el.value); if (!isNaN(v) && v > 0) return v; }
     const officeMap = prefix === 'wtd' ? OFFICE_WTD_TARGETS : OFFICE_QTD_TARGETS;
     return (officeMap[office] || {})[cat] || (prefix === 'wtd' ? WTD_TARGETS : QTD_TARGETS)[cat];
   }
   const el = document.getElementById(`${prefix}-target-${cat}`);
-  if (el) { const v = parseInt(el.value); if (!isNaN(v) && v > 0) return v; }
   // No office arg = primary office. Use per-office sheet targets if loaded, then flat fallback.
   const primaryOffice = CONSUL_CONFIG.offices[0];
   const officeMap = prefix === 'wtd' ? OFFICE_WTD_TARGETS : OFFICE_QTD_TARGETS;
@@ -2911,7 +2961,7 @@ let rosterOfficeFilter=CONSUL_CONFIG.offices[0], rosterSortMode='name', rosterVi
 const WTD_GOALS_DEFAULT = {ac:4, cs:3, sra:2, cap:1, ic:1, pitches:30, hours:30};
 let WTD_GOALS = (function(){
   try {
-    const saved = localStorage.getItem('xii-wtd-goals');
+    const saved = null; // goals come only from the Office Goals tab
     if (saved) {
       const parsed = JSON.parse(saved);
       return Object.assign({}, WTD_GOALS_DEFAULT, parsed);
@@ -2920,7 +2970,7 @@ let WTD_GOALS = (function(){
   return Object.assign({}, WTD_GOALS_DEFAULT);
 })();
 function saveWTDGoals() {
-  try { localStorage.setItem('xii-wtd-goals', JSON.stringify(WTD_GOALS)); } catch(e) {}
+  /* goals are sheet-controlled; no local persistence */
 }
 
 // ── HELPERS ──
@@ -3440,9 +3490,8 @@ function buildProgressCard(cat, target, actual, pace, prefix){
       <div class="prog-num">
         <span class="prog-num-lbl">Target</span>
         <input class="overview-target-input" id="${prefix}-target-${cat}"
-          type="number" min="1" value="${target}"
-          onchange="renderOverview()" onclick="this.select()"
-          title="Click to edit target">
+          type="number" min="1" value="${target}" readonly tabindex="-1"
+          title="Set in the Office Goals tab">
       </div>
       <div class="prog-num"><span class="prog-num-lbl">Actual</span><span class="prog-num-val" style="color:${bColor}">${actual}</span></div>
       <div class="prog-num"><span class="prog-num-lbl">Pace</span>${paceVal}</div>
