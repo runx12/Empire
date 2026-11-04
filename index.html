@@ -5407,13 +5407,14 @@ function squadScorecardData(squadKey, mode) {
   const isW = mode !== 'qtd';
   const members = ROSTER_EMPLOYEES.filter(e => e.squad === squadKey);
   const sqCfg = SQUAD_DB[squadKey] || {}, leader = sqCfg.leader || '';
-  const cols = isW ? ['Pitches', 'AC', 'CS', 'SRA', 'CAP', 'IC'] : ['SRA', 'CAP', 'IC', 'Days/SRA'];
-  const counted = isW ? 6 : 3;          // columns that decide whether a rep "has activity"
-  const sraIdx  = isW ? 3 : 0;
+  const cols = isW ? ['Pitches', 'AC', 'CS', 'SRA', 'CAP', 'IC'] : ['AC', 'SRA', 'CAP', 'IC', 'Days/SRA'];
+  const counted = isW ? 6 : 4;          // columns that decide whether a rep "has activity"
+  const sraIdx  = isW ? 3 : 1;
+  const daysIdx = isW ? -1 : 4;
   const vals = e => {
     const w = WTD_MAP[e.id] || {}, q = QTD_MAP[e.id] || {};
     return isW ? [w.pitches || 0, w.wtd_ac || 0, w.wtd_cs || 0, w.wtd_sra || 0, w.wtd_cap || 0, w.wtd_ic || 0]
-               : [q.qtr_sra || 0, q.qtr_cap || 0, q.qtr_ic || 0, q.days_since_sra || 0];
+               : [q.qtd_ac || 0, q.qtr_sra || 0, q.qtr_cap || 0, q.qtr_ic || 0, q.days_since_sra || 0];
   };
   // Everyone in the squad is listed; reps with no activity are flagged (idle) and sorted to the bottom
   const active = members.map(e => { const v = vals(e); return { e: e, v: v, idle: !v.slice(0, counted).some(n => n > 0) }; })
@@ -5421,7 +5422,7 @@ function squadScorecardData(squadKey, mode) {
       if (a.e.name === leader) return -1;
       if (b.e.name === leader) return 1;
       if (a.idle !== b.idle) return a.idle ? 1 : -1;
-      return (b.v[sraIdx] - a.v[sraIdx]) || (b.v[1 % counted] - a.v[1 % counted]) || a.e.name.localeCompare(b.e.name);
+      return (b.v[sraIdx] - a.v[sraIdx]) || (b.v[isW ? 1 : 2] - a.v[isW ? 1 : 2]) || a.e.name.localeCompare(b.e.name);
     });
 
   // Group by pod (reps with no pod go last under "Not Assigned"); skip headers if nobody has a pod
@@ -5445,14 +5446,14 @@ function squadScorecardData(squadKey, mode) {
   })); });
 
   const totals = cols.map((c, i) => {
-    if (!isW && i === 3) return '';                        // Days/SRA doesn't sum
+    if (!isW && i === 4) return '';                        // Days/SRA doesn't sum
     const sum = active.reduce((s, r) => s + r.v[i], 0);
-    const goal = !isW ? (i === 0 ? sqCfg.qtr_sra : i === 2 ? sqCfg.qtr_ic : 0) : 0;
+    const goal = !isW ? (i === 1 ? sqCfg.qtr_sra : i === 3 ? sqCfg.qtr_ic : 0) : 0;
     return goal ? sum + ' / ' + goal : String(sum);
   });
 
   return {
-    squadKey: squadKey, mode: isW ? 'wtd' : 'qtd', sraIdx: sraIdx, cols: cols, groups: groups, totals: totals,
+    squadKey: squadKey, mode: isW ? 'wtd' : 'qtd', sraIdx: sraIdx, daysIdx: daysIdx, cols: cols, groups: groups, totals: totals,
     count: active.length,
     title: squadKey + (/squad\s*$/i.test(squadKey) ? '' : ' Squad') + ' Scorecard',
     subtitle: _scSubtitle(isW ? 'wtd' : 'qtd'),
@@ -5482,7 +5483,7 @@ function renderSquadSnapshot(squadKey) {
     g.rows.forEach((r, i) => {
       const bg = i % 2 === 0 ? SC_COLOR.stripe : SC_COLOR.row;
       html += '<tr style="background:' + bg + '"><td style="' + F + 'color:' + SC_COLOR.text + ';font-size:14px;padding:12px 20px;white-space:nowrap;">' + (r.combine ? '<span style="text-decoration:underline;text-underline-offset:3px;">' + r.name + '</span>' : r.name) + (r.idle ? ' <span title="No activity" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + SC_COLOR.idle + ';margin-left:7px;vertical-align:middle;"></span>' : '') + '</td>'
-        + r.vals.map((v, ci) => '<td style="' + F + 'color:' + (r.hits[ci] ? SC_COLOR.hitText : SC_COLOR.text) + ';font-size:14px;padding:12px 10px;text-align:center;' + (r.hits[ci] ? 'background:' + SC_COLOR.hitBg + ';font-weight:700;box-shadow:inset 0 0 10px rgba(45,196,142,0.55);' : '') + '">' + ((d.mode === 'qtd' && ci === 3 && !v) ? '—' : (d.mode === 'qtd' && ci === d.sraIdx && r.sraGoal > 0 ? v + '<span style="font-size:10px;font-weight:400;color:#8a8f99;"> / ' + fmtGoal(r.sraGoal) + '</span><div style="height:3px;width:44px;margin:4px auto 0;background:#d9dce3;border-radius:2px;overflow:hidden;"><div style="height:3px;width:' + Math.min(100, Math.round(v / r.sraGoal * 100)) + '%;background:' + (r.hits[ci] ? '#2DC48E' : '#5A9EA0') + ';"></div></div>' : v)) + '</td>').join('') + '</tr>';
+        + r.vals.map((v, ci) => '<td style="' + F + 'color:' + (r.hits[ci] ? SC_COLOR.hitText : SC_COLOR.text) + ';font-size:14px;padding:12px 10px;text-align:center;' + (r.hits[ci] ? 'background:' + SC_COLOR.hitBg + ';font-weight:700;box-shadow:inset 0 0 10px rgba(45,196,142,0.55);' : '') + '">' + ((d.mode === 'qtd' && ci === d.daysIdx && !v) ? '—' : (d.mode === 'qtd' && ci === d.sraIdx && r.sraGoal > 0 ? v + '<span style="font-size:10px;font-weight:400;color:#8a8f99;"> / ' + fmtGoal(r.sraGoal) + '</span><div style="height:3px;width:44px;margin:4px auto 0;background:#d9dce3;border-radius:2px;overflow:hidden;"><div style="height:3px;width:' + Math.min(100, Math.round(v / r.sraGoal * 100)) + '%;background:' + (r.hits[ci] ? '#2DC48E' : '#5A9EA0') + ';"></div></div>' : v)) + '</td>').join('') + '</tr>';
     });
   });
   html += '<tr style="background:' + SC_COLOR.totalBg + ';border-top:2px solid ' + SC_COLOR.head + '"><td style="' + F + 'color:' + SC_COLOR.head + ';font-weight:700;font-size:15px;padding:14px 20px;white-space:nowrap;">' + d.totalLabel + '</td>'
@@ -5551,7 +5552,7 @@ function drawSquadScorecard(d, scale) {
           c.fillStyle = SC_COLOR.hitText; c.font = '700 15px ' + SC_FONT;
         }
         const sg = d.mode === 'qtd' && ci === d.sraIdx && r.sraGoal > 0;
-        c.fillText((d.mode === 'qtd' && ci === 3 && !v) ? '—' : String(v), colX(ci), y + rowH / 2 + (sg ? -3 : 1));
+        c.fillText((d.mode === 'qtd' && ci === d.daysIdx && !v) ? '—' : String(v), colX(ci), y + rowH / 2 + (sg ? -3 : 1));
         if (sg) {
           const gl = '/' + fmtGoal(r.sraGoal), vw = c.measureText(String(v)).width;
           c.save(); c.font = '400 10px ' + SC_FONT; c.fillStyle = '#8a8f99'; c.textAlign = 'left'; c.fillText(gl, colX(ci) + vw / 2 + 2, y + rowH / 2 - 3); c.restore();
@@ -8799,7 +8800,7 @@ async function fetchSheetsData(opts) {
     // Zero out QTD totals for ALL reps first — Totals only includes active reps,
     // so anyone absent from Totals genuinely has 0 activity this quarter.
     Object.values(QTD_MAP).forEach(function(e) {
-      e.qtd_cs  = 0; e.qtd_sra = 0; e.qtd_cap = 0; e.qtd_ic = 0;
+      e.qtd_ac  = 0; e.qtd_cs  = 0; e.qtd_sra = 0; e.qtd_cap = 0; e.qtd_ic = 0;
       e.qtr_sra = 0; e.qtr_cap = 0; e.qtr_ic  = 0;
       // qtdpts_sra / qtdpts_ic preserved — set from QTD Points, not overwritten by Totals
     });
@@ -8825,6 +8826,7 @@ async function fetchSheetsData(opts) {
         TOTALS_OFFICE[repOffice].ic  += ic;
       }
       if (qtdEntry) {
+        qtdEntry.qtd_ac  = ac;
         qtdEntry.qtd_cs  = cs;
         qtdEntry.qtd_sra = sra;
         qtdEntry.qtd_cap = cap;
@@ -8838,7 +8840,7 @@ async function fetchSheetsData(opts) {
           id: id, name: ro.name||id, squad: ro.squad||'', office: ro.office||'', status: ro.status||'',
           wtd_ac:0, wtd_cs:0, wtd_sra:0, wtd_cap:0, wtd_ic:0,
           knocks:0, pitches:0, hours_knocked:0,
-          qtd_cs:cs, qtd_sra:sra, qtd_cap:cap, qtd_ic:ic,
+          qtd_ac:ac, qtd_cs:cs, qtd_sra:sra, qtd_cap:cap, qtd_ic:ic,
           qtr_sra:sra, qtr_cap:cap, qtr_ic:ic,
           qtr_status:'', rolling_status:'', days_since_sra:0,
           status_change:'', rec_points:null, rec_stars:''
