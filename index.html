@@ -706,6 +706,37 @@ body.light-mode .rk-chk-item.checked { color: #1C1C1E; }
 #panel-calendar .footer-bar{flex-shrink:0;}
 #training-calendar{--tc-accent:#35C4AE;flex:1;min-height:0;overflow:auto;padding:22px 36px 28px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:34px;align-items:start;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;}
 body.light-mode #training-calendar{--tc-accent:#0F7A6B;}
+#cd-toggle .tc-tab.active{background:#3B82F6;color:#fff;}
+#cd-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;padding:20px 36px 4px;}
+.cd-sum{border:1px solid rgba(59,130,246,0.30);background:rgba(59,130,246,0.07);border-radius:10px;padding:14px 18px;}
+.cd-sum.hi{border-color:#3B82F6;background:rgba(59,130,246,0.14);}
+.cd-sum-v{font-size:34px;font-weight:700;color:var(--off-white);line-height:1.1;}
+.cd-sum.hi .cd-sum-v{color:#6AA3FF;}
+.cd-sum-l{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#6AA3FF;margin-top:6px;}
+.cd-sum-s{font-size:12px;color:var(--text-muted);margin-top:2px;}
+#cd-body{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:20px;padding:18px 36px 30px;align-items:start;}
+.cd-card{border:1px solid rgba(59,130,246,0.28);border-radius:10px;overflow:hidden;background:rgba(255,255,255,0.02);}
+.cd-card header{background:#1E4FA3;color:#fff;padding:12px 16px 14px;display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;}
+.cd-sq{font-size:17px;font-weight:700;}
+.cd-sqmeta{margin-left:auto;font-size:12px;color:#cfe0ff;}
+.cd-bar{height:6px;border-radius:3px;background:rgba(59,130,246,0.22);overflow:hidden;}
+.cd-bar i{display:block;height:100%;background:#3B82F6;border-radius:3px;}
+.cd-bar i.hit{background:#2DC48E;}
+.cd-sqbar{flex-basis:100%;background:rgba(255,255,255,0.22);}
+.cd-sqbar i{background:#9cc3ff;}
+.cd-sqbar i.hit{background:#2DC48E;}
+.cd-row{display:grid;grid-template-columns:minmax(0,1.4fr) 70px 62px 74px;gap:10px;align-items:center;padding:8px 16px;border-top:1px solid var(--border);font-size:13px;color:var(--off-white);}
+.cd-row.hit{background:rgba(45,196,142,0.13);}
+.cd-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cd-num{text-align:right;white-space:nowrap;}
+.cd-num b{font-weight:700;}
+.cd-row.hit .cd-num b{color:#2DC48E;}
+.cd-left{text-align:right;font-size:12px;color:var(--text-muted);white-space:nowrap;}
+.cd-left b{color:var(--off-white);}
+.cd-done{color:#2DC48E;font-weight:700;}
+.cd-muted{opacity:.6;}
+.cd-nobar{background:transparent;}
+@media (max-width:900px){#cd-summary{grid-template-columns:repeat(2,minmax(0,1fr));padding:14px 14px 0;}#cd-body{grid-template-columns:1fr;padding:14px 14px 24px;}}
 #tc-toggle,.tc-toggle{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
 .tc-tab{background:transparent;border:0;color:var(--text-muted);font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:7px 16px;cursor:pointer;}
 .tc-tab.active{background:#35C4AE;color:#0b1f1c;}
@@ -2006,6 +2037,7 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
   <div class="xii-mob-tab" data-tab="overview" onclick="xiiMobSwitch('overview',this)">Overview</div>
   <div class="xii-mob-tab" data-tab="wtd" onclick="xiiMobSwitch('wtd',this)">Squads</div>
   <div class="xii-mob-tab" data-tab="pace" onclick="xiiMobSwitch('pace',this)">Pace</div>
+  <div class="xii-mob-tab" data-tab="countdown" onclick="xiiMobSwitch('countdown',this)">Countdown</div>
   <div class="xii-mob-tab" data-tab="rankings" onclick="xiiMobSwitch('rankings',this)">Rankings</div>
   <div class="xii-mob-tab" data-tab="status-incentive" onclick="xiiMobSwitch('status-incentive',this)">Chasers</div>
   <div class="xii-mob-tab" data-tab="roster" onclick="xiiMobSwitch('roster',this)">Roster</div>
@@ -2019,6 +2051,7 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
   <div class="tab active" onclick="switchTab('overview',this)">Overview</div>
   <div class="tab" onclick="switchTab('wtd',this)">Squads</div>
   <div class="tab" onclick="switchTab('pace',this)">Pace</div>
+  <div class="tab" onclick="switchTab('countdown',this)">Countdown</div>
   <div class="tab" onclick="switchTab('calendar',this)">Calendar</div>
   <div class="tab" onclick="switchTab('rankings',this)">Rankings</div>
   <div class="tab" onclick="switchTab('status-incentive',this)">Chasers</div>
@@ -2204,6 +2237,26 @@ body.light-mode #panel-onboard-employee .dash-chip.active, body.light-mode /* Le
   </div>
   <div class="footer-bar">
     <span class="footer-count">QUARTER PACE</span>
+    <span class="footer-brand">■ XII — BUILDING CULTURE FORWARD ■</span>
+  </div>
+</div>
+
+<div class="tab-panel" id="panel-countdown">
+  <div class="stats-bar" style="grid-template-columns:1fr;padding:0;">
+    <div class="stat-card" style="display:flex;align-items:center;gap:14px;padding:14px 36px;flex-wrap:wrap;">
+      <span class="stat-label" style="margin-bottom:0;">SRA Countdown &middot; Nov 1 &ndash; Dec 31</span>
+      <div id="cd-toggle" class="tc-toggle"></div>
+      <span style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:10px;letter-spacing:1.5px;color:var(--text-muted);text-transform:uppercase;">As of</span>
+      <input type="date" class="overview-date-input" id="cd-date-input" onchange="renderCountdown()">
+      <button class="export-btn" style="margin-left:auto;" onclick="downloadCountdown()" title="Download this view as a PNG">&#8595; Download PNG</button>
+    </div>
+  </div>
+  <div style="flex:1;min-height:0;overflow:auto;">
+    <div id="cd-summary"></div>
+    <div id="cd-body"></div>
+  </div>
+  <div class="footer-bar">
+    <span class="footer-count">SRA COUNTDOWN</span>
     <span class="footer-brand">■ XII — BUILDING CULTURE FORWARD ■</span>
   </div>
 </div>
@@ -2936,6 +2989,139 @@ function downloadPace() {
   }, 'image/png');
 }
 
+// ── SRA COUNTDOWN (Sheet tab "Countdown": id, Name, Squad, PAI, Employment Status, EOY SRA Goal, OCT SRA) ──
+// EOY SRA Goal = the Nov 1 – Dec 31 goal. Progress = Totals-tab SRA (quarter to date) minus OCT SRA.
+var CD_END = '2026-12-31';
+var CD_BLUE = '#3B82F6', CD_BLUE_DK = '#1E4FA3', CD_GREEN = '#2DC48E';
+var COUNTDOWN_ROWS = [], CD_OFFICE = '';
+function cdNum(v) { var n = parseFloat(String(v == null ? '' : v).replace(/,/g, '')); return isNaN(n) ? null : n; }
+function cdAsOf() {
+  var el = document.getElementById('cd-date-input');
+  return (el && el.value) ? new Date(el.value + 'T12:00:00') : new Date();
+}
+function cdData(office, asOf) {
+  var end = new Date(CD_END + 'T12:00:00');
+  var daysLeft = Math.max(0, Math.round((end - asOf) / 86400000) + 1);
+  var weeksLeft = Math.max(daysLeft / 7, 1 / 7);
+  var squads = {};
+  COUNTDOWN_ROWS.forEach(function(r) {
+    if (shortOffice(r.office) !== office) return;
+    if (/^(termed|transferred)$/i.test(r.empStatus) || EXCLUDED_REP_IDS.has(r.id)) return;
+    var pai = r.pai.toLowerCase(), q = QTD_MAP[r.id] || {};
+    var since = Math.max(0, Math.round(((q.qtr_sra || 0) - (r.oct || 0)) * 10) / 10);
+    var goal = r.goal;                                   // null = blank
+    if (/^new[\s_-]*hires?$/.test(pai)) goal = null;     // new hires have no goal
+    else if (goal == null && pai === 'combine') goal = 1; // Combine reps with a blank goal get 1
+    if (!(goal > 0)) goal = 0;
+    if (pai === 'inactive' && since <= 0) return;        // inactive reps only appear once they get an SRA
+    if (!goal && since <= 0) return;
+    var key = r.squad || 'No Squad';
+    var sq = squads[key] = squads[key] || { name: key, reps: [], since: 0, goal: 0, capped: 0, hit: 0, withGoal: 0 };
+    var hit = goal > 0 && since >= goal;
+    sq.reps.push({ id: r.id, name: r.name, since: since, goal: goal, hit: hit, left: goal > 0 ? Math.max(0, Math.round((goal - since) * 10) / 10) : 0, pct: goal > 0 ? since / goal : 0 });
+    sq.since += since; sq.goal += goal; sq.capped += goal > 0 ? Math.min(since, goal) : 0;
+    if (goal > 0) { sq.withGoal++; if (hit) sq.hit++; }
+  });
+  var list = Object.keys(squads).map(function(k) { return squads[k]; }).sort(function(a, b) {
+    return (a.name === 'No Squad') - (b.name === 'No Squad') || a.name.localeCompare(b.name);
+  });
+  list.forEach(function(sq) {
+    sq.reps.sort(function(a, b) { return (b.hit - a.hit) || (b.pct - a.pct) || (b.since - a.since) || a.name.localeCompare(b.name); });
+    sq.pct = sq.goal > 0 ? sq.capped / sq.goal : 0;
+  });
+  var T = { since: 0, goal: 0, capped: 0, hit: 0, withGoal: 0 };
+  list.forEach(function(sq) { T.since += sq.since; T.goal += sq.goal; T.capped += sq.capped; T.hit += sq.hit; T.withGoal += sq.withGoal; });
+  T.left = Math.max(0, T.goal - T.capped);
+  T.pct = T.goal > 0 ? T.capped / T.goal : 0;
+  T.perWeek = T.left / weeksLeft;
+  return { office: office, squads: list, T: T, daysLeft: daysLeft, weeksLeft: weeksLeft, asOf: asOf };
+}
+function cdFmt(n) { return String(Math.round(n * 10) / 10); }
+function renderCountdown() {
+  var host = document.getElementById('cd-body'); if (!host) return;
+  var offs = paceOffices();
+  if (!CD_OFFICE || offs.indexOf(CD_OFFICE) < 0) CD_OFFICE = offs[0] || '';
+  var di = document.getElementById('cd-date-input');
+  if (di && !di.value) { var t = new Date(); di.value = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0'); }
+  var tog = document.getElementById('cd-toggle');
+  if (tog) tog.innerHTML = offs.map(function(o) { return '<button type="button" class="tc-tab' + (o === CD_OFFICE ? ' active' : '') + '" onclick="setCountdownOffice(\'' + o + '\')">' + o + '</button>'; }).join('');
+  var d = cdData(CD_OFFICE, cdAsOf()), T = d.T;
+  var sum = document.getElementById('cd-summary');
+  var card = function(v, l, s, hi) { return '<div class="cd-sum' + (hi ? ' hi' : '') + '"><div class="cd-sum-v">' + v + '</div><div class="cd-sum-l">' + l + '</div><div class="cd-sum-s">' + s + '</div></div>'; };
+  if (sum) sum.innerHTML =
+    card(d.daysLeft, 'Days left', 'through Dec 31', true) +
+    card(T.hit + ' / ' + T.withGoal, 'Reps at goal', Math.round(T.pct * 100) + '% of goal SRAs complete') +
+    card(cdFmt(T.since) + ' / ' + T.goal, 'SRA since Nov 1', cdFmt(T.left) + ' still to go') +
+    card(cdFmt(T.perWeek), 'SRA needed a week', 'to finish by Dec 31');
+  var esc = function(s) { return String(s).replace(/[&<>"]/g, function(c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  host.innerHTML = d.squads.length ? d.squads.map(function(sq) {
+    var rows = sq.reps.map(function(r) {
+      var right, mid;
+      if (r.goal > 0) {
+        mid = '<div class="cd-bar"><i class="' + (r.hit ? 'hit' : '') + '" style="width:' + Math.min(100, Math.round(r.pct * 100)) + '%"></i></div>';
+        right = r.hit ? '<span class="cd-done">&#10003; Goal hit</span>' : '<b>' + cdFmt(r.left) + '</b> to go';
+      } else { mid = '<div class="cd-bar cd-nobar"></div>'; right = '<span class="cd-muted">no goal</span>'; }
+      return '<div class="cd-row' + (r.hit ? ' hit' : '') + '"><div class="cd-name">' + combineNameHtml(r.id, esc(r.name)) + '</div>' + mid +
+        '<div class="cd-num"><b>' + cdFmt(r.since) + '</b>' + (r.goal > 0 ? ' / ' + r.goal : ' SRA') + '</div><div class="cd-left">' + right + '</div></div>';
+    }).join('');
+    return '<section class="cd-card"><header><span class="cd-sq">' + esc(sq.name) + '</span><span class="cd-sqmeta">' + sq.hit + ' / ' + sq.withGoal + ' at goal &middot; ' + Math.round(sq.pct * 100) + '%</span>' +
+      '<div class="cd-bar cd-sqbar"><i class="' + (sq.goal > 0 && sq.capped >= sq.goal ? 'hit' : '') + '" style="width:' + Math.min(100, Math.round(sq.pct * 100)) + '%"></i></div></header>' + rows + '</section>';
+  }).join('') : '<div style="padding:40px;color:var(--text-muted)">No Countdown rows for ' + esc(CD_OFFICE) + '. Check the Countdown tab in the sheet.</div>';
+}
+function setCountdownOffice(o) { CD_OFFICE = o; renderCountdown(); }
+function downloadCountdown() {
+  var d = cdData(CD_OFFICE, cdAsOf()), T = d.T, SANS = '"Helvetica Neue", Helvetica, Arial, sans-serif';
+  var W = 1920, M = 48, GAP = 24, COLS = 3, CW = (W - 2 * M - GAP * (COLS - 1)) / COLS, HH = 54, RH = 34, PAD = 10;
+  // lay out squad blocks into the shortest column
+  var colsY = [], blocks = [], top = 330;
+  for (var i = 0; i < COLS; i++) colsY.push(top);
+  d.squads.forEach(function(sq) {
+    var c = colsY.indexOf(Math.min.apply(null, colsY)), h = HH + sq.reps.length * RH + PAD;
+    blocks.push({ sq: sq, x: M + c * (CW + GAP), y: colsY[c], h: h }); colsY[c] += h + GAP;
+  });
+  var H = Math.max(top + 80, Math.max.apply(null, colsY) + 40);
+  var cv = document.createElement('canvas'); cv.width = W; cv.height = H; var c = cv.getContext('2d');
+  var rr = function(x, y, w, h, r, f, s) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); if (f) { c.fillStyle = f; c.fill(); } if (s) { c.strokeStyle = s; c.lineWidth = 1; c.stroke(); } };
+  var tx = function(s, x, y, font, col, al) { c.font = font; c.fillStyle = col; c.textAlign = al || 'left'; c.textBaseline = 'middle'; c.fillText(String(s), x, y); };
+  c.fillStyle = '#0d1424'; c.fillRect(0, 0, W, H);
+  var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  tx('SRA COUNTDOWN  ·  NOV 1 – DEC 31', M, 52, '700 17px ' + SANS, CD_BLUE);
+  tx(d.office + ' SRA Countdown', M, 100, '700 50px Georgia, serif', '#ffffff');
+  tx('As of ' + MON[d.asOf.getMonth()] + ' ' + d.asOf.getDate() + ', ' + d.asOf.getFullYear() + '  ·  SRAs since Nov 1 against each rep’s Nov–Dec goal', M, 146, '400 21px ' + SANS, '#c9d4ea');
+  var sc = [[d.daysLeft, 'Days left', 'through Dec 31', true], [T.hit + ' / ' + T.withGoal, 'Reps at goal', Math.round(T.pct * 100) + '% of goal SRAs complete'],
+            [cdFmt(T.since) + ' / ' + T.goal, 'SRA since Nov 1', cdFmt(T.left) + ' still to go'], [cdFmt(T.perWeek), 'SRA needed a week', 'to finish by Dec 31']];
+  var sw = (W - 2 * M - 3 * 22) / 4;
+  sc.forEach(function(s, i) {
+    var x = M + i * (sw + 22); rr(x, 180, sw, 110, 14, '#16223b', s[3] ? CD_BLUE : '#26365a'); if (s[3]) { c.strokeStyle = CD_BLUE; c.lineWidth = 2; c.stroke(); }
+    tx(s[0], x + 24, 224, '700 46px Georgia, serif', s[3] ? CD_BLUE : '#ffffff');
+    tx(s[1], x + 24, 262, '700 17px ' + SANS, '#ffffff'); tx(s[2], x + sw - 24, 262, '400 14px ' + SANS, '#8fa0c4', 'right');
+  });
+  blocks.forEach(function(b) {
+    rr(b.x, b.y, CW, b.h, 12, '#121c30', '#26365a');
+    rr(b.x, b.y, CW, HH, 12, CD_BLUE_DK); c.fillStyle = CD_BLUE_DK; c.fillRect(b.x, b.y + 30, CW, HH - 30);
+    tx(b.sq.name, b.x + 18, b.y + 22, '700 22px ' + SANS, '#ffffff');
+    tx(b.sq.hit + ' / ' + b.sq.withGoal + ' at goal · ' + Math.round(b.sq.pct * 100) + '%', b.x + CW - 18, b.y + 22, '400 14px ' + SANS, '#cfe0ff', 'right');
+    rr(b.x + 18, b.y + 40, CW - 36, 6, 3, 'rgba(255,255,255,0.22)');
+    if (b.sq.pct > 0) rr(b.x + 18, b.y + 40, Math.max(6, (CW - 36) * Math.min(1, b.sq.pct)), 6, 3, b.sq.capped >= b.sq.goal && b.sq.goal > 0 ? CD_GREEN : '#9cc3ff');
+    b.sq.reps.forEach(function(r, j) {
+      var y = b.y + HH + j * RH, cy = y + RH / 2;
+      if (r.hit) { c.fillStyle = 'rgba(45,196,142,0.14)'; c.fillRect(b.x + 1, y, CW - 2, RH); }
+      c.font = '400 16px ' + SANS; var nm = r.name; while (c.measureText(nm + (nm !== r.name ? '…' : '')).width > 156 && nm.length > 3) { nm = nm.slice(0, -1); } if (nm !== r.name) nm += '…';
+      tx(nm, b.x + 18, cy, '400 16px ' + SANS, '#eef3ff');
+      if (isCombineRep(r.id)) { c.fillStyle = '#eef3ff'; c.font = '400 16px ' + SANS; c.fillRect(b.x + 18, cy + 9, c.measureText(nm).width, 1.5); }
+      var bx = b.x + 196, bw = 96;
+      if (r.goal > 0) { rr(bx, cy - 4, bw, 8, 4, '#1f2d4d'); if (r.since > 0) rr(bx, cy - 4, Math.max(8, bw * Math.min(1, r.pct)), 8, 4, r.hit ? CD_GREEN : CD_BLUE); }
+      tx(cdFmt(r.since) + (r.goal > 0 ? ' / ' + r.goal : ' SRA'), b.x + 336, cy, '700 15px ' + SANS, r.hit ? CD_GREEN : '#ffffff', 'right');
+      tx(r.goal > 0 ? (r.hit ? '✓ Goal hit' : cdFmt(r.left) + ' to go') : 'no goal', b.x + CW - 16, cy, r.hit ? '700 14px ' + SANS : '400 14px ' + SANS, r.hit ? CD_GREEN : '#8fa0c4', 'right');
+    });
+  });
+  var a = d.asOf, ds = a.getFullYear() + '-' + String(a.getMonth() + 1).padStart(2, '0') + '-' + String(a.getDate()).padStart(2, '0');
+  cv.toBlob(function(bl) {
+    var u = URL.createObjectURL(bl), l = document.createElement('a'); l.href = u; l.download = 'SRA_Countdown_' + CD_OFFICE.replace(/\s+/g, '_') + '_' + ds + '.png';
+    document.body.appendChild(l); l.click(); l.remove(); setTimeout(function() { URL.revokeObjectURL(u); }, 1000);
+  }, 'image/png');
+}
+
 function renderTrainingCalendar() {
   const host = document.getElementById('training-calendar');
   if (!host) return;
@@ -3390,6 +3576,7 @@ function switchTab(id, el){
   else if(id==='overview') renderOverview();
   else if(id==='calendar') { renderTrainingCalendar(); }
   else if(id==='pace') renderPace();
+  else if(id==='countdown') renderCountdown();
   else if(id==='rankings') renderRankings();
   else if(id==='data') renderDataTab();
   else if(id==='combine') renderCombineTab();
@@ -8728,6 +8915,19 @@ async function fetchSheetsData(opts) {
     }
   } catch(e) { /* tab missing or unreachable: keep the built-in calendars */ }
 
+  // ── Countdown (Sheet tab "Countdown") ──
+  try {
+    var cdRes = await fetchWithTimeout(sheetsUrl('Countdown'));
+    if (!cdRes.ok) throw new Error('HTTP ' + cdRes.status);
+    COUNTDOWN_ROWS = sheetsRowsToObjects((await cdRes.json()).values || []).map(function(r) {
+      var id = String(r['id'] || r['employee id'] || '').trim();
+      if (!id || !/^\d+$/.test(id)) return null;
+      return { id: id, name: String(r['name'] || '').trim(), office: String(r['office'] || ''), squad: String(r['squad'] || '').trim(),
+               pai: String(r['pai'] || '').trim(), empStatus: String(r['employment status'] || '').trim(),
+               goal: cdNum(r['eoy sra goal']), oct: cdNum(r['oct sra']) || 0 };
+    }).filter(Boolean);
+  } catch(e) { errors.push('Countdown: ' + e.message); }
+
   // ── New Hires ────────────────────────────────────────────────────────────────
   try {
     var nhRes = await fetchWithTimeout(sheetsUrl('New Hires'));
@@ -8855,6 +9055,7 @@ async function fetchSheetsData(opts) {
     if (typeof gc_build === 'function') gc_build();
     if (typeof renderOverview === 'function') renderOverview();
     if (typeof renderQTD === 'function') renderQTD();
+    if (document.getElementById('panel-countdown') && document.getElementById('panel-countdown').classList.contains('active')) renderCountdown();
     console.log('[Totals] loaded', totCount, 'rows');
   } catch(e) { errors.push('Totals: ' + e.message); console.error('[Totals] error:', e); }
   purgeExcludedReps();
