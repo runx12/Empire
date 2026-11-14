@@ -2957,13 +2957,13 @@ var CD_BLUE = '#3B82F6', CD_BLUE_DK = '#1E4FA3', CD_GREEN = '#2DC48E';
 var COUNTDOWN_ROWS = [], CD_OFFICE = '';
 function cdNum(v) { var n = parseFloat(String(v == null ? '' : v).replace(/,/g, '')); return isNaN(n) ? null : n; }
 // Nov–Dec goal from the rep's CURRENT PAI and the Leader column (the sheet's goal column is no longer used).
-// Order: New Hire (no goal) > Combine (1) > Inactive (none) > Leader (10 if Productive, else 8) > Productive (10) > Active (4) > blank/other (none).
+// Order: New Hire (no goal) > Combine (1) > Leader (10 if Productive, else 8, any other PAI) > Inactive (none) > Productive (10) > Active (4) > blank/other (none).
 function cdGoal(pai, leader) {
   var p = String(pai || '').trim().toLowerCase();
   if (/^new[\s_-]*hires?$/.test(p)) return 0;
   if (p === 'combine') return 1;
+  if (leader) return p === 'productive' ? 10 : 8;   // leaders: 8 (10 if Productive) whether Active, Inactive or blank
   if (p === 'inactive') return 0;
-  if (leader) return p === 'productive' ? 10 : 8;
   if (p === 'productive') return 10;
   if (p === 'active') return 4;
   return 0;
@@ -2987,7 +2987,7 @@ function cdData(office, asOf) {
     var key = r.squad || 'No Squad';
     var sq = squads[key] = squads[key] || { name: key, reps: [], since: 0, goal: 0, capped: 0, hit: 0, withGoal: 0 };
     var hit = goal > 0 && since >= goal;
-    sq.reps.push({ id: r.id, name: r.name, since: since, goal: goal, hit: hit, left: goal > 0 ? Math.max(0, Math.round((goal - since) * 10) / 10) : 0, pct: goal > 0 ? since / goal : 0 });
+    sq.reps.push({ id: r.id, name: r.name, leader: !!r.leader, since: since, goal: goal, hit: hit, left: goal > 0 ? Math.max(0, Math.round((goal - since) * 10) / 10) : 0, pct: goal > 0 ? since / goal : 0 });
     sq.since += since; sq.goal += goal; sq.capped += goal > 0 ? Math.min(since, goal) : 0;
     if (goal > 0) { sq.withGoal++; if (hit) sq.hit++; }
   });
@@ -2995,7 +2995,7 @@ function cdData(office, asOf) {
     return (a.name === 'No Squad') - (b.name === 'No Squad') || a.name.localeCompare(b.name);
   });
   list.forEach(function(sq) {
-    sq.reps.sort(function(a, b) { return (b.hit - a.hit) || (b.pct - a.pct) || (b.since - a.since) || a.name.localeCompare(b.name); });
+    sq.reps.sort(function(a, b) { return (b.leader - a.leader) || (b.hit - a.hit) || (b.pct - a.pct) || (b.since - a.since) || a.name.localeCompare(b.name); });
     sq.pct = sq.goal > 0 ? sq.capped / sq.goal : 0;
   });
   var T = { since: 0, goal: 0, capped: 0, hit: 0, withGoal: 0 };
